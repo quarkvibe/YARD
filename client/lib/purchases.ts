@@ -5,8 +5,8 @@ import Purchases, {
 import { Platform } from "react-native";
 
 // RevenueCat API Keys
-const REVENUECAT_API_KEY_IOS = "test_LBIAFnindNEcElVBlCcOlNrrbTM";
-const REVENUECAT_API_KEY_ANDROID = "test_LBIAFnindNEcElVBlCcOlNrrbTM";
+const REVENUECAT_API_KEY_IOS = "appl_vMQWTMdLYvLemTIvZmHBBmIXChZ";
+const REVENUECAT_API_KEY_ANDROID = ""; // Add Android key when Google Play is configured
 
 // Entitlement identifier from RevenueCat dashboard
 export const REC_YARD_ENTITLEMENT = "rec_yard_access";
