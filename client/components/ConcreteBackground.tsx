@@ -12,11 +12,11 @@ interface ConcreteBackgroundProps {
   accentGlow?: boolean;
 }
 
-interface TallyGroup {
+interface TallyRow {
   id: string;
   x: number;
   y: number;
-  count: number; // 1-5 marks
+  groups: number[]; // Array of counts (mostly 5s, maybe a partial at end)
   rotation: string;
   opacity: number;
   scale: number;
@@ -41,27 +41,42 @@ interface GrainDot {
   opacity: number;
 }
 
-// Generate tally mark groups scattered across the background
-function generateTallyGroups(seed: number = 42): TallyGroup[] {
-  const tallies: TallyGroup[] = [];
-  const numGroups = 10;
+// Generate tally mark rows - realistic counting with multiple 5s and maybe a partial at end
+function generateTallyRows(seed: number = 42): TallyRow[] {
+  const rows: TallyRow[] = [];
+  
+  // Create a few rows of tallies scattered around the screen
+  const rowConfigs = [
+    { x: 5, y: 8, numFives: 4, remainder: 2 },   // 22 marks
+    { x: 70, y: 25, numFives: 3, remainder: 0 },  // 15 marks
+    { x: 10, y: 55, numFives: 2, remainder: 3 },  // 13 marks
+    { x: 65, y: 75, numFives: 5, remainder: 1 },  // 26 marks
+    { x: 8, y: 88, numFives: 3, remainder: 4 },   // 19 marks
+  ];
 
-  for (let i = 0; i < numGroups; i++) {
-    const x = ((seed * (i + 1) * 17) % 80) * (SCREEN_WIDTH / 100);
-    const y = ((seed * (i + 1) * 23) % 80) * (SCREEN_HEIGHT / 100);
+  rowConfigs.forEach((config, i) => {
+    const groups: number[] = [];
+    // Add complete sets of 5
+    for (let j = 0; j < config.numFives; j++) {
+      groups.push(5);
+    }
+    // Add remainder if any
+    if (config.remainder > 0) {
+      groups.push(config.remainder);
+    }
 
-    tallies.push({
-      id: `tally-${i}`,
-      x,
-      y,
-      count: 1 + ((seed * i) % 5), // 1-5 marks
-      rotation: `${((seed * i * 7) % 16) - 8}deg`, // slight rotation for hand-drawn look
-      opacity: 0.5 + ((seed * i) % 10) * 0.03, // Much higher opacity (50-80%)
-      scale: 1 + ((seed * i) % 3) * 0.15, // Scale 1.0-1.45
+    rows.push({
+      id: `tally-row-${i}`,
+      x: config.x * (SCREEN_WIDTH / 100),
+      y: config.y * (SCREEN_HEIGHT / 100),
+      groups,
+      rotation: `${((seed * i * 7) % 10) - 5}deg`,
+      opacity: 0.4 + ((seed * i) % 8) * 0.04,
+      scale: 0.9 + ((seed * i) % 3) * 0.1,
     });
-  }
+  });
 
-  return tallies;
+  return rows;
 }
 
 // Generate weathering stains
@@ -107,16 +122,18 @@ function generateGrainDots(seed: number = 19): GrainDot[] {
   return dots;
 }
 
-// Individual tally mark component - chalk-like marks on dark wall
-function TallyMark({ count, scale }: { count: number; scale: number }) {
-  const safeScale = Math.max(scale, 1);
-  const markWidth = 4 * safeScale;
-  const markHeight = 24 * safeScale;
-  const spacing = 8 * safeScale;
-  const markColor = "#8a8a8a"; // Chalk gray - visible on dark background
+// Individual tally group (1-5 marks)
+function TallyGroup({ count, scale }: { count: number; scale: number }) {
+  const safeScale = Math.max(scale, 0.9);
+  const markWidth = 3 * safeScale;
+  const markHeight = 20 * safeScale;
+  const spacing = 5 * safeScale;
+  const markColor = "#7a7a7a";
+  
+  const groupWidth = Math.min(count, 4) * (markWidth + spacing);
   
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View style={{ flexDirection: "row", alignItems: "center", width: groupWidth + spacing }}>
       {Array.from({ length: Math.min(count, 4) }).map((_, i) => (
         <View
           key={i}
@@ -134,15 +151,30 @@ function TallyMark({ count, scale }: { count: number; scale: number }) {
           style={{
             position: "absolute",
             width: markWidth,
-            height: markHeight * 1.4,
+            height: markHeight * 1.3,
             backgroundColor: markColor,
-            transform: [{ rotate: "-35deg" }],
-            left: spacing * 1.5,
-            top: -markHeight * 0.2,
+            transform: [{ rotate: "-30deg" }],
+            left: spacing,
+            top: -markHeight * 0.15,
             borderRadius: 1,
           }}
         />
       ) : null}
+    </View>
+  );
+}
+
+// Row of tally groups (multiple sets of 5 in a line)
+function TallyRowComponent({ groups, scale }: { groups: number[]; scale: number }) {
+  const groupSpacing = 12 * scale;
+  
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      {groups.map((count, i) => (
+        <View key={i} style={{ marginRight: groupSpacing }}>
+          <TallyGroup count={count} scale={scale} />
+        </View>
+      ))}
     </View>
   );
 }
@@ -154,8 +186,8 @@ export function ConcreteBackground({
   accentGlow = true,
 }: ConcreteBackgroundProps) {
   // Memoize generated elements
-  const tallyGroups = useMemo(
-    () => (showCracks ? generateTallyGroups() : []),
+  const tallyRows = useMemo(
+    () => (showCracks ? generateTallyRows() : []),
     [showCracks],
   );
   const stains = useMemo(() => generateStains(), []);
@@ -231,20 +263,20 @@ export function ConcreteBackground({
       {/* Tally marks layer */}
       {showCracks && (
         <View style={styles.tallyLayer} pointerEvents="none">
-          {tallyGroups.map((tally) => (
+          {tallyRows.map((row) => (
             <View
-              key={tally.id}
+              key={row.id}
               style={[
                 styles.tallyGroup,
                 {
-                  left: tally.x,
-                  top: tally.y,
-                  opacity: tally.opacity * intensityMultiplier,
-                  transform: [{ rotate: tally.rotation }],
+                  left: row.x,
+                  top: row.y,
+                  opacity: row.opacity * intensityMultiplier,
+                  transform: [{ rotate: row.rotation }],
                 },
               ]}
             >
-              <TallyMark count={tally.count} scale={tally.scale} />
+              <TallyRowComponent groups={row.groups} scale={row.scale} />
             </View>
           ))}
         </View>
