@@ -180,25 +180,20 @@ export default function WorkoutScreen() {
       }
       nextIndex = nextIndex + cardsToFlip.length - 1;
     } else if (flipModeId === "og") {
-      let card = deck[nextIndex];
-      cardsToFlip.push(card);
-      totalReps = card.value;
-      if (card.exercise === "pushups") {
-        pushupsToAdd = card.value;
-      } else {
-        squatsToAdd = card.value;
-      }
-      if (totalReps < 20 && nextIndex + 1 < deck.length) {
-        const secondCard = deck[nextIndex + 1];
-        cardsToFlip.push(secondCard);
-        totalReps += secondCard.value;
-        if (secondCard.exercise === "pushups") {
-          pushupsToAdd += secondCard.value;
+      let idx = nextIndex;
+      while (idx < deck.length) {
+        const card = deck[idx];
+        cardsToFlip.push(card);
+        totalReps += card.value;
+        if (card.exercise === "pushups") {
+          pushupsToAdd += card.value;
         } else {
-          squatsToAdd += secondCard.value;
+          squatsToAdd += card.value;
         }
-        nextIndex++;
+        idx++;
+        if (totalReps >= 20) break;
       }
+      nextIndex = idx - 1;
     } else if (flipModeId === "podfather") {
       let idx = nextIndex;
       while (idx < deck.length && totalReps < 30) {
