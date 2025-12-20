@@ -29,6 +29,8 @@ import {
   WorkoutRecord,
   FlipModeId,
   getFlipModeById,
+  ExerciseType,
+  getExerciseTypeById,
 } from "@/lib/storage";
 
 type WorkoutState = "idle" | "active" | "paused" | "complete";

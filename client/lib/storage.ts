@@ -59,6 +59,32 @@ export interface FlipMode {
   description: string;
 }
 
+export type ExerciseType = "pushups" | "squats" | "superset";
+
+export interface ExerciseTypeOption {
+  id: ExerciseType;
+  name: string;
+  description: string;
+}
+
+export const EXERCISE_TYPES: ExerciseTypeOption[] = [
+  {
+    id: "pushups",
+    name: "PUSHUPS",
+    description: "All cards = pushups",
+  },
+  {
+    id: "squats",
+    name: "SQUATS",
+    description: "All cards = squats",
+  },
+  {
+    id: "superset",
+    name: "SUPERSET",
+    description: "Mixed pushups + squats",
+  },
+];
+
 export const FLIP_MODES: FlipMode[] = [
   {
     id: "freshfish",
@@ -85,6 +111,7 @@ export const FLIP_MODES: FlipMode[] = [
 export interface AppSettings {
   selectedRuleSetId: string;
   selectedFlipModeId: FlipModeId;
+  selectedExerciseType: ExerciseType;
   soundEnabled: boolean;
   hapticsEnabled: boolean;
 }
@@ -172,66 +199,19 @@ export const DEFAULT_RULE_SETS: RuleSet[] = [
       spades: "pushups",
     },
   },
-  {
-    id: "pushupsonly",
-    name: "PUSHUPS ONLY",
-    description: "All suits pushups",
-    cardValues: {
-      A: 15,
-      "2": 2,
-      "3": 3,
-      "4": 4,
-      "5": 5,
-      "6": 6,
-      "7": 7,
-      "8": 8,
-      "9": 9,
-      "10": 10,
-      J: 10,
-      Q: 10,
-      K: 10,
-    },
-    suitExercises: {
-      hearts: "pushups",
-      diamonds: "pushups",
-      clubs: "pushups",
-      spades: "pushups",
-    },
-  },
-  {
-    id: "squatsonly",
-    name: "SQUATS ONLY",
-    description: "All suits squats",
-    cardValues: {
-      A: 15,
-      "2": 2,
-      "3": 3,
-      "4": 4,
-      "5": 5,
-      "6": 6,
-      "7": 7,
-      "8": 8,
-      "9": 9,
-      "10": 10,
-      J: 10,
-      Q: 10,
-      K: 10,
-    },
-    suitExercises: {
-      hearts: "squats",
-      diamonds: "squats",
-      clubs: "squats",
-      spades: "squats",
-    },
-  },
 ];
 
 export const DEFAULT_SETTINGS: AppSettings = {
   selectedRuleSetId: "standard",
   selectedFlipModeId: "freshfish",
+  selectedExerciseType: "superset",
   soundEnabled: false,
   hapticsEnabled: false,
 };
+
+export function getExerciseTypeById(id: ExerciseType): ExerciseTypeOption {
+  return EXERCISE_TYPES.find((et) => et.id === id) || EXERCISE_TYPES[2];
+}
 
 export function getFlipModeById(id: FlipModeId): FlipMode {
   return FLIP_MODES.find((fm) => fm.id === id) || FLIP_MODES[0];
@@ -301,11 +281,18 @@ export function getRuleSetById(id: string): RuleSet {
   return DEFAULT_RULE_SETS.find((rs) => rs.id === id) || DEFAULT_RULE_SETS[0];
 }
 
-export function generateDeck(ruleSet: RuleSet): CardValue[] {
+export function generateDeck(ruleSet: RuleSet, exerciseType: ExerciseType): CardValue[] {
   const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"] as const;
   const suits = ["hearts", "diamonds", "clubs", "spades"] as const;
 
   const deck: CardValue[] = [];
+
+  const getSuitExercise = (suit: typeof suits[number]): "pushups" | "squats" => {
+    if (exerciseType === "pushups") return "pushups";
+    if (exerciseType === "squats") return "squats";
+    // Superset: hearts/diamonds = squats, clubs/spades = pushups
+    return suit === "hearts" || suit === "diamonds" ? "squats" : "pushups";
+  };
 
   for (const suit of suits) {
     for (const rank of ranks) {
@@ -313,7 +300,7 @@ export function generateDeck(ruleSet: RuleSet): CardValue[] {
         rank,
         suit,
         value: ruleSet.cardValues[rank],
-        exercise: ruleSet.suitExercises[suit],
+        exercise: getSuitExercise(suit),
       });
     }
   }
