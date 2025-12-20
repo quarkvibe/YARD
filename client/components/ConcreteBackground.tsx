@@ -44,20 +44,20 @@ interface GrainDot {
 // Generate tally mark groups scattered across the background
 function generateTallyGroups(seed: number = 42): TallyGroup[] {
   const tallies: TallyGroup[] = [];
-  const numGroups = 12;
+  const numGroups = 10;
 
   for (let i = 0; i < numGroups; i++) {
-    const x = ((seed * (i + 1) * 17) % 85) * (SCREEN_WIDTH / 100);
-    const y = ((seed * (i + 1) * 23) % 85) * (SCREEN_HEIGHT / 100);
+    const x = ((seed * (i + 1) * 17) % 80) * (SCREEN_WIDTH / 100);
+    const y = ((seed * (i + 1) * 23) % 80) * (SCREEN_HEIGHT / 100);
 
     tallies.push({
       id: `tally-${i}`,
       x,
       y,
       count: 1 + ((seed * i) % 5), // 1-5 marks
-      rotation: `${((seed * i * 7) % 20) - 10}deg`, // slight rotation for hand-drawn look
-      opacity: 0.15 + ((seed * i) % 10) * 0.02,
-      scale: 0.6 + ((seed * i) % 5) * 0.1,
+      rotation: `${((seed * i * 7) % 16) - 8}deg`, // slight rotation for hand-drawn look
+      opacity: 0.5 + ((seed * i) % 10) * 0.03, // Much higher opacity (50-80%)
+      scale: 1 + ((seed * i) % 3) * 0.15, // Scale 1.0-1.45
     });
   }
 
@@ -107,11 +107,13 @@ function generateGrainDots(seed: number = 19): GrainDot[] {
   return dots;
 }
 
-// Individual tally mark component
+// Individual tally mark component - chalk-like marks on dark wall
 function TallyMark({ count, scale }: { count: number; scale: number }) {
-  const markWidth = 2 * scale;
-  const markHeight = 18 * scale;
-  const spacing = 6 * scale;
+  const safeScale = Math.max(scale, 1);
+  const markWidth = 4 * safeScale;
+  const markHeight = 24 * safeScale;
+  const spacing = 8 * safeScale;
+  const markColor = "#8a8a8a"; // Chalk gray - visible on dark background
   
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -121,8 +123,9 @@ function TallyMark({ count, scale }: { count: number; scale: number }) {
           style={{
             width: markWidth,
             height: markHeight,
-            backgroundColor: "#4a4a4a",
+            backgroundColor: markColor,
             marginRight: spacing,
+            borderRadius: 1,
           }}
         />
       ))}
@@ -131,10 +134,12 @@ function TallyMark({ count, scale }: { count: number; scale: number }) {
           style={{
             position: "absolute",
             width: markWidth,
-            height: markHeight * 1.3,
-            backgroundColor: "#4a4a4a",
-            transform: [{ rotate: "-30deg" }],
-            left: spacing * 0.5,
+            height: markHeight * 1.4,
+            backgroundColor: markColor,
+            transform: [{ rotate: "-35deg" }],
+            left: spacing * 1.5,
+            top: -markHeight * 0.2,
+            borderRadius: 1,
           }}
         />
       ) : null}
