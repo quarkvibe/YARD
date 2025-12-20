@@ -76,9 +76,9 @@ npm run server:prod
 - **SUPERSET**: Spades/clubs = pushups, hearts/diamonds = squats (mixed)
 
 ### Intensity Levels (Rule Sets)
-- **STANDARD**: A=1, J/Q/K=10 (340 total reps)
-- **HARD TIME**: A=11, J/Q/K=15 (416 total reps)
-- **LIFER**: A=14, J/Q/K=20 (500 total reps)
+- **STANDARD**: A=15, J/Q/K=10, Numbers=face value (396 total reps)
+- **HARD TIME**: 1.5x all values (594 total reps)
+- **LIFER**: 2x all values (792 total reps)
 
 ### Flip Modes
 - **FRESH FISH**: One card at a time
