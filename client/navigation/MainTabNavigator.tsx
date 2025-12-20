@@ -1,15 +1,13 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform } from "react-native";
 
 import HomeScreen from "@/screens/HomeScreen";
 import WorkoutScreen from "@/screens/WorkoutScreen";
 import HistoryScreen from "@/screens/HistoryScreen";
 import RecYardScreen from "@/screens/RecYardScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
-import { useTheme } from "@/hooks/useTheme";
-import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { Colors, Spacing } from "@/constants/theme";
 
 export type MainTabParamList = {
@@ -23,14 +21,10 @@ export type MainTabParamList = {
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator() {
-  const { theme, isDark } = useTheme();
-  const screenOptions = useScreenOptions();
-
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
       screenOptions={{
-        ...screenOptions,
         tabBarActiveTintColor: Colors.dark.accent,
         tabBarInactiveTintColor: Colors.dark.tabIconDefault,
         tabBarStyle: {

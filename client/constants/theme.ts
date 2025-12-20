@@ -141,7 +141,8 @@ export const Fonts = Platform.select({
   },
   web: {
     sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    condensed: "'Oswald', 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif",
+    condensed:
+      "'Oswald', 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif",
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });

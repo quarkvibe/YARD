@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -12,11 +12,14 @@ import { ThemedText } from "@/components/ThemedText";
 import { BorderRadius, Spacing, Colors } from "@/constants/theme";
 import type { CardValue } from "@/lib/storage";
 
+type CardSize = "small" | "medium" | "large";
+
 interface PlayingCardProps {
   card: CardValue | null;
   isFlipped: boolean;
   onFlip?: () => void;
   disabled?: boolean;
+  size?: CardSize;
 }
 
 const springConfig: WithSpringConfig = {
@@ -30,23 +33,69 @@ const SUIT_SYMBOLS = {
   diamonds: "\u2666",
   clubs: "\u2663",
   spades: "\u2660",
-};
+} as const;
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const SUIT_COLORS = {
+  hearts: "#E74C3C", // Red for hearts
+  diamonds: "#E74C3C", // Red for diamonds
+  clubs: "#2C3E50", // Dark charcoal for clubs
+  spades: "#2C3E50", // Dark charcoal for spades
+} as const;
 
-export function PlayingCard({ card, isFlipped, onFlip, disabled }: PlayingCardProps) {
+// Card dimensions based on size
+const CARD_DIMENSIONS = {
+  small: { width: 120, height: 170 },
+  medium: { width: 180, height: 260 },
+  large: { width: 220, height: 320 },
+} as const;
+
+// Typography scales based on size
+const TYPOGRAPHY_SCALES = {
+  small: {
+    cornerRank: 16,
+    cornerSuit: 14,
+    centerSuit: 50,
+    backText: 18,
+    backLetterSpacing: 4,
+  },
+  medium: {
+    cornerRank: 24,
+    cornerSuit: 20,
+    centerSuit: 80,
+    backText: 28,
+    backLetterSpacing: 8,
+  },
+  large: {
+    cornerRank: 32,
+    cornerSuit: 26,
+    centerSuit: 100,
+    backText: 36,
+    backLetterSpacing: 10,
+  },
+} as const;
+
+export function PlayingCard({
+  card,
+  isFlipped,
+  onFlip,
+  disabled,
+  size = "medium",
+}: PlayingCardProps) {
   const flipProgress = useSharedValue(isFlipped ? 1 : 0);
   const scale = useSharedValue(1);
 
+  const dimensions = CARD_DIMENSIONS[size];
+  const typography = TYPOGRAPHY_SCALES[size];
+
   React.useEffect(() => {
     flipProgress.value = withSpring(isFlipped ? 1 : 0, springConfig);
-  }, [isFlipped]);
+  }, [isFlipped, flipProgress]);
 
   const frontAnimatedStyle = useAnimatedStyle(() => {
     const rotateY = interpolate(flipProgress.value, [0, 1], [180, 360]);
     return {
       transform: [
-        { perspective: 1000 },
+        { perspective: 1200 },
         { rotateY: `${rotateY}deg` },
         { scale: scale.value },
       ],
@@ -59,7 +108,7 @@ export function PlayingCard({ card, isFlipped, onFlip, disabled }: PlayingCardPr
     const rotateY = interpolate(flipProgress.value, [0, 1], [0, 180]);
     return {
       transform: [
-        { perspective: 1000 },
+        { perspective: 1200 },
         { rotateY: `${rotateY}deg` },
         { scale: scale.value },
       ],
@@ -68,83 +117,163 @@ export function PlayingCard({ card, isFlipped, onFlip, disabled }: PlayingCardPr
     };
   });
 
-  const handlePressIn = () => {
-    if (!disabled) {
-      scale.value = withSpring(0.95, { damping: 15, stiffness: 150 });
-    }
+  const getSuitColor = (suit: keyof typeof SUIT_COLORS) => {
+    return SUIT_COLORS[suit];
   };
 
-  const handlePressOut = () => {
-    if (!disabled) {
-      scale.value = withSpring(1, { damping: 15, stiffness: 150 });
-    }
+  const cardContainerStyle = {
+    width: dimensions.width,
+    height: dimensions.height,
   };
 
-  const getSuitColor = (suit: string) => {
-    if (suit === "hearts" || suit === "diamonds") {
-      return Colors.dark.pushups;
-    }
-    return "#1A1A1A";
-  };
+  const cornerPadding = size === "small" ? Spacing.sm : Spacing.md;
 
   return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.card, styles.cardBack, backAnimatedStyle]}>
+    <View style={[styles.container, cardContainerStyle]}>
+      {/* Card Back */}
+      <Animated.View
+        style={[
+          styles.card,
+          styles.cardBack,
+          cardContainerStyle,
+          backAnimatedStyle,
+        ]}
+      >
         <View style={styles.backPattern}>
           <View style={styles.backInner}>
-            <ThemedText style={styles.backText}>YARD</ThemedText>
+            <ThemedText
+              style={[
+                styles.backText,
+                {
+                  fontSize: typography.backText,
+                  letterSpacing: typography.backLetterSpacing,
+                },
+              ]}
+            >
+              YARD
+            </ThemedText>
           </View>
         </View>
+
+        {/* Decorative border lines */}
+        <View style={styles.backBorderTop} />
+        <View style={styles.backBorderBottom} />
+        <View style={styles.backBorderLeft} />
+        <View style={styles.backBorderRight} />
       </Animated.View>
 
-      <AnimatedPressable
-        style={[styles.card, styles.cardFront, frontAnimatedStyle]}
-        onPress={onFlip}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        disabled={disabled || !isFlipped}
+      {/* Card Front */}
+      <Animated.View
+        style={[
+          styles.card,
+          styles.cardFront,
+          cardContainerStyle,
+          { padding: cornerPadding },
+          frontAnimatedStyle,
+        ]}
       >
         {card ? (
           <>
-            <View style={styles.cornerTop}>
-              <ThemedText style={[styles.cornerRank, { color: getSuitColor(card.suit) }]}>
+            {/* Top left corner */}
+            <View
+              style={[
+                styles.cornerTop,
+                { top: cornerPadding, left: cornerPadding },
+              ]}
+            >
+              <ThemedText
+                style={[
+                  styles.cornerRank,
+                  {
+                    fontSize: typography.cornerRank,
+                    color: getSuitColor(card.suit),
+                  },
+                ]}
+              >
                 {card.rank}
               </ThemedText>
-              <ThemedText style={[styles.cornerSuit, { color: getSuitColor(card.suit) }]}>
+              <ThemedText
+                style={[
+                  styles.cornerSuit,
+                  {
+                    fontSize: typography.cornerSuit,
+                    color: getSuitColor(card.suit),
+                  },
+                ]}
+              >
                 {SUIT_SYMBOLS[card.suit]}
               </ThemedText>
             </View>
 
-            <ThemedText style={[styles.centerSuit, { color: getSuitColor(card.suit) }]}>
-              {SUIT_SYMBOLS[card.suit]}
-            </ThemedText>
-
-            <View style={styles.cornerBottom}>
-              <ThemedText style={[styles.cornerSuit, { color: getSuitColor(card.suit) }]}>
+            {/* Center suit */}
+            <View style={styles.centerContainer}>
+              <ThemedText
+                style={[
+                  styles.centerSuit,
+                  {
+                    fontSize: typography.centerSuit,
+                    color: getSuitColor(card.suit),
+                  },
+                ]}
+              >
                 {SUIT_SYMBOLS[card.suit]}
               </ThemedText>
-              <ThemedText style={[styles.cornerRank, { color: getSuitColor(card.suit) }]}>
+            </View>
+
+            {/* Bottom right corner (rotated) */}
+            <View
+              style={[
+                styles.cornerBottom,
+                { bottom: cornerPadding, right: cornerPadding },
+              ]}
+            >
+              <ThemedText
+                style={[
+                  styles.cornerSuit,
+                  {
+                    fontSize: typography.cornerSuit,
+                    color: getSuitColor(card.suit),
+                  },
+                ]}
+              >
+                {SUIT_SYMBOLS[card.suit]}
+              </ThemedText>
+              <ThemedText
+                style={[
+                  styles.cornerRank,
+                  {
+                    fontSize: typography.cornerRank,
+                    color: getSuitColor(card.suit),
+                  },
+                ]}
+              >
                 {card.rank}
               </ThemedText>
+            </View>
+
+            {/* Rep value badge */}
+            <View style={styles.repBadge}>
+              <ThemedText style={styles.repValue}>{card.value}</ThemedText>
             </View>
           </>
         ) : null}
-      </AnimatedPressable>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    width: 180,
-    height: 260,
     position: "relative",
   },
   card: {
     position: "absolute",
-    width: "100%",
-    height: "100%",
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.md,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 12,
   },
   cardBack: {
     backgroundColor: Colors.dark.cardBackground,
@@ -154,8 +283,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cardFront: {
-    backgroundColor: Colors.dark.chalk,
-    padding: Spacing.md,
+    backgroundColor: "#FAFAFA",
   },
   backPattern: {
     width: "85%",
@@ -171,38 +299,88 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xs,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "rgba(255, 107, 53, 0.05)",
   },
   backText: {
-    fontSize: 28,
     fontWeight: "900",
-    letterSpacing: 8,
     color: Colors.dark.accent,
+  },
+  backBorderTop: {
+    position: "absolute",
+    top: 8,
+    left: 12,
+    right: 12,
+    height: 1,
+    backgroundColor: Colors.dark.accent,
+    opacity: 0.3,
+  },
+  backBorderBottom: {
+    position: "absolute",
+    bottom: 8,
+    left: 12,
+    right: 12,
+    height: 1,
+    backgroundColor: Colors.dark.accent,
+    opacity: 0.3,
+  },
+  backBorderLeft: {
+    position: "absolute",
+    top: 12,
+    left: 8,
+    bottom: 12,
+    width: 1,
+    backgroundColor: Colors.dark.accent,
+    opacity: 0.3,
+  },
+  backBorderRight: {
+    position: "absolute",
+    top: 12,
+    right: 8,
+    bottom: 12,
+    width: 1,
+    backgroundColor: Colors.dark.accent,
+    opacity: 0.3,
   },
   cornerTop: {
     position: "absolute",
-    top: Spacing.md,
-    left: Spacing.md,
     alignItems: "center",
   },
   cornerBottom: {
     position: "absolute",
-    bottom: Spacing.md,
-    right: Spacing.md,
     alignItems: "center",
     transform: [{ rotate: "180deg" }],
   },
   cornerRank: {
-    fontSize: 24,
     fontWeight: "800",
+    lineHeight: undefined,
   },
   cornerSuit: {
-    fontSize: 20,
+    marginTop: -4,
+  },
+  centerContainer: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
   },
   centerSuit: {
-    fontSize: 80,
+    textAlign: "center",
+  },
+  repBadge: {
     position: "absolute",
-    top: "50%",
+    bottom: 8,
     left: "50%",
-    transform: [{ translateX: -40 }, { translateY: -50 }],
+    transform: [{ translateX: -20 }],
+    backgroundColor: Colors.dark.accent,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.xs,
+    minWidth: 40,
+    alignItems: "center",
+  },
+  repValue: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#0b0b0b",
+    letterSpacing: 1,
   },
 });

@@ -11,7 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { ConcreteBackground } from "@/components/ConcreteBackground";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import {
@@ -28,7 +28,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 function TallyMarks({ count }: { count: number }) {
   const groups = Math.floor(count / 5);
   const remainder = count % 5;
-  
+
   const renderTallyGroup = (key: number) => (
     <View key={key} style={styles.tallyGroup}>
       <View style={styles.tallyMark} />
@@ -49,7 +49,7 @@ function TallyMarks({ count }: { count: number }) {
 
   const displayGroups = Math.min(groups, 20);
   const hasOverflow = groups > 20;
-  
+
   return (
     <View style={styles.tallyContainer}>
       {Array.from({ length: displayGroups }).map((_, i) => renderTallyGroup(i))}
@@ -63,7 +63,7 @@ function TallyMarks({ count }: { count: number }) {
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<{ navigate: (screen: string) => void }>();
   const { theme } = useTheme();
 
   const [ruleSetName, setRuleSetName] = useState("STANDARD");
@@ -76,7 +76,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [])
+    }, []),
   );
 
   const loadData = async () => {
@@ -105,30 +105,42 @@ export default function HomeScreen() {
   }));
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={[styles.content, { paddingTop: insets.top + Spacing["3xl"] }]}>
+    <ConcreteBackground intensity="medium" showCracks={true} accentGlow={true}>
+      <View
+        style={[styles.content, { paddingTop: insets.top + Spacing["3xl"] }]}
+      >
         <Animated.View entering={FadeIn.delay(100)} style={styles.brandSection}>
           <ThemedText style={styles.brandTitle}>YARD</ThemedText>
           <ThemedText style={styles.tagline}>FLIP. MOVE. FINISH.</ThemedText>
         </Animated.View>
 
         {bestTime !== null ? (
-          <Animated.View entering={FadeIn.delay(200)} style={styles.bestTimeSection}>
+          <Animated.View
+            entering={FadeIn.delay(200)}
+            style={styles.bestTimeSection}
+          >
             <ThemedText style={styles.bestTimeLabel}>BEST TIME</ThemedText>
-            <ThemedText style={styles.bestTimeValue}>{formatDuration(bestTime)}</ThemedText>
+            <ThemedText style={styles.bestTimeValue}>
+              {formatDuration(bestTime)}
+            </ThemedText>
             <ThemedText style={styles.ruleSetLabel}>{ruleSetName}</ThemedText>
           </Animated.View>
         ) : null}
 
-        <Animated.View entering={FadeIn.delay(250)} style={styles.configSection}>
-          <Pressable 
+        <Animated.View
+          entering={FadeIn.delay(250)}
+          style={styles.configSection}
+        >
+          <Pressable
             style={styles.configCard}
             onPress={() => navigation.navigate("SettingsTab")}
           >
             <ThemedText style={styles.configLabel}>EXERCISE</ThemedText>
-            <ThemedText style={styles.configValue}>{exerciseTypeName}</ThemedText>
+            <ThemedText style={styles.configValue}>
+              {exerciseTypeName}
+            </ThemedText>
           </Pressable>
-          <Pressable 
+          <Pressable
             style={styles.configCard}
             onPress={() => navigation.navigate("SettingsTab")}
           >
@@ -137,14 +149,19 @@ export default function HomeScreen() {
           </Pressable>
         </Animated.View>
 
-        <Animated.View entering={FadeIn.delay(350)} style={styles.actionSection}>
+        <Animated.View
+          entering={FadeIn.delay(350)}
+          style={styles.actionSection}
+        >
           <AnimatedPressable
             onPress={() => navigation.navigate("WorkoutTab")}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
             style={[styles.startButton, animatedButtonStyle]}
           >
-            <ThemedText style={styles.startButtonText}>START WORKOUT</ThemedText>
+            <ThemedText style={styles.startButtonText}>
+              START WORKOUT
+            </ThemedText>
           </AnimatedPressable>
         </Animated.View>
 
@@ -183,12 +200,15 @@ export default function HomeScreen() {
         </Animated.View>
 
         {totalWorkouts > 0 ? (
-          <Animated.View entering={FadeIn.delay(500)} style={styles.tallySection}>
+          <Animated.View
+            entering={FadeIn.delay(500)}
+            style={styles.tallySection}
+          >
             <TallyMarks count={totalWorkouts} />
           </Animated.View>
         ) : null}
       </View>
-    </ThemedView>
+    </ConcreteBackground>
   );
 }
 

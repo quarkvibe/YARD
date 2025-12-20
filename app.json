@@ -39,7 +39,9 @@
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-image-picker",
+      "expo-secure-store"
     ],
     "experiments": {
       "reactCompiler": true

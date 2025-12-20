@@ -1,13 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { View, StyleSheet, FlatList, Pressable } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, StyleSheet, FlatList } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { ConcreteBackground } from "@/components/ConcreteBackground";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import {
@@ -19,7 +18,6 @@ import {
 } from "@/lib/storage";
 
 export default function HistoryScreen() {
-  const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
 
@@ -29,7 +27,7 @@ export default function HistoryScreen() {
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [])
+    }, []),
   );
 
   const loadData = async () => {
@@ -45,21 +43,38 @@ export default function HistoryScreen() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).toUpperCase();
+    return date
+      .toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+      .toUpperCase();
   };
 
-  const renderWorkoutItem = ({ item, index }: { item: WorkoutRecord; index: number }) => (
-    <Animated.View entering={FadeIn.delay(index * 50)} style={styles.workoutItem}>
+  const renderWorkoutItem = ({
+    item,
+    index,
+  }: {
+    item: WorkoutRecord;
+    index: number;
+  }) => (
+    <Animated.View
+      entering={FadeIn.delay(index * 50)}
+      style={styles.workoutItem}
+    >
       <View style={styles.workoutHeader}>
-        <ThemedText style={styles.workoutDate}>{formatDate(item.date)}</ThemedText>
-        <ThemedText style={styles.workoutTime}>{formatDuration(item.duration)}</ThemedText>
+        <ThemedText style={styles.workoutDate}>
+          {formatDate(item.date)}
+        </ThemedText>
+        <ThemedText style={styles.workoutTime}>
+          {formatDuration(item.duration)}
+        </ThemedText>
       </View>
       <View style={styles.workoutDetails}>
-        <ThemedText style={styles.workoutRuleSet}>{item.ruleSetName}</ThemedText>
+        <ThemedText style={styles.workoutRuleSet}>
+          {item.ruleSetName}
+        </ThemedText>
         <View style={styles.workoutStats}>
           <ThemedText style={styles.statText}>
             {item.totalPushups} PUSHUPS
@@ -78,9 +93,13 @@ export default function HistoryScreen() {
       <View style={styles.bestTimesGrid}>
         {DEFAULT_RULE_SETS.map((ruleSet) => (
           <View key={ruleSet.id} style={styles.bestTimeCard}>
-            <ThemedText style={styles.bestTimeRuleSet}>{ruleSet.name}</ThemedText>
+            <ThemedText style={styles.bestTimeRuleSet}>
+              {ruleSet.name}
+            </ThemedText>
             <ThemedText style={styles.bestTimeValue}>
-              {bestTimes[ruleSet.id] ? formatDuration(bestTimes[ruleSet.id]!) : "--:--"}
+              {bestTimes[ruleSet.id]
+                ? formatDuration(bestTimes[ruleSet.id]!)
+                : "--:--"}
             </ThemedText>
           </View>
         ))}
@@ -99,7 +118,7 @@ export default function HistoryScreen() {
   );
 
   return (
-    <ThemedView style={styles.container}>
+    <ConcreteBackground intensity="light" showCracks={true}>
       <FlatList
         data={workouts}
         keyExtractor={(item) => item.id}
@@ -115,7 +134,7 @@ export default function HistoryScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       />
-    </ThemedView>
+    </ConcreteBackground>
   );
 }
 

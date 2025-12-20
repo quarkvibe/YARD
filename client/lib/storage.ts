@@ -19,6 +19,8 @@ export interface WorkoutRecord {
   duration: number;
   ruleSetId: string;
   ruleSetName: string;
+  exerciseType: ExerciseType;
+  flipModeId: FlipModeId;
   totalPushups: number;
   totalSquats: number;
   cardsCompleted: number;
@@ -124,9 +126,9 @@ export const DEFAULT_RULE_SETS: RuleSet[] = [
   {
     id: "standard",
     name: "STANDARD",
-    description: "A=15, Face=10",
+    description: "A=1, Face=10 • 340 total reps",
     cardValues: {
-      A: 15,
+      A: 1,
       "2": 2,
       "3": 3,
       "4": 4,
@@ -148,20 +150,20 @@ export const DEFAULT_RULE_SETS: RuleSet[] = [
     },
   },
   {
-    id: "extreme",
-    name: "EXTREME",
-    description: "1.5x all values",
+    id: "hard-time",
+    name: "HARD TIME",
+    description: "A=11, Face=15 • 416 total reps",
     cardValues: {
-      A: 23,
-      "2": 3,
-      "3": 5,
-      "4": 6,
-      "5": 8,
-      "6": 9,
-      "7": 11,
-      "8": 12,
-      "9": 14,
-      "10": 15,
+      A: 11,
+      "2": 2,
+      "3": 3,
+      "4": 4,
+      "5": 5,
+      "6": 6,
+      "7": 7,
+      "8": 8,
+      "9": 9,
+      "10": 10,
       J: 15,
       Q: 15,
       K: 15,
@@ -176,18 +178,18 @@ export const DEFAULT_RULE_SETS: RuleSet[] = [
   {
     id: "lifer",
     name: "LIFER",
-    description: "2x all values",
+    description: "A=14, Face=20 • 500 total reps",
     cardValues: {
-      A: 30,
-      "2": 4,
-      "3": 6,
-      "4": 8,
-      "5": 10,
-      "6": 12,
-      "7": 14,
-      "8": 16,
-      "9": 18,
-      "10": 20,
+      A: 14,
+      "2": 2,
+      "3": 3,
+      "4": 4,
+      "5": 5,
+      "6": 6,
+      "7": 7,
+      "8": 8,
+      "9": 9,
+      "10": 10,
       J: 20,
       Q: 20,
       K: 20,
@@ -244,7 +246,9 @@ export async function saveWorkout(workout: WorkoutRecord): Promise<void> {
 export async function getSettings(): Promise<AppSettings> {
   try {
     const data = await AsyncStorage.getItem(STORAGE_KEYS.SETTINGS);
-    return data ? { ...DEFAULT_SETTINGS, ...JSON.parse(data) } : DEFAULT_SETTINGS;
+    return data
+      ? { ...DEFAULT_SETTINGS, ...JSON.parse(data) }
+      : DEFAULT_SETTINGS;
   } catch (error) {
     console.error("Error loading settings:", error);
     return DEFAULT_SETTINGS;
@@ -281,13 +285,32 @@ export function getRuleSetById(id: string): RuleSet {
   return DEFAULT_RULE_SETS.find((rs) => rs.id === id) || DEFAULT_RULE_SETS[0];
 }
 
-export function generateDeck(ruleSet: RuleSet, exerciseType: ExerciseType): CardValue[] {
-  const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"] as const;
+export function generateDeck(
+  ruleSet: RuleSet,
+  exerciseType: ExerciseType,
+): CardValue[] {
+  const ranks = [
+    "A",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "J",
+    "Q",
+    "K",
+  ] as const;
   const suits = ["hearts", "diamonds", "clubs", "spades"] as const;
 
   const deck: CardValue[] = [];
 
-  const getSuitExercise = (suit: typeof suits[number]): "pushups" | "squats" => {
+  const getSuitExercise = (
+    suit: (typeof suits)[number],
+  ): "pushups" | "squats" => {
     if (exerciseType === "pushups") return "pushups";
     if (exerciseType === "squats") return "squats";
     // Superset: hearts/diamonds = squats, clubs/spades = pushups
@@ -323,10 +346,38 @@ export function formatDuration(seconds: number): string {
   return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }
 
-export function getBestTime(workouts: WorkoutRecord[], ruleSetId: string): number | null {
-  const matchingWorkouts = workouts.filter(
-    (w) => w.ruleSetId === ruleSetId && w.cardsCompleted === 52
-  );
+export function getBestTime(
+  workouts: WorkoutRecord[],
+  ruleSetId: string,
+  exerciseType?: ExerciseType,
+): number | null {
+  const matchingWorkouts = workouts.filter((w) => {
+    const matchesRuleSet = w.ruleSetId === ruleSetId;
+    const matchesExercise = exerciseType
+      ? w.exerciseType === exerciseType
+      : true;
+    const isComplete = w.cardsCompleted === 52;
+    return matchesRuleSet && matchesExercise && isComplete;
+  });
   if (matchingWorkouts.length === 0) return null;
   return Math.min(...matchingWorkouts.map((w) => w.duration));
+}
+
+export function getBestTimeOverall(workouts: WorkoutRecord[]): {
+  time: number;
+  ruleSetId: string;
+  exerciseType: ExerciseType;
+} | null {
+  const completeWorkouts = workouts.filter((w) => w.cardsCompleted === 52);
+  if (completeWorkouts.length === 0) return null;
+
+  const best = completeWorkouts.reduce((prev, curr) =>
+    curr.duration < prev.duration ? curr : prev,
+  );
+
+  return {
+    time: best.duration,
+    ruleSetId: best.ruleSetId,
+    exerciseType: best.exerciseType || "superset",
+  };
 }

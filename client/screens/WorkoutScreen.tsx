@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useRef } from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import { View, StyleSheet, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -14,7 +15,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { ConcreteBackground } from "@/components/ConcreteBackground";
 import { PlayingCard } from "@/components/PlayingCard";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import {
@@ -30,7 +31,6 @@ import {
   FlipModeId,
   getFlipModeById,
   ExerciseType,
-  getExerciseTypeById,
 } from "@/lib/storage";
 
 type WorkoutState = "idle" | "active" | "paused" | "complete";
@@ -40,12 +40,11 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export default function WorkoutScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<{ navigate: (screen: string) => void }>();
 
   const [workoutState, setWorkoutState] = useState<WorkoutState>("idle");
   const [deck, setDeck] = useState<CardValue[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(-1);
-  const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [timer, setTimer] = useState(0);
   const [totalPushups, setTotalPushups] = useState(0);
   const [totalSquats, setTotalSquats] = useState(0);
@@ -53,6 +52,7 @@ export default function WorkoutScreen() {
   const [ruleSetId, setRuleSetId] = useState("standard");
   const [flipModeId, setFlipModeId] = useState<FlipModeId>("freshfish");
   const [flipModeName, setFlipModeName] = useState("FRESH FISH");
+  const [exerciseType, setExerciseType] = useState<ExerciseType>("superset");
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [hapticsEnabled, setHapticsEnabled] = useState(false);
@@ -62,7 +62,8 @@ export default function WorkoutScreen() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const buttonScale = useSharedValue(1);
 
-  const currentCard = activeCards.length > 0 ? activeCards[activeCards.length - 1] : null;
+  const currentCard =
+    activeCards.length > 0 ? activeCards[activeCards.length - 1] : null;
   const cardsRemaining = deck.length - currentCardIndex - 1;
   const cardsCompleted = currentCardIndex + 1;
 
@@ -84,27 +85,50 @@ export default function WorkoutScreen() {
   useFocusEffect(
     useCallback(() => {
       loadSettings();
-    }, [loadSettings])
+    }, [loadSettings]),
   );
 
-  const triggerHaptic = useCallback((style: Haptics.ImpactFeedbackStyle) => {
-    if (hapticsEnabled) {
-      Haptics.impactAsync(style);
-    }
-  }, [hapticsEnabled]);
+  const triggerHaptic = useCallback(
+    (style: Haptics.ImpactFeedbackStyle) => {
+      if (hapticsEnabled) {
+        Haptics.impactAsync(style);
+      }
+    },
+    [hapticsEnabled],
+  );
 
-  const triggerNotificationHaptic = useCallback((type: Haptics.NotificationFeedbackType) => {
-    if (hapticsEnabled) {
-      Haptics.notificationAsync(type);
+  const triggerNotificationHaptic = useCallback(
+    (type: Haptics.NotificationFeedbackType) => {
+      if (hapticsEnabled) {
+        Haptics.notificationAsync(type);
+      }
+    },
+    [hapticsEnabled],
+  );
+
+  const startTimeRef = useRef<number>(0);
+
+  // Screen wake lock during workout
+  useEffect(() => {
+    if (workoutState === "active") {
+      activateKeepAwakeAsync();
+    } else {
+      deactivateKeepAwake();
     }
-  }, [hapticsEnabled]);
+    return () => {
+      deactivateKeepAwake();
+    };
+  }, [workoutState]);
 
   const startTimer = useCallback(() => {
     if (timerRef.current) return;
+    // Use timestamp-based timing for accuracy
+    startTimeRef.current = Date.now() - timer * 1000;
     timerRef.current = setInterval(() => {
-      setTimer((prev) => prev + 1);
-    }, 1000);
-  }, []);
+      const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      setTimer(elapsed);
+    }, 100); // Update more frequently for precision
+  }, [timer]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -123,10 +147,11 @@ export default function WorkoutScreen() {
     setFlipModeName(flipMode.name);
     setHapticsEnabled(settings.hapticsEnabled);
 
+    setExerciseType(settings.selectedExerciseType);
     const newDeck = generateDeck(ruleSet, settings.selectedExerciseType);
     setDeck(newDeck);
     setCurrentCardIndex(-1);
-    setIsCardFlipped(false);
+    // Card flip animation handled by PlayingCard component
     setTimer(0);
     setTotalPushups(0);
     setTotalSquats(0);
@@ -139,6 +164,45 @@ export default function WorkoutScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   }, []);
+
+  const completeWorkout = useCallback(async () => {
+    stopTimer();
+    setWorkoutState("complete");
+
+    triggerNotificationHaptic(Haptics.NotificationFeedbackType.Success);
+
+    const workoutRecord: WorkoutRecord = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      duration: timer,
+      ruleSetId,
+      ruleSetName,
+      exerciseType,
+      flipModeId,
+      totalPushups,
+      totalSquats,
+      cardsCompleted: currentCardIndex + 1,
+    };
+
+    await saveWorkout(workoutRecord);
+
+    if (bestTime === null || timer < bestTime) {
+      setIsNewRecord(true);
+      setBestTime(timer);
+    }
+  }, [
+    timer,
+    ruleSetId,
+    ruleSetName,
+    exerciseType,
+    flipModeId,
+    totalPushups,
+    totalSquats,
+    currentCardIndex,
+    bestTime,
+    stopTimer,
+    triggerNotificationHaptic,
+  ]);
 
   const flipCard = useCallback(async () => {
     if (workoutState !== "active") return;
@@ -217,37 +281,15 @@ export default function WorkoutScreen() {
     setActiveCards(cardsToFlip);
     setActiveReps(totalReps);
     setCurrentCardIndex(nextIndex);
-    setIsCardFlipped(true);
-
-    setTimeout(() => {
-      setIsCardFlipped(false);
-    }, 300);
-  }, [workoutState, currentCardIndex, deck, flipModeId, startTimer, triggerHaptic]);
-
-  const completeWorkout = useCallback(async () => {
-    stopTimer();
-    setWorkoutState("complete");
-
-    triggerNotificationHaptic(Haptics.NotificationFeedbackType.Success);
-
-    const workoutRecord: WorkoutRecord = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      duration: timer,
-      ruleSetId,
-      ruleSetName,
-      totalPushups,
-      totalSquats,
-      cardsCompleted: 52,
-    };
-
-    await saveWorkout(workoutRecord);
-
-    if (bestTime === null || timer < bestTime) {
-      setIsNewRecord(true);
-      setBestTime(timer);
-    }
-  }, [timer, ruleSetId, ruleSetName, totalPushups, totalSquats, bestTime, stopTimer, triggerNotificationHaptic]);
+  }, [
+    workoutState,
+    currentCardIndex,
+    deck,
+    flipModeId,
+    startTimer,
+    triggerHaptic,
+    completeWorkout,
+  ]);
 
   const pauseWorkout = useCallback(() => {
     stopTimer();
@@ -261,12 +303,12 @@ export default function WorkoutScreen() {
     triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
   }, [startTimer, triggerHaptic]);
 
-  const resetDeck = useCallback(() => {
+  const performReset = useCallback(() => {
     stopTimer();
     setWorkoutState("idle");
     setDeck([]);
     setCurrentCardIndex(-1);
-    setIsCardFlipped(false);
+    // Card flip animation handled by PlayingCard component
     setTimer(0);
     setTotalPushups(0);
     setTotalSquats(0);
@@ -275,6 +317,27 @@ export default function WorkoutScreen() {
     setActiveReps(0);
     triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
   }, [stopTimer, triggerHaptic]);
+
+  const resetDeck = useCallback(() => {
+    // Show confirmation if workout is in progress
+    if (workoutState === "active" || workoutState === "paused") {
+      Alert.alert(
+        "QUIT WORKOUT",
+        "Your progress will be lost. Are you sure?",
+        [
+          { text: "CANCEL", style: "cancel" },
+          {
+            text: "QUIT",
+            style: "destructive",
+            onPress: performReset,
+          },
+        ],
+        { cancelable: true },
+      );
+    } else {
+      performReset();
+    }
+  }, [workoutState, performReset]);
 
   const handleButtonPressIn = () => {
     buttonScale.value = withSpring(0.95, { damping: 15, stiffness: 150 });
@@ -289,7 +352,11 @@ export default function WorkoutScreen() {
   }));
 
   const renderIdleState = () => (
-    <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.centerContent}>
+    <Animated.View
+      entering={FadeIn}
+      exiting={FadeOut}
+      style={styles.centerContent}
+    >
       <View style={styles.deckPreview}>
         <PlayingCard card={null} isFlipped={false} />
       </View>
@@ -300,7 +367,9 @@ export default function WorkoutScreen() {
       {bestTime !== null ? (
         <View style={styles.bestTimeContainer}>
           <ThemedText style={styles.bestTimeLabel}>BEST TIME</ThemedText>
-          <ThemedText style={styles.bestTimeValue}>{formatDuration(bestTime)}</ThemedText>
+          <ThemedText style={styles.bestTimeValue}>
+            {formatDuration(bestTime)}
+          </ThemedText>
         </View>
       ) : null}
 
@@ -324,7 +393,9 @@ export default function WorkoutScreen() {
         </Pressable>
 
         <View style={styles.timerContainer}>
-          <ThemedText style={styles.timerText}>{formatDuration(timer)}</ThemedText>
+          <ThemedText style={styles.timerText}>
+            {formatDuration(timer)}
+          </ThemedText>
           <Pressable
             onPress={workoutState === "paused" ? resumeWorkout : pauseWorkout}
             style={styles.pauseButton}
@@ -340,9 +411,7 @@ export default function WorkoutScreen() {
 
       {activeCards.length > 0 ? (
         <View style={styles.exerciseBadge}>
-          <ThemedText style={styles.exerciseText}>
-            {activeReps} REPS
-          </ThemedText>
+          <ThemedText style={styles.exerciseText}>{activeReps} REPS</ThemedText>
           {activeCards.length > 1 ? (
             <ThemedText style={styles.cardCountText}>
               ({activeCards.length} CARDS)
@@ -351,7 +420,9 @@ export default function WorkoutScreen() {
         </View>
       ) : (
         <View style={styles.exerciseBadgePlaceholder}>
-          <ThemedText style={styles.tapToStartText}>TAP FLIP TO START</ThemedText>
+          <ThemedText style={styles.tapToStartText}>
+            TAP FLIP TO START
+          </ThemedText>
         </View>
       )}
 
@@ -359,15 +430,30 @@ export default function WorkoutScreen() {
         {activeCards.length > 1 ? (
           <View style={styles.multiCardStack}>
             {activeCards.map((card, index) => (
-              <View
+              <Animated.View
                 key={`${card.suit}-${card.rank}-${index}`}
+                entering={FadeIn.delay(index * 80)}
                 style={[
                   styles.stackedCard,
-                  { marginLeft: index * 30, zIndex: index },
+                  {
+                    transform: [
+                      {
+                        translateX: (index - (activeCards.length - 1) / 2) * 45,
+                      },
+                      {
+                        rotate: `${(index - (activeCards.length - 1) / 2) * 5}deg`,
+                      },
+                      {
+                        translateY:
+                          Math.abs(index - (activeCards.length - 1) / 2) * 8,
+                      },
+                    ],
+                    zIndex: index,
+                  },
                 ]}
               >
-                <PlayingCard card={card} isFlipped={true} />
-              </View>
+                <PlayingCard card={card} isFlipped={true} size="small" />
+              </Animated.View>
             ))}
           </View>
         ) : (
@@ -384,12 +470,16 @@ export default function WorkoutScreen() {
             ]}
           />
         </View>
-        <ThemedText style={styles.progressText}>{cardsCompleted}/52 CARDS</ThemedText>
+        <ThemedText style={styles.progressText}>
+          {cardsCompleted}/52 CARDS
+        </ThemedText>
       </View>
 
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <ThemedText style={[styles.statValue, { color: Colors.dark.pushups }]}>
+          <ThemedText
+            style={[styles.statValue, { color: Colors.dark.pushups }]}
+          >
             {totalPushups}
           </ThemedText>
           <ThemedText style={styles.statLabel}>PUSHUPS</ThemedText>
@@ -430,17 +520,23 @@ export default function WorkoutScreen() {
         </View>
       ) : null}
 
-      <ThemedText style={styles.completeTime}>{formatDuration(timer)}</ThemedText>
+      <ThemedText style={styles.completeTime}>
+        {formatDuration(timer)}
+      </ThemedText>
 
       <View style={styles.finalStatsRow}>
         <View style={styles.finalStatCard}>
-          <ThemedText style={[styles.finalStatValue, { color: Colors.dark.pushups }]}>
+          <ThemedText
+            style={[styles.finalStatValue, { color: Colors.dark.pushups }]}
+          >
             {totalPushups}
           </ThemedText>
           <ThemedText style={styles.finalStatLabel}>PUSHUPS</ThemedText>
         </View>
         <View style={styles.finalStatCard}>
-          <ThemedText style={[styles.finalStatValue, { color: Colors.dark.squats }]}>
+          <ThemedText
+            style={[styles.finalStatValue, { color: Colors.dark.squats }]}
+          >
             {totalSquats}
           </ThemedText>
           <ThemedText style={styles.finalStatLabel}>SQUATS</ThemedText>
@@ -468,19 +564,23 @@ export default function WorkoutScreen() {
   );
 
   return (
-    <ThemedView
-      style={[
-        styles.container,
-        {
-          paddingTop: insets.top + Spacing.xl,
-          paddingBottom: tabBarHeight + Spacing.xl,
-        },
-      ]}
-    >
-      {workoutState === "idle" ? renderIdleState() : null}
-      {workoutState === "active" || workoutState === "paused" ? renderActiveState() : null}
-      {workoutState === "complete" ? renderCompleteState() : null}
-    </ThemedView>
+    <ConcreteBackground intensity="medium" showCracks={true} accentGlow={true}>
+      <View
+        style={[
+          styles.container,
+          {
+            paddingTop: insets.top + Spacing.xl,
+            paddingBottom: tabBarHeight + Spacing.xl,
+          },
+        ]}
+      >
+        {workoutState === "idle" ? renderIdleState() : null}
+        {workoutState === "active" || workoutState === "paused"
+          ? renderActiveState()
+          : null}
+        {workoutState === "complete" ? renderCompleteState() : null}
+      </View>
+    </ConcreteBackground>
   );
 }
 
