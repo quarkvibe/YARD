@@ -40,23 +40,28 @@ Preferred communication style: Simple, everyday language.
 - **Error Handling**: Custom ErrorBoundary component wrapping the app
 
 ### Workout Logic
-- 52-card deck with suits mapped to exercises (spades/clubs = pushups, hearts/diamonds = squats)
-- Card values determine rep counts (configurable via rule sets)
+- 52-card deck generates exercises based on selected exercise type
+- Exercise type determines movement: PUSHUPS (all pushups), SQUATS (all squats), SUPERSET (mixed by suit)
+- Intensity controls rep counts via card value multipliers
 - Timer tracks workout duration with pause/resume functionality
-- Personal records tracked per rule set
+- Personal records tracked per intensity level
 
-### Rule Sets
-- **STANDARD**: A=1, J/Q/K=10, mixed exercises
-- **HARD TIME**: A=11, J/Q/K=15, maximum burn
-- **PUSHUPS ONLY**: All suits pushups
-- **SQUATS ONLY**: All suits squats
+### Exercise Types
+- **PUSHUPS**: All 52 cards are pushups
+- **SQUATS**: All 52 cards are squats
+- **SUPERSET**: Spades/clubs = pushups, hearts/diamonds = squats (mixed)
+
+### Intensity Levels
+- **STANDARD**: A=1, J/Q/K=10 (base reps)
+- **EXTREME**: A=11, J/Q/K=15 (higher reps)
+- **LIFER**: A=14, J/Q/K=20 (maximum burn)
 
 ### Screens
-1. **Home** - Hub with START WORKOUT button, best time display
+1. **Home** - Hub with START WORKOUT button, exercise/intensity config cards, best time display
 2. **Workout** - Card flipping, timer, FLIP button
 3. **History** - Past workouts, personal bests per ruleset
 4. **REC YARD** - Premium competitive module ($2.99/mo) with profile setup, global leaderboard, verified times, and weekly challenges
-5. **Settings** - Ruleset picker, preferences
+5. **Settings** - Exercise type selector, intensity picker, flip mode, preferences
 
 ## External Dependencies
 
