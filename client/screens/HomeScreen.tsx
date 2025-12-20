@@ -12,7 +12,6 @@ import Animated, {
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import {
@@ -25,6 +24,36 @@ import {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
+function TallyMarks({ count }: { count: number }) {
+  const groups = Math.floor(count / 5);
+  const remainder = count % 5;
+  
+  const renderTallyGroup = (key: number) => (
+    <View key={key} style={styles.tallyGroup}>
+      <View style={styles.tallyMark} />
+      <View style={styles.tallyMark} />
+      <View style={styles.tallyMark} />
+      <View style={styles.tallyMark} />
+      <View style={[styles.tallyMark, styles.tallyStrike]} />
+    </View>
+  );
+
+  const renderPartialTally = (marks: number) => (
+    <View style={styles.tallyGroup}>
+      {Array.from({ length: marks }).map((_, i) => (
+        <View key={i} style={styles.tallyMark} />
+      ))}
+    </View>
+  );
+
+  return (
+    <View style={styles.tallyContainer}>
+      {Array.from({ length: Math.min(groups, 10) }).map((_, i) => renderTallyGroup(i))}
+      {remainder > 0 ? renderPartialTally(remainder) : null}
+    </View>
+  );
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
@@ -32,6 +61,7 @@ export default function HomeScreen() {
 
   const [ruleSetName, setRuleSetName] = useState("STANDARD");
   const [bestTime, setBestTime] = useState<number | null>(null);
+  const [totalWorkouts, setTotalWorkouts] = useState(0);
 
   const buttonScale = useSharedValue(1);
 
@@ -47,6 +77,7 @@ export default function HomeScreen() {
     setRuleSetName(ruleSet.name);
 
     const workouts = await getWorkouts();
+    setTotalWorkouts(workouts.length);
     const best = getBestTime(workouts, ruleSet.id);
     setBestTime(best);
   };
@@ -123,6 +154,12 @@ export default function HomeScreen() {
             <ThemedText style={styles.linkText}>SETTINGS</ThemedText>
           </Pressable>
         </Animated.View>
+
+        {totalWorkouts > 0 ? (
+          <Animated.View entering={FadeIn.delay(500)} style={styles.tallySection}>
+            <TallyMarks count={totalWorkouts} />
+          </Animated.View>
+        ) : null}
       </View>
     </ThemedView>
   );
@@ -150,9 +187,9 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "600",
     letterSpacing: 4,
-    color: Colors.dark.textSecondary,
+    color: Colors.dark.accent,
     marginTop: Spacing.md,
   },
   bestTimeSection: {
@@ -217,5 +254,35 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 2,
     color: Colors.dark.textSecondary,
+  },
+  tallySection: {
+    position: "absolute",
+    bottom: Spacing["4xl"],
+    left: Spacing["2xl"],
+  },
+  tallyContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.md,
+    opacity: 0.3,
+  },
+  tallyGroup: {
+    flexDirection: "row",
+    gap: 3,
+    position: "relative",
+  },
+  tallyMark: {
+    width: 2,
+    height: 24,
+    backgroundColor: Colors.dark.textSecondary,
+    transform: [{ rotate: "-10deg" }],
+  },
+  tallyStrike: {
+    position: "absolute",
+    width: 28,
+    height: 2,
+    top: 11,
+    left: -3,
+    transform: [{ rotate: "30deg" }],
   },
 });
