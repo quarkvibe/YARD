@@ -123,7 +123,7 @@ export default function WorkoutScreen() {
     setFlipModeName(flipMode.name);
     setHapticsEnabled(settings.hapticsEnabled);
 
-    const newDeck = generateDeck(ruleSet);
+    const newDeck = generateDeck(ruleSet, settings.selectedExerciseType);
     setDeck(newDeck);
     setCurrentCardIndex(-1);
     setIsCardFlipped(false);

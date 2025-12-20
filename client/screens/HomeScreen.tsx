@@ -20,6 +20,7 @@ import {
   getBestTime,
   getRuleSetById,
   formatDuration,
+  getExerciseTypeById,
 } from "@/lib/storage";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -66,6 +67,7 @@ export default function HomeScreen() {
   const { theme } = useTheme();
 
   const [ruleSetName, setRuleSetName] = useState("STANDARD");
+  const [exerciseTypeName, setExerciseTypeName] = useState("SUPERSET");
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [totalWorkouts, setTotalWorkouts] = useState(0);
 
@@ -80,7 +82,9 @@ export default function HomeScreen() {
   const loadData = async () => {
     const settings = await getSettings();
     const ruleSet = getRuleSetById(settings.selectedRuleSetId);
+    const exerciseType = getExerciseTypeById(settings.selectedExerciseType);
     setRuleSetName(ruleSet.name);
+    setExerciseTypeName(exerciseType.name);
 
     const workouts = await getWorkouts();
     setTotalWorkouts(workouts.length);
@@ -116,7 +120,24 @@ export default function HomeScreen() {
           </Animated.View>
         ) : null}
 
-        <Animated.View entering={FadeIn.delay(300)} style={styles.actionSection}>
+        <Animated.View entering={FadeIn.delay(250)} style={styles.configSection}>
+          <Pressable 
+            style={styles.configCard}
+            onPress={() => navigation.navigate("SettingsTab")}
+          >
+            <ThemedText style={styles.configLabel}>EXERCISE</ThemedText>
+            <ThemedText style={styles.configValue}>{exerciseTypeName}</ThemedText>
+          </Pressable>
+          <Pressable 
+            style={styles.configCard}
+            onPress={() => navigation.navigate("SettingsTab")}
+          >
+            <ThemedText style={styles.configLabel}>INTENSITY</ThemedText>
+            <ThemedText style={styles.configValue}>{ruleSetName}</ThemedText>
+          </Pressable>
+        </Animated.View>
+
+        <Animated.View entering={FadeIn.delay(350)} style={styles.actionSection}>
           <AnimatedPressable
             onPress={() => navigation.navigate("WorkoutTab")}
             onPressIn={handlePressIn}
@@ -225,6 +246,34 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     color: Colors.dark.accent,
     marginTop: Spacing.sm,
+  },
+  configSection: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: Spacing.md,
+    marginBottom: Spacing["2xl"],
+  },
+  configCard: {
+    flex: 1,
+    backgroundColor: Colors.dark.cardBackground,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    alignItems: "center",
+  },
+  configLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  configValue: {
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 2,
+    color: Colors.dark.accent,
   },
   actionSection: {
     alignItems: "center",

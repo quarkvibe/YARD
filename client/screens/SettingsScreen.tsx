@@ -16,6 +16,8 @@ import {
   RuleSet,
   FLIP_MODES,
   FlipMode,
+  EXERCISE_TYPES,
+  ExerciseTypeOption,
 } from "@/lib/storage";
 
 export default function SettingsScreen() {
@@ -46,6 +48,28 @@ export default function SettingsScreen() {
     if (newSettings.hapticsEnabled) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+  };
+
+  const renderExerciseTypeCard = (exerciseType: ExerciseTypeOption) => {
+    const isSelected = settings?.selectedExerciseType === exerciseType.id;
+
+    return (
+      <Pressable
+        key={exerciseType.id}
+        onPress={() => handleSettingChange("selectedExerciseType", exerciseType.id)}
+        style={[
+          styles.exerciseTypeCard,
+          isSelected && styles.exerciseTypeCardSelected,
+        ]}
+      >
+        <ThemedText style={[
+          styles.exerciseTypeName,
+          isSelected && styles.exerciseTypeNameSelected,
+        ]}>
+          {exerciseType.name}
+        </ThemedText>
+      </Pressable>
+    );
   };
 
   const renderFlipModeCard = (flipMode: FlipMode) => {
@@ -125,48 +149,6 @@ export default function SettingsScreen() {
                 ))}
               </View>
             </View>
-
-            <View style={styles.suitsSection}>
-              <ThemedText style={styles.detailLabel}>SUIT EXERCISES</ThemedText>
-              <View style={styles.suitGrid}>
-                {Object.entries(ruleSet.suitExercises).map(([suit, exercise]) => (
-                  <View key={suit} style={styles.suitItem}>
-                    <ThemedText
-                      style={[
-                        styles.suitSymbol,
-                        {
-                          color:
-                            suit === "hearts" || suit === "diamonds"
-                              ? Colors.dark.pushups
-                              : Colors.dark.chalk,
-                        },
-                      ]}
-                    >
-                      {suit === "hearts"
-                        ? "\u2665"
-                        : suit === "diamonds"
-                          ? "\u2666"
-                          : suit === "clubs"
-                            ? "\u2663"
-                            : "\u2660"}
-                    </ThemedText>
-                    <ThemedText
-                      style={[
-                        styles.suitExercise,
-                        {
-                          color:
-                            exercise === "pushups"
-                              ? Colors.dark.pushups
-                              : Colors.dark.squats,
-                        },
-                      ]}
-                    >
-                      {exercise.toUpperCase()}
-                    </ThemedText>
-                  </View>
-                ))}
-              </View>
-            </View>
           </View>
         ) : null}
       </Pressable>
@@ -190,13 +172,18 @@ export default function SettingsScreen() {
         paddingHorizontal: Spacing.xl,
       }}
     >
+      <ThemedText style={styles.sectionTitle}>EXERCISE</ThemedText>
+      <View style={styles.exerciseTypesContainer}>
+        {EXERCISE_TYPES.map(renderExerciseTypeCard)}
+      </View>
+
+      <ThemedText style={styles.sectionTitle}>INTENSITY</ThemedText>
+      {DEFAULT_RULE_SETS.map(renderRuleSetCard)}
+
       <ThemedText style={styles.sectionTitle}>FLIP MODE</ThemedText>
       <View style={styles.flipModesContainer}>
         {FLIP_MODES.map(renderFlipModeCard)}
       </View>
-
-      <ThemedText style={styles.sectionTitle}>RULESET</ThemedText>
-      {DEFAULT_RULE_SETS.map(renderRuleSetCard)}
 
       <ThemedText style={styles.sectionTitle}>PREFERENCES</ThemedText>
 
@@ -261,6 +248,35 @@ const styles = StyleSheet.create({
     color: Colors.dark.textSecondary,
     marginBottom: Spacing.lg,
     marginTop: Spacing.lg,
+  },
+  exerciseTypesContainer: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  exerciseTypeCard: {
+    flex: 1,
+    backgroundColor: Colors.dark.cardBackground,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    alignItems: "center",
+  },
+  exerciseTypeCardSelected: {
+    borderColor: Colors.dark.accent,
+    borderWidth: 2,
+    backgroundColor: Colors.dark.cardBackground,
+  },
+  exerciseTypeName: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+  },
+  exerciseTypeNameSelected: {
+    color: Colors.dark.accent,
   },
   flipModesContainer: {
     gap: Spacing.sm,
