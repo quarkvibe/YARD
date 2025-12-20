@@ -1,9 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const STORAGE_KEYS = {
-  WORKOUTS: "@deck_workout/workouts",
-  SETTINGS: "@deck_workout/settings",
-  PROFILE: "@deck_workout/profile",
+  WORKOUTS: "@yard/workouts",
+  SETTINGS: "@yard/settings",
+  PROFILE: "@yard/profile",
 } as const;
 
 export interface CardValue {
@@ -59,16 +59,67 @@ export interface AppSettings {
 
 export interface UserProfile {
   displayName: string;
-  avatarIndex: number;
 }
 
 export const DEFAULT_RULE_SETS: RuleSet[] = [
   {
     id: "standard",
-    name: "Standard",
-    description: "Classic prison workout. Face cards = 10, Ace = 11.",
+    name: "STANDARD",
+    description: "A=1, J/Q/K=10",
+    cardValues: {
+      A: 1,
+      "2": 2,
+      "3": 3,
+      "4": 4,
+      "5": 5,
+      "6": 6,
+      "7": 7,
+      "8": 8,
+      "9": 9,
+      "10": 10,
+      J: 10,
+      Q: 10,
+      K: 10,
+    },
+    suitExercises: {
+      hearts: "squats",
+      diamonds: "squats",
+      clubs: "pushups",
+      spades: "pushups",
+    },
+  },
+  {
+    id: "hardtime",
+    name: "HARD TIME",
+    description: "A=11, J/Q/K=15",
     cardValues: {
       A: 11,
+      "2": 2,
+      "3": 3,
+      "4": 4,
+      "5": 5,
+      "6": 6,
+      "7": 7,
+      "8": 8,
+      "9": 9,
+      "10": 10,
+      J: 15,
+      Q: 15,
+      K: 15,
+    },
+    suitExercises: {
+      hearts: "squats",
+      diamonds: "squats",
+      clubs: "pushups",
+      spades: "pushups",
+    },
+  },
+  {
+    id: "pushupsonly",
+    name: "PUSHUPS ONLY",
+    description: "All suits pushups",
+    cardValues: {
+      A: 1,
       "2": 2,
       "3": 3,
       "4": 4,
@@ -85,40 +136,14 @@ export const DEFAULT_RULE_SETS: RuleSet[] = [
     suitExercises: {
       hearts: "pushups",
       diamonds: "pushups",
-      clubs: "squats",
-      spades: "squats",
+      clubs: "pushups",
+      spades: "pushups",
     },
   },
   {
-    id: "endurance",
-    name: "Endurance",
-    description: "Higher reps for maximum burn. Face cards = 15, Ace = 20.",
-    cardValues: {
-      A: 20,
-      "2": 2,
-      "3": 3,
-      "4": 4,
-      "5": 5,
-      "6": 6,
-      "7": 7,
-      "8": 8,
-      "9": 9,
-      "10": 10,
-      J: 15,
-      Q: 15,
-      K: 15,
-    },
-    suitExercises: {
-      hearts: "pushups",
-      diamonds: "pushups",
-      clubs: "squats",
-      spades: "squats",
-    },
-  },
-  {
-    id: "sprint",
-    name: "Sprint",
-    description: "Quick workout. Face cards = 5, Ace = 1.",
+    id: "squatsonly",
+    name: "SQUATS ONLY",
+    description: "All suits squats",
     cardValues: {
       A: 1,
       "2": 2,
@@ -130,14 +155,14 @@ export const DEFAULT_RULE_SETS: RuleSet[] = [
       "8": 8,
       "9": 9,
       "10": 10,
-      J: 5,
-      Q: 5,
-      K: 5,
+      J: 10,
+      Q: 10,
+      K: 10,
     },
     suitExercises: {
-      hearts: "pushups",
+      hearts: "squats",
       diamonds: "squats",
-      clubs: "pushups",
+      clubs: "squats",
       spades: "squats",
     },
   },
@@ -145,13 +170,12 @@ export const DEFAULT_RULE_SETS: RuleSet[] = [
 
 export const DEFAULT_SETTINGS: AppSettings = {
   selectedRuleSetId: "standard",
-  soundEnabled: true,
-  hapticsEnabled: true,
+  soundEnabled: false,
+  hapticsEnabled: false,
 };
 
 export const DEFAULT_PROFILE: UserProfile = {
-  displayName: "Athlete",
-  avatarIndex: 0,
+  displayName: "",
 };
 
 export async function getWorkouts(): Promise<WorkoutRecord[]> {

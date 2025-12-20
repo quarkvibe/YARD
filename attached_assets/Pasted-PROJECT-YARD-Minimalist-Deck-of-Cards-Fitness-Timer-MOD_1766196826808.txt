@@ -1,0 +1,148 @@
+PROJECT: YARD — Minimalist Deck-of-Cards Fitness Timer
+MODE ADD-ON: REC TIME — Competitive leaderboards + weekly challenges
+
+GOAL
+Build a brutally simple, masculine fitness app inspired by prison/military PT culture. The workout is a deck of cards: flip cards, do pushups/squats based on card value, complete the deck, track total time, and try to beat best time. The app must feel institutional (prison yard + military), minimalist, high-contrast, and disciplined. No fluff, no social feed, no influencer vibes.
+
+CORE PRODUCT PRINCIPLES
+- Extremely simple: “Flip. Move. Finish.”
+- Minimal taps, minimal screens, minimal text.
+- No accounts required for base app.
+- REC TIME is optional competitive access; the workout stays identical, only ranking/visibility changes.
+- Brand tone: masculine, institutional, understated, serious, gritty-but-clean.
+- Accessibility: readable large timer, big buttons, high contrast.
+
+APP NAME
+- YARD (primary)
+- “REC TIME” is the name of the competitive mode.
+
+DESIGN LANGUAGE (UI/UX)
+- Colors: matte black background (#0b0b0b), concrete gray accents, chalk white text. Optional single accent color (yard orange OR olive drab) used sparingly for Start/Finish/New Record/Rec Time indicators.
+- Typography: ALL CAPS, condensed/stencil-inspired look. No rounded playful fonts.
+- Texture: subtle concrete/steel scratch texture optional, but keep legibility first.
+- Vibe words: YARD, COUNT, CLOCK, FINISH, LOCKED IN, DISCIPLINE.
+- No emojis, no animations unless functional (e.g., card flip).
+
+PRIMARY USER FLOW (MVP)
+1) Launch -> Splash screen
+2) Home screen:
+   - Primary action: START WORKOUT
+   - Secondary: RULESET, HISTORY, REC TIME (if enabled/available), SETTINGS
+3) During workout:
+   - Card shown large
+   - Two suit mappings:
+     - Example default: Spades/Clubs = PUSHUPS, Hearts/Diamonds = SQUATS (or user can choose)
+   - Value mapping:
+     - A = 1 (or 11 if ruleset selected)
+     - 2-10 = face value
+     - J/Q/K = 10 by default (ruleset option can set to 15/20)
+     - Joker optional ruleset: burpees or “max set”
+   - Big timer always visible
+   - Big “FLIP” button (or swipe) reveals next card
+   - Display required reps for that card prominently: “PUSHUPS x 8”
+   - Simple “DONE” acknowledgement is implicit (user flips when done). No rep counting needed.
+4) Finish:
+   - Show total time
+   - Show personal best + whether new record
+   - Save run to history (date/time, ruleset, mode, total time)
+   - Buttons: RUN AGAIN, VIEW HISTORY, ENTER REC TIME (if not already), SHARE (optional minimal share card image)
+
+RULESETS (KEEP SIMPLE)
+Provide a small set of presets; no complicated custom editor needed.
+- STANDARD: A=1, J/Q/K=10
+- HARD TIME: A=11, J/Q/K=15
+- PUSHUPS ONLY: all suits pushups
+- SQUATS ONLY: all suits squats
+- ALTERNATE: odd cards pushups, even cards squats (optional)
+Rulesets should be selectable before starting a workout.
+
+DATA TO TRACK (LOCAL)
+- Personal best time per ruleset
+- History list of completed runs (timestamp, duration, ruleset, mode)
+- Streaks are optional but must not guilt the user (no “you missed a day” messaging).
+
+REC TIME (COMPETITIVE MODE) — IMPORTANT
+Positioning: Not “premium” or “pro”. It’s access.
+REC TIME is an optional subscription-like add-on (conceptually $1.99/month), but implement it as a feature flag/mock for MVP.
+
+REC TIME FEATURES (HIGH LEVEL)
+- Leaderboards: Global + Regional (optional) + “This Week”
+- Weekly Challenge: same ruleset and constraints for everyone that week (e.g., STANDARD deck)
+- Anonymous handles: user chooses a simple name; no profile pics, no bios, no chat.
+- Ranking is by TIME ONLY (lower is better).
+- After finishing a REC TIME run, user can submit time and see rank.
+- Display: “YOUR TIME”, “YOUR RANK”, “WEEK BEST”, “GLOBAL BEST”
+- Keep Rec Time UI minimalist and institutional. No social feed.
+
+REC TIME USER EXPERIENCE
+- Home screen shows a small “REC TIME” entry (locked if not enabled).
+- Rec Time screen:
+  - “CLOCK IN” button to start the weekly challenge (or pick from 1-2 competitive queues max).
+  - Shows leaderboard list (rank, handle, time).
+  - Shows user’s best Rec Time submissions.
+- No spammy upsells. If locked, show one simple screen: “REC TIME IS ACCESS TO RANKINGS + WEEKLY DECK. $1.99/MO. CANCEL ANYTIME.”
+
+SCREENS (REQUIRED)
+- Splash screen
+- Home
+- Ruleset picker
+- Workout (card + timer)
+- Finish summary
+- History
+- Settings
+- Rec Time (locked/unlocked states)
+- Leaderboards (can be part of Rec Time screen)
+
+SPLASH SCREEN (VISUAL SPEC)
+- Black background with subtle concrete texture
+- Center: “YARD” in stencil/condensed all-caps
+- Subtext small: “FLIP. MOVE. FINISH.”
+Optional: faint tally marks or card outline watermark.
+
+APP ICON (CONCEPT OPTIONS)
+Pick one and build around it:
+1) Card outline with a suit symbol replaced by a pushup silhouette (stencil style)
+2) Five-bar tally marks scratched/chalked on black
+3) Minimal shield/patch insignia that feels military/institutional
+Use high contrast, minimal details, works at small sizes.
+
+CONTENT + COPY TONE (VERY IMPORTANT)
+Short. Cold. Institutional. No hype.
+Examples:
+- START WORKOUT
+- FLIP
+- FINISH
+- NEW RECORD
+- CLOCK IN (Rec Time)
+Avoid:
+- “You got this!”
+- “Crush it!”
+- “Let’s go!”
+
+NON-FUNCTIONAL REQUIREMENTS
+- App must be fast and offline-friendly for base mode.
+- No sign-in required for base.
+- Simple state management; deterministic deck order should be random per run with optional “seeded” mode for weekly challenge.
+- Ensure timer accuracy and prevent accidental resets.
+- Provide haptics/sound as optional toggles (default off or subtle).
+
+DELIVERABLES (WHAT TO BUILD NOW)
+- A working MVP with: deck logic, rulesets, timer, history, best time tracking, clean institutional UI.
+- A Rec Time stub: screens + fake leaderboard data and a submission flow (later can connect to real backend).
+- A clear structure so Rec Time can be wired to real auth/backend later without rewriting core workout logic.
+
+FUTURE (NOT REQUIRED FOR MVP)
+- Real backend for Rec Time leaderboards
+- Anti-cheat heuristics (basic sanity checks)
+- Friend squads (only if brand-safe; avoid social feed)
+- Additional movement decks (burpees/core) without changing app simplicity.
+
+OUTPUT EXPECTATION
+Generate:
+- A concise product plan and screen-by-screen spec
+- UI component breakdown (not code-heavy)
+- Data model outline (entities + fields)
+- Basic navigation map
+- Suggested folder structure
+- Stubbed Rec Time (fake data) that can later be swapped for real API
+- Keep it simple, clean, and on-brand.

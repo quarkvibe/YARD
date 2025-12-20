@@ -1,168 +1,170 @@
-# Fitness Card Deck - Design Guidelines
+# YARD - Design Guidelines
 
 ## App Overview
-A prison-style fitness app where users flip through a virtual deck of cards to perform pushups and squats based on card values. Track workout times and beat personal records.
+YARD is a brutally simple, masculine fitness app inspired by prison/military PT culture. The workout is a deck of cards: flip cards, do pushups/squats based on card value, complete the deck, track total time, and try to beat best time.
+
+## Brand Principles
+- **Extremely simple**: "Flip. Move. Finish."
+- **Minimal taps, minimal screens, minimal text**
+- **No accounts required for base app**
+- **Tone**: masculine, institutional, understated, serious, gritty-but-clean
+- **Accessibility**: readable large timer, big buttons, high contrast
 
 ## Architecture Decisions
 
 ### Authentication
 **No Authentication Required**
 - Single-user, local-first app with data stored on device
-- Include a **Profile screen** with:
-  - User avatar (generate 1 motivational fitness-themed avatar preset)
-  - Display name field
-  - Personal records display
-  - App preferences (theme, sound effects, haptics)
+- REC TIME (competitive mode) is a feature stub for future implementation
 
 ### Navigation Structure
-**Tab Navigation** (3 tabs)
-- **Workout** (center tab) - Core action, card flipping interface
-- **Stats** (left tab) - Workout history and personal records
-- **Settings** (right tab) - Rules configuration and profile
+**Single-screen focus with modal navigation**
+- **Home** - Primary hub with START WORKOUT button
+- **Workout** - Full-screen card flipping interface  
+- **Finish** - Workout completion summary
+- **History** - Past workout records
+- **Settings** - Rules and preferences
+- **Rec Time** - Competitive mode (stub)
 
-## Screen Specifications
-
-### 1. Workout Screen (Center Tab)
-**Purpose**: Primary card-flipping workout interface
-
-**Layout**:
-- Header: Transparent, no navigation elements
-- Main Content: Non-scrollable, fixed layout
-  - Large card display area (center)
-  - Current exercise label (above card)
-  - Rep counter (below card)
-  - Timer display (top right corner, always visible)
-  - Progress indicator showing cards remaining
-- Floating Elements:
-  - "Flip" button (bottom center, elevated with shadow)
-  - "Reset Deck" button (top left, subtle text button)
-  - "Pause/Resume" button (integrated with timer)
-- Safe Area Insets: top: insets.top + Spacing.xl, bottom: tabBarHeight + Spacing.xl
-
-**Components**:
-- Animated card component with flip animation
-- Large circular timer (MM:SS format)
-- Exercise type badge (Pushups/Squats)
-- Card value display (large, prominent typography)
-- Progress bar or fraction (e.g., "23/52 cards")
-- Primary action button (Flip Card)
-
-**States**:
-- Pre-workout: Deck face-down, "Start Workout" button
-- Active: Card flipping, timer running, rep counter incrementing
-- Paused: Timer stopped, overlay with resume/end options
-- Complete: Celebration state, time display, "Save & View Stats" button
-
-### 2. Stats Screen (Left Tab)
-**Purpose**: View workout history and personal records
-
-**Layout**:
-- Header: Default navigation, title "Stats"
-- Main Content: Scrollable list
-  - Personal Records card at top (fastest times for each rule set)
-  - Workout history list below (chronological, newest first)
-- Safe Area Insets: top: Spacing.xl, bottom: tabBarHeight + Spacing.xl
-
-**Components**:
-- PR summary cards (highlight best times)
-- List items showing: date, rule set used, time completed, total reps
-- Empty state with motivational message for first-time users
-- Filter options (All time, This week, This month)
-
-### 3. Settings Screen (Right Tab)
-**Purpose**: Configure workout rules and app preferences
-
-**Layout**:
-- Header: Default navigation, title "Settings"
-- Main Content: Scrollable form sections
-  - Profile section (avatar, name)
-  - Rule Sets section (select/customize card values)
-  - Preferences section (theme, sounds, haptics)
-  - About section (app version, instructions)
-- Safe Area Insets: top: Spacing.xl, bottom: tabBarHeight + Spacing.xl
-
-**Components**:
-- Profile avatar (tappable to change)
-- Text input for name
-- Rule set cards (preset options: Standard, Endurance, Sprint)
-- Custom rule builder with card suit assignments
-- Toggle switches for preferences
-- Instructional modal explaining rules
-
-### 4. Rule Set Modal (Native Modal)
-**Purpose**: Explain and customize workout rules
-
-**Layout**:
-- Header: Modal with close button (top left), title "Workout Rules"
-- Main Content: Scrollable
-  - Rule set explanation
-  - Card value mappings (e.g., Ace = 1, Face cards = 10)
-  - Suit assignments (which suits = pushups vs squats)
-- Action buttons at bottom (Save, Cancel)
-
-**Components**:
-- Visual card examples
-- Editable value fields
-- Exercise type toggles per suit
-
-## Design System
+## Design Language
 
 ### Color Palette
 **Primary Colors**:
-- Accent: Bold, energetic orange (#FF6B35) - for CTAs and active states
-- Background: Deep navy (#1A1D29) - main background
-- Surface: Charcoal (#2A2D3A) - cards, elevated surfaces
-- Success: Vibrant green (#4CAF50) - completed workouts, PRs
+- Background: Matte black (#0b0b0b)
+- Surface: Concrete gray (#1A1A1A, #2A2A2A)
+- Text: Chalk white (#FAFAFA)
+- Accent: Yard orange (#FF6B35) - used sparingly for Start/Finish/New Record
 
 **Semantic Colors**:
-- Pushups: Red accent (#E74C3C)
-- Squats: Blue accent (#3498DB)
-- Text Primary: White (#FFFFFF)
-- Text Secondary: Light gray (#B0B3B8)
+- Pushups: Red (#E74C3C)
+- Squats: Blue (#3498DB)
+- Success/New Record: Green (#4CAF50)
+- Text Secondary: Gray (#A0A0A0)
 
 ### Typography
-**Font Family**: System (SF Pro for iOS, Roboto for Android)
-- Hero (Card Values): 72pt, Bold
-- Timer: 48pt, Medium, Monospace
-- Headers: 28pt, Bold
+- **ALL CAPS** for headers and buttons
+- **Condensed/stencil-inspired** look
+- **Letter spacing** for institutional feel
+- Hero (Card Values): 72pt, Extra Bold, uppercase
+- Timer: 56pt, Bold, monospace
+- Headers: 24-32pt, Bold, uppercase, letter-spaced
 - Body: 16pt, Regular
-- Captions: 14pt, Regular
-
-### Spacing
-- xl: 32px (screen margins)
-- lg: 24px (section spacing)
-- md: 16px (component spacing)
-- sm: 8px (tight spacing)
+- Captions: 12pt, Medium, uppercase
 
 ### Visual Design
-- Card component: Rounded corners (16px), subtle gradient, playing card aesthetic
-- Floating buttons: Elevation shadow (shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.10, shadowRadius: 2)
-- Interactive feedback: Scale animation on press (0.95), haptic feedback on card flip
-- Timer: Circular progress indicator around digits
-- Progress bar: Segmented (52 segments for full deck)
+- **No emojis** anywhere in the app
+- **No playful animations** - only functional ones (card flip)
+- **High contrast** - white on black
+- **Subtle concrete/steel texture** optional but keep legibility first
+- **Minimal shadows** - use color/elevation instead
 
-### Assets Required
-1. **User Avatar**: 1 fitness-themed preset (simple illustration of a person exercising or abstract fitness icon)
-2. **Card Suits**: Standard playing card suits (♠️ ♥️ ♦️ ♣️) using unicode or simple vector icons
-3. **Exercise Icons**: Feather icons from @expo/vector-icons:
-   - "activity" for workout
-   - "bar-chart-2" for stats
-   - "settings" for settings
-   - "play" for start/resume
-   - "pause" for pause
-   - "rotate-cw" for reset
+### Copy Tone
+Short. Cold. Institutional. No hype.
 
-### Accessibility
-- High contrast between text and backgrounds
-- Minimum touch targets: 44x44pt
-- Timer and card values must be readable at arm's length during exercise
-- Haptic feedback on all interactions
-- VoiceOver labels for all interactive elements
-- Sound cues for card flips (optional, toggleable)
+**Use**:
+- START WORKOUT
+- FLIP
+- FINISH
+- NEW RECORD
+- CLOCK IN
+- RUN AGAIN
+- LOCKED IN
 
-### Interaction Design
-- **Card Flip**: Swipe up or tap "Flip" button triggers 3D flip animation
-- **Timer**: Auto-starts on first card flip, pauses when app backgrounds
-- **Workout End**: Automatic when deck completes, shows celebration animation
-- **PR Notification**: Toast/banner when personal record is beaten
-- All buttons have pressed state (slight scale + opacity change)
+**Avoid**:
+- "You got this!"
+- "Crush it!"
+- "Let's go!"
+- Any motivational fluff
+
+## Screen Specifications
+
+### 1. Home Screen
+**Purpose**: Primary hub, one-button focus
+
+**Layout**:
+- Center: Large "YARD" branding
+- Primary action: START WORKOUT button (large, prominent)
+- Secondary links: RULESET, HISTORY, REC TIME, SETTINGS
+- Subtext: "FLIP. MOVE. FINISH."
+
+**Components**:
+- YARD logo/wordmark
+- Large primary button
+- Minimal text links below
+
+### 2. Workout Screen
+**Purpose**: Full-screen card flipping interface
+
+**Layout**:
+- Header: Timer (large, always visible)
+- Main Content: Large card display
+- Exercise label: "PUSHUPS x 8" format
+- Progress: Cards remaining count
+- Action: Large FLIP button
+
+**States**:
+- Pre-flip: Card face-down
+- Active: Card revealed, timer running
+- Complete: Final card done, auto-transition to Finish
+
+### 3. Finish Screen
+**Purpose**: Workout summary
+
+**Layout**:
+- Total time (large, center)
+- Personal best comparison
+- NEW RECORD indicator if applicable
+- Buttons: RUN AGAIN, VIEW HISTORY
+
+### 4. History Screen
+**Purpose**: Past workout records
+
+**Layout**:
+- List of completed workouts
+- Each shows: date, time, ruleset
+- Personal bests per ruleset at top
+
+### 5. Settings Screen
+**Purpose**: Ruleset selection and preferences
+
+**Layout**:
+- Ruleset picker (STANDARD, HARD TIME, PUSHUPS ONLY, SQUATS ONLY)
+- Preferences: Sound, Haptics toggles
+- About section
+
+### 6. Rec Time Screen (Stub)
+**Purpose**: Competitive mode placeholder
+
+**Layout**:
+- Locked state: Simple unlock prompt
+- Unlocked state: Leaderboard list, weekly challenge
+
+## Rulesets
+
+### STANDARD
+- A = 1, 2-10 = face value, J/Q/K = 10
+- Spades/Clubs = Pushups, Hearts/Diamonds = Squats
+
+### HARD TIME
+- A = 11, 2-10 = face value, J/Q/K = 15
+- Spades/Clubs = Pushups, Hearts/Diamonds = Squats
+
+### PUSHUPS ONLY
+- All suits = Pushups
+- Standard card values
+
+### SQUATS ONLY
+- All suits = Squats
+- Standard card values
+
+## Accessibility
+- High contrast (white on black)
+- Minimum touch targets: 48x48pt
+- Timer and card values readable at arm's length
+- Haptic feedback optional (default off or subtle)
+- Sound optional (default off)
+
+## Assets Required
+1. **App Icon**: Stencil-style card outline or tally marks on black
+2. **Card Suits**: Standard playing card suits using unicode or simple vector
+3. **Icons**: Feather icons from @expo/vector-icons
