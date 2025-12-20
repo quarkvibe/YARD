@@ -31,6 +31,8 @@ import {
   FlipModeId,
   getFlipModeById,
   ExerciseType,
+  SupersetModeId,
+  getSupersetModeById,
 } from "@/lib/storage";
 
 type WorkoutState = "idle" | "active" | "paused" | "complete";
@@ -53,6 +55,9 @@ export default function WorkoutScreen() {
   const [flipModeId, setFlipModeId] = useState<FlipModeId>("freshfish");
   const [flipModeName, setFlipModeName] = useState("FRESH FISH");
   const [exerciseType, setExerciseType] = useState<ExerciseType>("superset");
+  const [supersetModeId, setSupersetModeId] = useState<SupersetModeId>("alternating");
+  const [supersetModeName, setSupersetModeName] = useState("ALTERNATING");
+  const [alternatingExercise, setAlternatingExercise] = useState<"pushups" | "squats">("squats");
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [hapticsEnabled, setHapticsEnabled] = useState(false);
@@ -71,11 +76,17 @@ export default function WorkoutScreen() {
     const settings = await getSettings();
     const ruleSet = getRuleSetById(settings.selectedRuleSetId);
     const flipMode = getFlipModeById(settings.selectedFlipModeId);
+    const supersetMode = getSupersetModeById(settings.selectedSupersetModeId);
     setRuleSetId(ruleSet.id);
     setRuleSetName(ruleSet.name);
     setFlipModeId(flipMode.id);
     setFlipModeName(flipMode.name);
+    setSupersetModeId(supersetMode.id);
+    setSupersetModeName(supersetMode.name);
+    setExerciseType(settings.selectedExerciseType);
     setHapticsEnabled(settings.hapticsEnabled);
+    // Reset alternating state when settings reload
+    setAlternatingExercise("squats");
 
     const workouts = await getWorkouts();
     const best = getBestTime(workouts, ruleSet.id);
@@ -141,17 +152,19 @@ export default function WorkoutScreen() {
     const settings = await getSettings();
     const ruleSet = getRuleSetById(settings.selectedRuleSetId);
     const flipMode = getFlipModeById(settings.selectedFlipModeId);
+    const supersetMode = getSupersetModeById(settings.selectedSupersetModeId);
     setRuleSetId(ruleSet.id);
     setRuleSetName(ruleSet.name);
     setFlipModeId(flipMode.id);
     setFlipModeName(flipMode.name);
+    setSupersetModeId(supersetMode.id);
+    setSupersetModeName(supersetMode.name);
     setHapticsEnabled(settings.hapticsEnabled);
 
     setExerciseType(settings.selectedExerciseType);
     const newDeck = generateDeck(ruleSet, settings.selectedExerciseType);
     setDeck(newDeck);
     setCurrentCardIndex(-1);
-    // Card flip animation handled by PlayingCard component
     setTimer(0);
     setTotalPushups(0);
     setTotalSquats(0);
@@ -159,6 +172,7 @@ export default function WorkoutScreen() {
     setIsNewRecord(false);
     setActiveCards([]);
     setActiveReps(0);
+    setAlternatingExercise("squats"); // Start with squats for alternating mode
 
     if (settings.hapticsEnabled) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -224,43 +238,105 @@ export default function WorkoutScreen() {
     let pushupsToAdd = 0;
     let squatsToAdd = 0;
 
-    if (flipModeId === "freshfish") {
+    // Helper to assign exercise based on superset mode
+    const assignExercise = (card: CardValue, cardPosition: number): "pushups" | "squats" => {
+      if (exerciseType !== "superset") {
+        return card.exercise; // Use suit-based assignment for non-superset
+      }
+      
+      // Superset mode-specific logic
+      if (supersetModeId === "alternating") {
+        // Alternates each card
+        return alternatingExercise;
+      } else if (supersetModeId === "split2" || supersetModeId === "split4") {
+        // First half is one exercise, second half is another
+        const splitPoint = supersetModeId === "split2" ? 1 : 2;
+        return cardPosition < splitPoint ? "squats" : "pushups";
+      } else {
+        // splitunder20 - use alternating logic
+        return alternatingExercise;
+      }
+    };
+
+    // Determine flip mode to use (for superset, use the superset mode's flip logic)
+    const effectiveFlipMode = exerciseType === "superset" ? 
+      (supersetModeId === "split2" ? "trustee" : 
+       supersetModeId === "split4" ? "split4" :
+       supersetModeId === "splitunder20" ? "og" : 
+       flipModeId) : flipModeId;
+
+    if (effectiveFlipMode === "freshfish" || (exerciseType === "superset" && supersetModeId === "alternating")) {
       const card = deck[nextIndex];
-      cardsToFlip.push(card);
+      const exercise = assignExercise(card, 0);
+      const modifiedCard = { ...card, exercise };
+      cardsToFlip.push(modifiedCard);
       totalReps = card.value;
-      if (card.exercise === "pushups") {
+      if (exercise === "pushups") {
         pushupsToAdd = card.value;
       } else {
         squatsToAdd = card.value;
       }
-    } else if (flipModeId === "trustee") {
+      // Toggle for next alternating flip
+      if (exerciseType === "superset" && supersetModeId === "alternating") {
+        setAlternatingExercise(prev => prev === "squats" ? "pushups" : "squats");
+      }
+    } else if (effectiveFlipMode === "trustee" || (exerciseType === "superset" && supersetModeId === "split2")) {
       for (let i = 0; i < 2 && nextIndex + i < deck.length; i++) {
         const card = deck[nextIndex + i];
-        cardsToFlip.push(card);
+        const exercise = assignExercise(card, i);
+        const modifiedCard = { ...card, exercise };
+        cardsToFlip.push(modifiedCard);
         totalReps += card.value;
-        if (card.exercise === "pushups") {
+        if (exercise === "pushups") {
           pushupsToAdd += card.value;
         } else {
           squatsToAdd += card.value;
         }
       }
       nextIndex = nextIndex + cardsToFlip.length - 1;
-    } else if (flipModeId === "og") {
+    } else if (effectiveFlipMode === "split4") {
+      for (let i = 0; i < 4 && nextIndex + i < deck.length; i++) {
+        const card = deck[nextIndex + i];
+        const exercise = assignExercise(card, i);
+        const modifiedCard = { ...card, exercise };
+        cardsToFlip.push(modifiedCard);
+        totalReps += card.value;
+        if (exercise === "pushups") {
+          pushupsToAdd += card.value;
+        } else {
+          squatsToAdd += card.value;
+        }
+      }
+      nextIndex = nextIndex + cardsToFlip.length - 1;
+    } else if (effectiveFlipMode === "og" || (exerciseType === "superset" && supersetModeId === "splitunder20")) {
       let idx = nextIndex;
+      let currentExercise = alternatingExercise;
       while (idx < deck.length) {
         const card = deck[idx];
-        cardsToFlip.push(card);
+        const exercise = exerciseType === "superset" ? currentExercise : card.exercise;
+        const modifiedCard = { ...card, exercise };
+        cardsToFlip.push(modifiedCard);
         totalReps += card.value;
-        if (card.exercise === "pushups") {
+        if (exercise === "pushups") {
           pushupsToAdd += card.value;
         } else {
           squatsToAdd += card.value;
         }
         idx++;
         if (totalReps >= 20) break;
+        // Toggle exercise for each card in splitunder20
+        if (exerciseType === "superset" && supersetModeId === "splitunder20") {
+          currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+        }
       }
       nextIndex = idx - 1;
-    } else if (flipModeId === "podfather") {
+      // Update alternating state for next flip - continue from where we left off
+      if (exerciseType === "superset" && supersetModeId === "splitunder20") {
+        // Next flip should start with the opposite of what we ended with
+        const nextExercise = currentExercise === "squats" ? "pushups" : "squats";
+        setAlternatingExercise(nextExercise);
+      }
+    } else if (effectiveFlipMode === "podfather") {
       let idx = nextIndex;
       while (idx < deck.length && totalReps < 30) {
         const card = deck[idx];
@@ -286,6 +362,9 @@ export default function WorkoutScreen() {
     currentCardIndex,
     deck,
     flipModeId,
+    exerciseType,
+    supersetModeId,
+    alternatingExercise,
     startTimer,
     triggerHaptic,
     completeWorkout,
@@ -308,13 +387,13 @@ export default function WorkoutScreen() {
     setWorkoutState("idle");
     setDeck([]);
     setCurrentCardIndex(-1);
-    // Card flip animation handled by PlayingCard component
     setTimer(0);
     setTotalPushups(0);
     setTotalSquats(0);
     setIsNewRecord(false);
     setActiveCards([]);
     setActiveReps(0);
+    setAlternatingExercise("squats");
     triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
   }, [stopTimer, triggerHaptic]);
 

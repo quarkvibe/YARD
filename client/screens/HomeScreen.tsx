@@ -21,6 +21,7 @@ import {
   getRuleSetById,
   formatDuration,
   getExerciseTypeById,
+  getSupersetModeById,
 } from "@/lib/storage";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -66,8 +67,10 @@ export default function HomeScreen() {
   const navigation = useNavigation<{ navigate: (screen: string) => void }>();
   const { theme } = useTheme();
 
-  const [ruleSetName, setRuleSetName] = useState("STANDARD");
+  const [ruleSetName, setRuleSetName] = useState("MISDEMEANOR");
   const [exerciseTypeName, setExerciseTypeName] = useState("SUPERSET");
+  const [supersetModeName, setSupersetModeName] = useState("ALTERNATING");
+  const [isSuperset, setIsSuperset] = useState(true);
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [totalWorkouts, setTotalWorkouts] = useState(0);
 
@@ -83,8 +86,11 @@ export default function HomeScreen() {
     const settings = await getSettings();
     const ruleSet = getRuleSetById(settings.selectedRuleSetId);
     const exerciseType = getExerciseTypeById(settings.selectedExerciseType);
+    const supersetMode = getSupersetModeById(settings.selectedSupersetModeId);
     setRuleSetName(ruleSet.name);
     setExerciseTypeName(exerciseType.name);
+    setSupersetModeName(supersetMode.name);
+    setIsSuperset(settings.selectedExerciseType === "superset");
 
     const workouts = await getWorkouts();
     setTotalWorkouts(workouts.length);
@@ -148,6 +154,21 @@ export default function HomeScreen() {
             <ThemedText style={styles.configValue}>{ruleSetName}</ThemedText>
           </Pressable>
         </Animated.View>
+
+        {isSuperset ? (
+          <Animated.View
+            entering={FadeIn.delay(300)}
+            style={styles.supersetModeSection}
+          >
+            <Pressable
+              style={styles.supersetModeCard}
+              onPress={() => navigation.navigate("SettingsTab")}
+            >
+              <ThemedText style={styles.configLabel}>SUPERSET MODE</ThemedText>
+              <ThemedText style={styles.configValue}>{supersetModeName}</ThemedText>
+            </Pressable>
+          </Animated.View>
+        ) : null}
 
         <Animated.View
           entering={FadeIn.delay(350)}
@@ -274,7 +295,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     gap: Spacing.md,
-    marginBottom: Spacing["2xl"],
+    marginBottom: Spacing.lg,
   },
   configCard: {
     flex: 1,
@@ -283,6 +304,17 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
     borderWidth: 1,
     borderColor: Colors.dark.cardBorder,
+    alignItems: "center",
+  },
+  supersetModeSection: {
+    marginBottom: Spacing["2xl"],
+  },
+  supersetModeCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.accent,
     alignItems: "center",
   },
   configLabel: {

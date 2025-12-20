@@ -19,6 +19,8 @@ import {
   FlipMode,
   EXERCISE_TYPES,
   ExerciseTypeOption,
+  SUPERSET_MODES,
+  SupersetMode,
 } from "@/lib/storage";
 
 export default function SettingsScreen() {
@@ -94,6 +96,28 @@ export default function SettingsScreen() {
           <ThemedText style={styles.flipModeName}>{flipMode.name}</ThemedText>
           <ThemedText style={styles.flipModeDescription}>
             {flipMode.description}
+          </ThemedText>
+        </View>
+        {isSelected ? (
+          <Feather name="check" size={18} color={Colors.dark.accent} />
+        ) : null}
+      </Pressable>
+    );
+  };
+
+  const renderSupersetModeCard = (supersetMode: SupersetMode) => {
+    const isSelected = settings?.selectedSupersetModeId === supersetMode.id;
+
+    return (
+      <Pressable
+        key={supersetMode.id}
+        onPress={() => handleSettingChange("selectedSupersetModeId", supersetMode.id)}
+        style={[styles.flipModeCard, isSelected && styles.flipModeCardSelected]}
+      >
+        <View style={styles.flipModeContent}>
+          <ThemedText style={styles.flipModeName}>{supersetMode.name}</ThemedText>
+          <ThemedText style={styles.flipModeDescription}>
+            {supersetMode.description}
           </ThemedText>
         </View>
         {isSelected ? (
@@ -182,6 +206,15 @@ export default function SettingsScreen() {
         <View style={styles.exerciseTypesContainer}>
           {EXERCISE_TYPES.map(renderExerciseTypeCard)}
         </View>
+
+        {settings.selectedExerciseType === "superset" ? (
+          <>
+            <ThemedText style={styles.sectionTitle}>SUPERSET MODE</ThemedText>
+            <View style={styles.flipModesContainer}>
+              {SUPERSET_MODES.map(renderSupersetModeCard)}
+            </View>
+          </>
+        ) : null}
 
         <ThemedText style={styles.sectionTitle}>INTENSITY</ThemedText>
         {DEFAULT_RULE_SETS.map(renderRuleSetCard)}
