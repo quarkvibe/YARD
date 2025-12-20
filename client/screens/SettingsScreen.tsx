@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from "react";
 import { ScrollView, View, StyleSheet, Switch, Pressable } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
+import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import {
@@ -23,9 +24,14 @@ import {
 export default function SettingsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
+  const navigation = useNavigation<any>();
 
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [showRuleDetails, setShowRuleDetails] = useState<string | null>(null);
+
+  const handleStartWorkout = () => {
+    navigation.navigate("WorkoutTab");
+  };
 
   const loadData = useCallback(async () => {
     const loadedSettings = await getSettings();
@@ -172,6 +178,8 @@ export default function SettingsScreen() {
         paddingHorizontal: Spacing.xl,
       }}
     >
+      <ThemedText style={styles.sectionHeader}>REGIMEN</ThemedText>
+
       <ThemedText style={styles.sectionTitle}>EXERCISE</ThemedText>
       <View style={styles.exerciseTypesContainer}>
         {EXERCISE_TYPES.map(renderExerciseTypeCard)}
@@ -185,7 +193,7 @@ export default function SettingsScreen() {
         {FLIP_MODES.map(renderFlipModeCard)}
       </View>
 
-      <ThemedText style={styles.sectionTitle}>PREFERENCES</ThemedText>
+      <ThemedText style={styles.sectionHeader}>APP SETTINGS</ThemedText>
 
       <View style={styles.preferencesCard}>
         <View style={styles.preferenceItem}>
@@ -215,16 +223,34 @@ export default function SettingsScreen() {
             thumbColor={Colors.dark.chalk}
           />
         </View>
+
+        <View style={styles.divider} />
+
+        <Pressable style={styles.preferenceItem}>
+          <View style={styles.preferenceInfo}>
+            <Feather name="help-circle" size={18} color={Colors.dark.chalk} />
+            <ThemedText style={styles.preferenceLabel}>HELP</ThemedText>
+          </View>
+          <Feather name="chevron-right" size={18} color={Colors.dark.textSecondary} />
+        </Pressable>
+
+        <View style={styles.divider} />
+
+        <Pressable style={styles.preferenceItem}>
+          <View style={styles.preferenceInfo}>
+            <Feather name="info" size={18} color={Colors.dark.chalk} />
+            <ThemedText style={styles.preferenceLabel}>ABOUT YARD</ThemedText>
+          </View>
+          <Feather name="chevron-right" size={18} color={Colors.dark.textSecondary} />
+        </Pressable>
       </View>
 
-      <View style={styles.aboutCard}>
-        <ThemedText style={styles.aboutTitle}>ABOUT YARD</ThemedText>
-        <ThemedText style={styles.aboutText}>
-          Inspired by prison and military PT culture. Using a standard 52-card deck, you
-          perform pushups or squats based on the card you flip. Complete the entire deck as
-          fast as possible.
-        </ThemedText>
-        <ThemedText style={styles.versionText}>VERSION 1.0.0</ThemedText>
+      <ThemedText style={styles.versionText}>VERSION 1.0.0</ThemedText>
+
+      <View style={styles.startWorkoutContainer}>
+        <Button onPress={handleStartWorkout}>
+          START WORKOUT
+        </Button>
       </View>
     </ScrollView>
   );
@@ -240,6 +266,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     letterSpacing: 2,
+  },
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: "700",
+    letterSpacing: 3,
+    color: Colors.dark.chalk,
+    marginBottom: Spacing.md,
   },
   sectionTitle: {
     fontSize: 14,
@@ -468,5 +501,10 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     color: Colors.dark.textSecondary,
     textAlign: "center",
+    marginTop: Spacing.lg,
+  },
+  startWorkoutContainer: {
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
 });
