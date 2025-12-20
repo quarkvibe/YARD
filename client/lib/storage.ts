@@ -124,8 +124,8 @@ export interface UserProfile {
 
 export const DEFAULT_RULE_SETS: RuleSet[] = [
   {
-    id: "standard",
-    name: "STANDARD",
+    id: "misdemeanor",
+    name: "MISDEMEANOR",
     description: "A=15, Face=10 • 396 reps",
     cardValues: {
       A: 15,
@@ -204,7 +204,7 @@ export const DEFAULT_RULE_SETS: RuleSet[] = [
 ];
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  selectedRuleSetId: "standard",
+  selectedRuleSetId: "misdemeanor",
   selectedFlipModeId: "freshfish",
   selectedExerciseType: "superset",
   soundEnabled: false,

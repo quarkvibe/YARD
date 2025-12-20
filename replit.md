@@ -76,7 +76,7 @@ npm run server:prod
 - **SUPERSET**: Spades/clubs = pushups, hearts/diamonds = squats (mixed)
 
 ### Intensity Levels (Rule Sets)
-- **STANDARD**: A=15, J/Q/K=10, Numbers=face value (396 total reps)
+- **MISDEMEANOR**: A=15, J/Q/K=10, Numbers=face value (396 total reps)
 - **HARD TIME**: 1.5x all values (594 total reps)
 - **LIFER**: 2x all values (792 total reps)
 
