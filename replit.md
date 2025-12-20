@@ -19,7 +19,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 - **Framework**: Expo SDK 54 with React Native 0.81
-- **Navigation**: React Navigation with bottom tabs (Home, Workout, History, Rec Time, Settings)
+- **Navigation**: React Navigation with bottom tabs (Home, Workout, History, REC YARD, Settings)
 - **State Management**: React useState for local state, useFocusEffect for screen refresh
 - **Animations**: React Native Reanimated for card flip animations
 - **Styling**: Custom theme system with YARD design language (matte black, concrete gray, chalk white, yard orange accent)
@@ -55,7 +55,7 @@ Preferred communication style: Simple, everyday language.
 1. **Home** - Hub with START WORKOUT button, best time display
 2. **Workout** - Card flipping, timer, FLIP button
 3. **History** - Past workouts, personal bests per ruleset
-4. **Rec Time** - Competitive mode stub with fake leaderboard
+4. **REC YARD** - Premium competitive module ($2.99/mo) with profile setup, global leaderboard, verified times, and weekly challenges
 5. **Settings** - Ruleset picker, preferences
 
 ## External Dependencies
