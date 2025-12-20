@@ -1,8 +1,15 @@
-# Deck of Cards Workout
+# YARD - Deck of Cards Workout
 
 ## Overview
 
-A mobile fitness app where users flip through a virtual deck of cards to perform exercises (pushups and squats) based on card values. The app tracks workout times and personal records. Built as an Expo React Native application with a local-first, single-user approach - all data is stored on-device using AsyncStorage.
+YARD is a brutally simple, masculine fitness app inspired by prison/military PT culture. The workout is a deck of cards: flip cards, do pushups/squats based on card value, complete the deck, track total time, and try to beat best time. Built as an Expo React Native application with a local-first, single-user approach - all data is stored on-device using AsyncStorage.
+
+## Brand Principles
+- **Extremely simple**: "Flip. Move. Finish."
+- **Minimal taps, minimal screens, minimal text**
+- **No accounts required for base app**
+- **Tone**: masculine, institutional, understated, serious, gritty-but-clean
+- **No emojis, no playful animations**
 
 ## User Preferences
 
@@ -12,32 +19,44 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 - **Framework**: Expo SDK 54 with React Native 0.81
-- **Navigation**: React Navigation with bottom tabs (Stats, Workout, Settings) and native stack navigator
-- **State Management**: TanStack React Query for server state, React useState for local state
-- **Animations**: React Native Reanimated for smooth card flip animations and UI interactions
-- **Styling**: Custom theme system with light/dark mode support defined in `client/constants/theme.ts`
+- **Navigation**: React Navigation with bottom tabs (Home, Workout, History, Rec Time, Settings)
+- **State Management**: React useState for local state, useFocusEffect for screen refresh
+- **Animations**: React Native Reanimated for card flip animations
+- **Styling**: Custom theme system with YARD design language (matte black, concrete gray, chalk white, yard orange accent)
+
+### Design Language
+- **Colors**: Matte black (#0b0b0b), concrete gray (#1A1A1A), chalk white (#FAFAFA), yard orange (#FF6B35)
+- **Typography**: ALL CAPS, condensed, letter-spaced, stencil-inspired
+- **Copy Tone**: Short, cold, institutional - no hype or motivational fluff
 
 ### Data Storage
-- **Local Storage**: AsyncStorage for all user data (workouts, settings, profile)
+- **Local Storage**: AsyncStorage for all user data (workouts, settings)
 - **No Authentication**: Single-user app with data persisted locally on device
-- **Data Models**: Workout records, rule sets, user profile, and app settings defined in `client/lib/storage.ts`
-
-### Backend Architecture
-- **Server**: Express.js server exists but primarily serves as API proxy during development
-- **Database Schema**: Drizzle ORM with PostgreSQL schema defined in `shared/schema.ts`, though the app currently uses local storage
-- **Routes**: Minimal - the app is designed to work offline-first
+- **Data Models**: Workout records, rule sets defined in `client/lib/storage.ts`
 
 ### Key Design Patterns
 - **Path Aliases**: `@/` maps to `./client`, `@shared/` maps to `./shared`
-- **Component Structure**: Reusable themed components (ThemedText, ThemedView, Card, Button) with consistent styling
+- **Component Structure**: Reusable themed components (ThemedText, ThemedView, PlayingCard, Button)
 - **Error Handling**: Custom ErrorBoundary component wrapping the app
-- **Platform Compatibility**: Platform-specific adaptations for iOS, Android, and web
 
 ### Workout Logic
-- 52-card deck with suits mapped to exercises (hearts/diamonds vs clubs/spades)
-- Card values determine rep counts (customizable via rule sets)
+- 52-card deck with suits mapped to exercises (spades/clubs = pushups, hearts/diamonds = squats)
+- Card values determine rep counts (configurable via rule sets)
 - Timer tracks workout duration with pause/resume functionality
 - Personal records tracked per rule set
+
+### Rule Sets
+- **STANDARD**: A=1, J/Q/K=10, mixed exercises
+- **HARD TIME**: A=11, J/Q/K=15, maximum burn
+- **PUSHUPS ONLY**: All suits pushups
+- **SQUATS ONLY**: All suits squats
+
+### Screens
+1. **Home** - Hub with START WORKOUT button, best time display
+2. **Workout** - Card flipping, timer, FLIP button
+3. **History** - Past workouts, personal bests per ruleset
+4. **Rec Time** - Competitive mode stub with fake leaderboard
+5. **Settings** - Ruleset picker, preferences
 
 ## External Dependencies
 
@@ -48,8 +67,7 @@ Preferred communication style: Simple, everyday language.
 ### UI & Animation
 - `react-native-reanimated` for animations
 - `react-native-gesture-handler` for touch interactions
-- `expo-haptics` for tactile feedback
-- `expo-blur` and `expo-glass-effect` for visual effects
+- `expo-haptics` for tactile feedback (optional, default off)
 - `@expo/vector-icons` (Feather icons)
 
 ### Navigation
@@ -58,10 +76,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Layer
 - `@react-native-async-storage/async-storage` for local persistence
-- `drizzle-orm` with `drizzle-zod` for schema validation (prepared for future server sync)
-- `pg` PostgreSQL client (for potential future backend features)
 - `zod` for runtime type validation
 
 ### Server
-- Express.js with `http-proxy-middleware` for development proxy
-- WebSocket support via `ws` package
+- Express.js server for API proxy during development

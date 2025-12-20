@@ -1,41 +1,31 @@
 import React, { useState, useCallback } from "react";
-import { ScrollView, View, StyleSheet, Switch, TextInput, Pressable } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
+import { ScrollView, View, StyleSheet, Switch, Pressable } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Card } from "@/components/Card";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import {
   getSettings,
   saveSettings,
-  getProfile,
-  saveProfile,
   AppSettings,
-  UserProfile,
   DEFAULT_RULE_SETS,
   RuleSet,
 } from "@/lib/storage";
 
 export default function SettingsScreen() {
-  const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
-  const insets = useSafeAreaInsets();
-  const { theme, isDark } = useTheme();
+  const { theme } = useTheme();
 
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [showRuleDetails, setShowRuleDetails] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
-    const [loadedSettings, loadedProfile] = await Promise.all([getSettings(), getProfile()]);
+    const loadedSettings = await getSettings();
     setSettings(loadedSettings);
-    setProfile(loadedProfile);
   }, []);
 
   useFocusEffect(
@@ -56,18 +46,6 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleProfileChange = async (key: keyof UserProfile, value: any) => {
-    if (!profile) return;
-
-    const newProfile = { ...profile, [key]: value };
-    setProfile(newProfile);
-    await saveProfile(newProfile);
-  };
-
-  const selectedRuleSet = settings
-    ? DEFAULT_RULE_SETS.find((rs) => rs.id === settings.selectedRuleSetId) || DEFAULT_RULE_SETS[0]
-    : DEFAULT_RULE_SETS[0];
-
   const renderRuleSetCard = (ruleSet: RuleSet) => {
     const isSelected = settings?.selectedRuleSetId === ruleSet.id;
     const isExpanded = showRuleDetails === ruleSet.id;
@@ -76,75 +54,66 @@ export default function SettingsScreen() {
       <Pressable
         key={ruleSet.id}
         onPress={() => handleSettingChange("selectedRuleSetId", ruleSet.id)}
+        style={[
+          styles.ruleSetCard,
+          isSelected && styles.ruleSetCardSelected,
+        ]}
       >
-        <Card
-          style={[
-            styles.ruleSetCard,
-            isSelected && { borderWidth: 2, borderColor: theme.accent },
-          ]}
-          elevation={isSelected ? 2 : 1}
-        >
-          <View style={styles.ruleSetHeader}>
-            <View style={styles.ruleSetInfo}>
-              <ThemedText type="h4">{ruleSet.name}</ThemedText>
-              <ThemedText type="small" style={{ color: theme.textSecondary }}>
-                {ruleSet.description}
-              </ThemedText>
-            </View>
-            {isSelected ? (
-              <Feather name="check-circle" size={24} color={theme.accent} />
-            ) : null}
-          </View>
-
-          <Pressable
-            onPress={() => setShowRuleDetails(isExpanded ? null : ruleSet.id)}
-            style={styles.expandButton}
-          >
-            <ThemedText type="small" style={{ color: theme.accent }}>
-              {isExpanded ? "Hide Details" : "Show Details"}
+        <View style={styles.ruleSetHeader}>
+          <View style={styles.ruleSetInfo}>
+            <ThemedText style={styles.ruleSetName}>{ruleSet.name}</ThemedText>
+            <ThemedText style={styles.ruleSetDescription}>
+              {ruleSet.description}
             </ThemedText>
-            <Feather
-              name={isExpanded ? "chevron-up" : "chevron-down"}
-              size={16}
-              color={theme.accent}
-            />
-          </Pressable>
+          </View>
+          {isSelected ? (
+            <Feather name="check" size={20} color={Colors.dark.accent} />
+          ) : null}
+        </View>
 
-          {isExpanded ? (
-            <View style={styles.ruleDetails}>
-              <ThemedText type="small" style={[styles.ruleDetailTitle, { color: theme.textSecondary }]}>
-                Card Values:
-              </ThemedText>
+        <Pressable
+          onPress={() => setShowRuleDetails(isExpanded ? null : ruleSet.id)}
+          style={styles.expandButton}
+        >
+          <ThemedText style={styles.expandText}>
+            {isExpanded ? "HIDE DETAILS" : "SHOW DETAILS"}
+          </ThemedText>
+          <Feather
+            name={isExpanded ? "chevron-up" : "chevron-down"}
+            size={14}
+            color={Colors.dark.textSecondary}
+          />
+        </Pressable>
+
+        {isExpanded ? (
+          <View style={styles.ruleDetails}>
+            <View style={styles.cardValuesSection}>
+              <ThemedText style={styles.detailLabel}>CARD VALUES</ThemedText>
               <View style={styles.cardValuesGrid}>
                 {Object.entries(ruleSet.cardValues).map(([rank, value]) => (
                   <View key={rank} style={styles.cardValueItem}>
-                    <ThemedText type="body" style={styles.cardRank}>
-                      {rank}
-                    </ThemedText>
-                    <ThemedText type="small" style={{ color: theme.textSecondary }}>
-                      = {value}
-                    </ThemedText>
+                    <ThemedText style={styles.cardRank}>{rank}</ThemedText>
+                    <ThemedText style={styles.cardValue}>={value}</ThemedText>
                   </View>
                 ))}
               </View>
+            </View>
 
-              <ThemedText
-                type="small"
-                style={[styles.ruleDetailTitle, { color: theme.textSecondary, marginTop: Spacing.md }]}
-              >
-                Suit Exercises:
-              </ThemedText>
+            <View style={styles.suitsSection}>
+              <ThemedText style={styles.detailLabel}>SUIT EXERCISES</ThemedText>
               <View style={styles.suitGrid}>
                 {Object.entries(ruleSet.suitExercises).map(([suit, exercise]) => (
                   <View key={suit} style={styles.suitItem}>
                     <ThemedText
-                      type="body"
-                      style={{
-                        color:
-                          suit === "hearts" || suit === "diamonds"
-                            ? Colors.dark.pushups
-                            : theme.text,
-                      }}
+                      style={[
+                        styles.suitSymbol,
+                        {
+                          color:
+                            suit === "hearts" || suit === "diamonds"
+                              ? Colors.dark.pushups
+                              : Colors.dark.chalk,
+                        },
+                      ]}
                     >
                       {suit === "hearts"
                         ? "\u2665"
@@ -155,91 +124,61 @@ export default function SettingsScreen() {
                             : "\u2660"}
                     </ThemedText>
                     <ThemedText
-                      type="caption"
-                      style={{
-                        color:
-                          exercise === "pushups" ? Colors.dark.pushups : Colors.dark.squats,
-                      }}
+                      style={[
+                        styles.suitExercise,
+                        {
+                          color:
+                            exercise === "pushups"
+                              ? Colors.dark.pushups
+                              : Colors.dark.squats,
+                        },
+                      ]}
                     >
-                      {exercise}
+                      {exercise.toUpperCase()}
                     </ThemedText>
                   </View>
                 ))}
               </View>
             </View>
-          ) : null}
-        </Card>
+          </View>
+        ) : null}
       </Pressable>
     );
   };
 
-  if (!settings || !profile) {
+  if (!settings) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
-        <ThemedText>Loading...</ThemedText>
+      <View style={styles.container}>
+        <ThemedText style={styles.loadingText}>LOADING...</ThemedText>
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
+      style={styles.container}
       contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.xl,
+        paddingTop: Spacing.xl,
         paddingBottom: tabBarHeight + Spacing.xl,
-        paddingHorizontal: Spacing.lg,
+        paddingHorizontal: Spacing.xl,
       }}
-      scrollIndicatorInsets={{ bottom: insets.bottom }}
     >
-      <Card style={styles.profileCard} elevation={1}>
-        <View style={styles.avatarContainer}>
-          <View style={[styles.avatar, { backgroundColor: theme.accent }]}>
-            <Feather name="user" size={40} color="#FFFFFF" />
-          </View>
-        </View>
-
-        <View style={styles.nameInputContainer}>
-          <ThemedText type="small" style={{ color: theme.textSecondary, marginBottom: Spacing.xs }}>
-            Display Name
-          </ThemedText>
-          <TextInput
-            style={[
-              styles.nameInput,
-              {
-                backgroundColor: theme.backgroundSecondary,
-                color: theme.text,
-                borderColor: theme.backgroundTertiary,
-              },
-            ]}
-            value={profile.displayName}
-            onChangeText={(text) => handleProfileChange("displayName", text)}
-            placeholder="Enter your name"
-            placeholderTextColor={theme.textSecondary}
-          />
-        </View>
-      </Card>
-
-      <ThemedText type="h4" style={styles.sectionTitle}>
-        Rule Sets
-      </ThemedText>
-
+      <ThemedText style={styles.sectionTitle}>RULESET</ThemedText>
       {DEFAULT_RULE_SETS.map(renderRuleSetCard)}
 
-      <ThemedText type="h4" style={styles.sectionTitle}>
-        Preferences
-      </ThemedText>
+      <ThemedText style={styles.sectionTitle}>PREFERENCES</ThemedText>
 
-      <Card style={styles.preferencesCard} elevation={1}>
+      <View style={styles.preferencesCard}>
         <View style={styles.preferenceItem}>
           <View style={styles.preferenceInfo}>
-            <Feather name="smartphone" size={20} color={theme.text} />
-            <ThemedText type="body">Haptic Feedback</ThemedText>
+            <Feather name="smartphone" size={18} color={Colors.dark.chalk} />
+            <ThemedText style={styles.preferenceLabel}>HAPTIC FEEDBACK</ThemedText>
           </View>
           <Switch
             value={settings.hapticsEnabled}
             onValueChange={(value) => handleSettingChange("hapticsEnabled", value)}
-            trackColor={{ false: theme.backgroundTertiary, true: theme.accent }}
-            thumbColor="#FFFFFF"
+            trackColor={{ false: Colors.dark.cardBorder, true: Colors.dark.accent }}
+            thumbColor={Colors.dark.chalk}
           />
         </View>
 
@@ -247,33 +186,27 @@ export default function SettingsScreen() {
 
         <View style={styles.preferenceItem}>
           <View style={styles.preferenceInfo}>
-            <Feather name="volume-2" size={20} color={theme.text} />
-            <ThemedText type="body">Sound Effects</ThemedText>
+            <Feather name="volume-2" size={18} color={Colors.dark.chalk} />
+            <ThemedText style={styles.preferenceLabel}>SOUND EFFECTS</ThemedText>
           </View>
           <Switch
             value={settings.soundEnabled}
             onValueChange={(value) => handleSettingChange("soundEnabled", value)}
-            trackColor={{ false: theme.backgroundTertiary, true: theme.accent }}
-            thumbColor="#FFFFFF"
+            trackColor={{ false: Colors.dark.cardBorder, true: Colors.dark.accent }}
+            thumbColor={Colors.dark.chalk}
           />
         </View>
-      </Card>
+      </View>
 
-      <Card style={styles.aboutCard} elevation={1}>
-        <ThemedText type="h4" style={styles.aboutTitle}>
-          About
+      <View style={styles.aboutCard}>
+        <ThemedText style={styles.aboutTitle}>ABOUT YARD</ThemedText>
+        <ThemedText style={styles.aboutText}>
+          Inspired by prison and military PT culture. Using a standard 52-card deck, you
+          perform pushups or squats based on the card you flip. Complete the entire deck as
+          fast as possible.
         </ThemedText>
-        <ThemedText type="body" style={{ color: theme.textSecondary }}>
-          Deck Workout is inspired by the classic prison fitness routine. Using a standard 52-card
-          deck, you perform pushups or squats based on the card you flip. Try to complete the entire
-          deck as fast as possible!
-        </ThemedText>
-        <View style={styles.versionContainer}>
-          <ThemedText type="caption" style={{ color: theme.textSecondary }}>
-            Version 1.0.0
-          </ThemedText>
-        </View>
-      </Card>
+        <ThemedText style={styles.versionText}>VERSION 1.0.0</ThemedText>
+      </View>
     </ScrollView>
   );
 }
@@ -281,37 +214,33 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.dark.backgroundRoot,
   },
-  profileCard: {
-    marginBottom: Spacing.xl,
-    alignItems: "center",
-  },
-  avatarContainer: {
-    marginBottom: Spacing.lg,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  nameInputContainer: {
-    width: "100%",
-  },
-  nameInput: {
-    height: 48,
-    borderRadius: BorderRadius.sm,
-    paddingHorizontal: Spacing.md,
-    borderWidth: 1,
-    fontSize: 16,
+  loadingText: {
+    color: Colors.dark.textSecondary,
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 2,
   },
   sectionTitle: {
-    marginBottom: Spacing.md,
-    marginTop: Spacing.md,
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    marginBottom: Spacing.lg,
+    marginTop: Spacing.lg,
   },
   ruleSetCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
     marginBottom: Spacing.md,
+  },
+  ruleSetCardSelected: {
+    borderColor: Colors.dark.accent,
+    borderWidth: 2,
   },
   ruleSetHeader: {
     flexDirection: "row",
@@ -322,19 +251,45 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: Spacing.md,
   },
+  ruleSetName: {
+    fontSize: 18,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
+    marginBottom: Spacing.xs,
+  },
+  ruleSetDescription: {
+    fontSize: 12,
+    fontWeight: "500",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+  },
   expandButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.xs,
     marginTop: Spacing.md,
   },
-  ruleDetails: {
-    marginTop: Spacing.md,
-    paddingTop: Spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.1)",
+  expandText: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
   },
-  ruleDetailTitle: {
+  ruleDetails: {
+    marginTop: Spacing.lg,
+    paddingTop: Spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: Colors.dark.cardBorder,
+  },
+  cardValuesSection: {
+    marginBottom: Spacing.lg,
+  },
+  detailLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
     marginBottom: Spacing.sm,
   },
   cardValuesGrid: {
@@ -345,22 +300,41 @@ const styles = StyleSheet.create({
   cardValueItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.xs,
-    minWidth: 60,
+    minWidth: 50,
   },
   cardRank: {
+    fontSize: 14,
     fontWeight: "700",
+    color: Colors.dark.chalk,
   },
+  cardValue: {
+    fontSize: 12,
+    color: Colors.dark.textSecondary,
+    marginLeft: 2,
+  },
+  suitsSection: {},
   suitGrid: {
     flexDirection: "row",
     gap: Spacing.xl,
-    marginTop: Spacing.sm,
   },
   suitItem: {
     alignItems: "center",
     gap: Spacing.xs,
   },
+  suitSymbol: {
+    fontSize: 24,
+  },
+  suitExercise: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 1,
+  },
   preferencesCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
     marginBottom: Spacing.xl,
   },
   preferenceItem: {
@@ -374,19 +348,43 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: Spacing.md,
   },
+  preferenceLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.chalk,
+  },
   divider: {
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: Colors.dark.cardBorder,
     marginVertical: Spacing.sm,
   },
   aboutCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
     marginBottom: Spacing.xl,
   },
   aboutTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
     marginBottom: Spacing.md,
   },
-  versionContainer: {
-    marginTop: Spacing.lg,
-    alignItems: "center",
+  aboutText: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: Colors.dark.textSecondary,
+    marginBottom: Spacing.lg,
+  },
+  versionText: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    textAlign: "center",
   },
 });

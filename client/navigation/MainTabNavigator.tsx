@@ -1,19 +1,22 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 
-import StatsScreen from "@/screens/StatsScreen";
+import HomeScreen from "@/screens/HomeScreen";
 import WorkoutScreen from "@/screens/WorkoutScreen";
+import HistoryScreen from "@/screens/HistoryScreen";
+import RecTimeScreen from "@/screens/RecTimeScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
-import { HeaderTitle } from "@/components/HeaderTitle";
 import { useTheme } from "@/hooks/useTheme";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
+import { Colors, Spacing } from "@/constants/theme";
 
 export type MainTabParamList = {
-  StatsTab: undefined;
+  HomeTab: undefined;
   WorkoutTab: undefined;
+  HistoryTab: undefined;
+  RecTimeTab: undefined;
   SettingsTab: undefined;
 };
 
@@ -25,38 +28,46 @@ export default function MainTabNavigator() {
 
   return (
     <Tab.Navigator
-      initialRouteName="WorkoutTab"
+      initialRouteName="HomeTab"
       screenOptions={{
         ...screenOptions,
-        tabBarActiveTintColor: theme.tabIconSelected,
-        tabBarInactiveTintColor: theme.tabIconDefault,
+        tabBarActiveTintColor: Colors.dark.accent,
+        tabBarInactiveTintColor: Colors.dark.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: Platform.select({
-            ios: "transparent",
-            android: theme.backgroundRoot,
-          }),
-          borderTopWidth: 0,
-          elevation: 0,
+          backgroundColor: Colors.dark.backgroundRoot,
+          borderTopWidth: 1,
+          borderTopColor: Colors.dark.cardBorder,
+          paddingTop: Spacing.sm,
+          height: Platform.select({ ios: 85, android: 65 }),
         },
-        tabBarBackground: () =>
-          Platform.OS === "ios" ? (
-            <BlurView
-              intensity={100}
-              tint={isDark ? "dark" : "light"}
-              style={StyleSheet.absoluteFill}
-            />
-          ) : null,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+          letterSpacing: 1,
+          textTransform: "uppercase",
+        },
+        headerStyle: {
+          backgroundColor: Colors.dark.backgroundRoot,
+        },
+        headerTitleStyle: {
+          color: Colors.dark.chalk,
+          fontSize: 16,
+          fontWeight: "700",
+          letterSpacing: 2,
+          textTransform: "uppercase",
+        },
+        headerTintColor: Colors.dark.chalk,
       }}
     >
       <Tab.Screen
-        name="StatsTab"
-        component={StatsScreen}
+        name="HomeTab"
+        component={HomeScreen}
         options={{
-          title: "Stats",
-          headerTitle: "Stats",
+          headerShown: false,
+          title: "Yard",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="bar-chart-2" size={size} color={color} />
+            <Feather name="home" size={size} color={color} />
           ),
         }}
       />
@@ -66,9 +77,30 @@ export default function MainTabNavigator() {
         options={{
           headerShown: false,
           title: "Workout",
-          headerTitle: () => <HeaderTitle />,
           tabBarIcon: ({ color, size }) => (
             <Feather name="activity" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="HistoryTab"
+        component={HistoryScreen}
+        options={{
+          title: "History",
+          headerTitle: "HISTORY",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="clock" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="RecTimeTab"
+        component={RecTimeScreen}
+        options={{
+          title: "Rec Time",
+          headerTitle: "REC TIME",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="award" size={size} color={color} />
           ),
         }}
       />
@@ -77,7 +109,7 @@ export default function MainTabNavigator() {
         component={SettingsScreen}
         options={{
           title: "Settings",
-          headerTitle: "Settings",
+          headerTitle: "SETTINGS",
           tabBarIcon: ({ color, size }) => (
             <Feather name="settings" size={size} color={color} />
           ),

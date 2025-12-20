@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, {
@@ -16,8 +16,6 @@ import Animated, {
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { PlayingCard } from "@/components/PlayingCard";
-import { Button } from "@/components/Button";
-import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import {
   CardValue,
@@ -38,7 +36,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export default function WorkoutScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const { theme, isDark } = useTheme();
+  const navigation = useNavigation<any>();
 
   const [workoutState, setWorkoutState] = useState<WorkoutState>("idle");
   const [deck, setDeck] = useState<CardValue[]>([]);
@@ -47,11 +45,11 @@ export default function WorkoutScreen() {
   const [timer, setTimer] = useState(0);
   const [totalPushups, setTotalPushups] = useState(0);
   const [totalSquats, setTotalSquats] = useState(0);
-  const [ruleSetName, setRuleSetName] = useState("Standard");
+  const [ruleSetName, setRuleSetName] = useState("STANDARD");
   const [ruleSetId, setRuleSetId] = useState("standard");
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [isNewRecord, setIsNewRecord] = useState(false);
-  const [hapticsEnabled, setHapticsEnabled] = useState(true);
+  const [hapticsEnabled, setHapticsEnabled] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const buttonScale = useSharedValue(1);
@@ -225,22 +223,23 @@ export default function WorkoutScreen() {
         <PlayingCard card={null} isFlipped={false} />
       </View>
 
-      <ThemedText type="h3" style={styles.ruleSetLabel}>
-        {ruleSetName} Rules
-      </ThemedText>
+      <ThemedText style={styles.ruleSetLabel}>{ruleSetName}</ThemedText>
 
       {bestTime !== null ? (
         <View style={styles.bestTimeContainer}>
-          <Feather name="award" size={20} color={Colors.dark.success} />
-          <ThemedText type="body" style={styles.bestTimeText}>
-            Best: {formatDuration(bestTime)}
-          </ThemedText>
+          <ThemedText style={styles.bestTimeLabel}>BEST TIME</ThemedText>
+          <ThemedText style={styles.bestTimeValue}>{formatDuration(bestTime)}</ThemedText>
         </View>
       ) : null}
 
-      <Button onPress={startWorkout} style={styles.startButton}>
-        Start Workout
-      </Button>
+      <AnimatedPressable
+        onPress={startWorkout}
+        onPressIn={handleButtonPressIn}
+        onPressOut={handleButtonPressOut}
+        style={[styles.startButton, animatedButtonStyle]}
+      >
+        <ThemedText style={styles.startButtonText}>START WORKOUT</ThemedText>
+      </AnimatedPressable>
     </Animated.View>
   );
 
@@ -248,24 +247,20 @@ export default function WorkoutScreen() {
     <Animated.View entering={FadeIn} style={styles.activeContent}>
       <View style={styles.topRow}>
         <Pressable onPress={resetDeck} style={styles.resetButton}>
-          <Feather name="rotate-cw" size={20} color={theme.textSecondary} />
-          <ThemedText type="small" style={{ color: theme.textSecondary }}>
-            Reset
-          </ThemedText>
+          <Feather name="x" size={20} color={Colors.dark.textSecondary} />
+          <ThemedText style={styles.resetText}>QUIT</ThemedText>
         </Pressable>
 
         <View style={styles.timerContainer}>
-          <ThemedText type="timer" style={[styles.timerText, { fontFamily: "monospace" }]}>
-            {formatDuration(timer)}
-          </ThemedText>
+          <ThemedText style={styles.timerText}>{formatDuration(timer)}</ThemedText>
           <Pressable
             onPress={workoutState === "paused" ? resumeWorkout : pauseWorkout}
             style={styles.pauseButton}
           >
             <Feather
               name={workoutState === "paused" ? "play" : "pause"}
-              size={24}
-              color={theme.accent}
+              size={20}
+              color={Colors.dark.accent}
             />
           </Pressable>
         </View>
@@ -281,15 +276,13 @@ export default function WorkoutScreen() {
             },
           ]}
         >
-          <ThemedText type="body" style={styles.exerciseText}>
-            {currentCard.value} {currentCard.exercise === "pushups" ? "PUSHUPS" : "SQUATS"}
+          <ThemedText style={styles.exerciseText}>
+            {currentCard.exercise.toUpperCase()} x {currentCard.value}
           </ThemedText>
         </View>
       ) : (
         <View style={styles.exerciseBadgePlaceholder}>
-          <ThemedText type="body" style={{ color: theme.textSecondary }}>
-            Tap Flip to start
-          </ThemedText>
+          <ThemedText style={styles.tapToStartText}>TAP FLIP TO START</ThemedText>
         </View>
       )}
 
@@ -298,38 +291,29 @@ export default function WorkoutScreen() {
       </View>
 
       <View style={styles.progressContainer}>
-        <View style={[styles.progressBar, { backgroundColor: theme.backgroundSecondary }]}>
+        <View style={styles.progressBar}>
           <View
             style={[
               styles.progressFill,
-              {
-                backgroundColor: theme.accent,
-                width: `${(cardsCompleted / 52) * 100}%`,
-              },
+              { width: `${(cardsCompleted / 52) * 100}%` },
             ]}
           />
         </View>
-        <ThemedText type="small" style={styles.progressText}>
-          {cardsCompleted}/52 cards
-        </ThemedText>
+        <ThemedText style={styles.progressText}>{cardsCompleted}/52 CARDS</ThemedText>
       </View>
 
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <ThemedText type="h3" style={{ color: Colors.dark.pushups }}>
+          <ThemedText style={[styles.statValue, { color: Colors.dark.pushups }]}>
             {totalPushups}
           </ThemedText>
-          <ThemedText type="caption" style={{ color: theme.textSecondary }}>
-            Pushups
-          </ThemedText>
+          <ThemedText style={styles.statLabel}>PUSHUPS</ThemedText>
         </View>
         <View style={styles.statItem}>
-          <ThemedText type="h3" style={{ color: Colors.dark.squats }}>
+          <ThemedText style={[styles.statValue, { color: Colors.dark.squats }]}>
             {totalSquats}
           </ThemedText>
-          <ThemedText type="caption" style={{ color: theme.textSecondary }}>
-            Squats
-          </ThemedText>
+          <ThemedText style={styles.statLabel}>SQUATS</ThemedText>
         </View>
       </View>
 
@@ -340,12 +324,12 @@ export default function WorkoutScreen() {
         disabled={workoutState === "paused"}
         style={[
           styles.flipButton,
-          { backgroundColor: theme.accent, opacity: workoutState === "paused" ? 0.5 : 1 },
+          { opacity: workoutState === "paused" ? 0.5 : 1 },
           animatedButtonStyle,
         ]}
       >
-        <ThemedText type="h4" style={styles.flipButtonText}>
-          {cardsRemaining === 0 ? "Finish" : "Flip Card"}
+        <ThemedText style={styles.flipButtonText}>
+          {cardsRemaining === 0 ? "FINISH" : "FLIP"}
         </ThemedText>
       </AnimatedPressable>
     </Animated.View>
@@ -353,45 +337,48 @@ export default function WorkoutScreen() {
 
   const renderCompleteState = () => (
     <Animated.View entering={FadeIn} style={styles.completeContent}>
+      <ThemedText style={styles.finishLabel}>FINISH</ThemedText>
+
       {isNewRecord ? (
         <View style={styles.newRecordBadge}>
-          <Feather name="award" size={32} color="#FFD700" />
-          <ThemedText type="h3" style={styles.newRecordText}>
-            New Personal Record!
-          </ThemedText>
+          <ThemedText style={styles.newRecordText}>NEW RECORD</ThemedText>
         </View>
       ) : null}
 
-      <ThemedText type="h1" style={styles.completeTime}>
-        {formatDuration(timer)}
-      </ThemedText>
-
-      <ThemedText type="body" style={{ color: theme.textSecondary, marginBottom: Spacing["2xl"] }}>
-        Workout Complete
-      </ThemedText>
+      <ThemedText style={styles.completeTime}>{formatDuration(timer)}</ThemedText>
 
       <View style={styles.finalStatsRow}>
-        <View style={[styles.finalStatCard, { backgroundColor: theme.backgroundSecondary }]}>
-          <ThemedText type="h2" style={{ color: Colors.dark.pushups }}>
+        <View style={styles.finalStatCard}>
+          <ThemedText style={[styles.finalStatValue, { color: Colors.dark.pushups }]}>
             {totalPushups}
           </ThemedText>
-          <ThemedText type="small" style={{ color: theme.textSecondary }}>
-            Pushups
-          </ThemedText>
+          <ThemedText style={styles.finalStatLabel}>PUSHUPS</ThemedText>
         </View>
-        <View style={[styles.finalStatCard, { backgroundColor: theme.backgroundSecondary }]}>
-          <ThemedText type="h2" style={{ color: Colors.dark.squats }}>
+        <View style={styles.finalStatCard}>
+          <ThemedText style={[styles.finalStatValue, { color: Colors.dark.squats }]}>
             {totalSquats}
           </ThemedText>
-          <ThemedText type="small" style={{ color: theme.textSecondary }}>
-            Squats
-          </ThemedText>
+          <ThemedText style={styles.finalStatLabel}>SQUATS</ThemedText>
         </View>
       </View>
 
-      <Button onPress={resetDeck} style={styles.doneButton}>
-        Done
-      </Button>
+      <View style={styles.completeActions}>
+        <AnimatedPressable
+          onPress={startWorkout}
+          onPressIn={handleButtonPressIn}
+          onPressOut={handleButtonPressOut}
+          style={[styles.runAgainButton, animatedButtonStyle]}
+        >
+          <ThemedText style={styles.runAgainText}>RUN AGAIN</ThemedText>
+        </AnimatedPressable>
+
+        <Pressable
+          onPress={() => navigation.navigate("HistoryTab")}
+          style={styles.viewHistoryButton}
+        >
+          <ThemedText style={styles.viewHistoryText}>VIEW HISTORY</ThemedText>
+        </Pressable>
+      </View>
     </Animated.View>
   );
 
@@ -415,7 +402,8 @@ export default function WorkoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    backgroundColor: Colors.dark.backgroundRoot,
   },
   centerContent: {
     flex: 1,
@@ -423,23 +411,43 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   deckPreview: {
-    marginBottom: Spacing["3xl"],
-  },
-  ruleSetLabel: {
-    marginBottom: Spacing.md,
-    textAlign: "center",
-  },
-  bestTimeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
     marginBottom: Spacing["2xl"],
   },
-  bestTimeText: {
-    color: Colors.dark.success,
+  ruleSetLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 3,
+    color: Colors.dark.accent,
+    marginBottom: Spacing.lg,
+  },
+  bestTimeContainer: {
+    alignItems: "center",
+    marginBottom: Spacing["2xl"],
+  },
+  bestTimeLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  bestTimeValue: {
+    fontSize: 32,
+    fontWeight: "700",
+    letterSpacing: 3,
+    color: Colors.dark.chalk,
   },
   startButton: {
-    width: 200,
+    backgroundColor: Colors.dark.accent,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing["3xl"],
+    borderRadius: BorderRadius.sm,
+  },
+  startButtonText: {
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 3,
+    color: Colors.dark.backgroundRoot,
   },
   activeContent: {
     flex: 1,
@@ -456,37 +464,55 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     padding: Spacing.sm,
   },
+  resetText: {
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+  },
   timerContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.md,
   },
   timerText: {
-    letterSpacing: 2,
+    fontSize: 32,
+    fontWeight: "700",
+    letterSpacing: 3,
+    color: Colors.dark.chalk,
+    fontVariant: ["tabular-nums"],
   },
   pauseButton: {
     padding: Spacing.sm,
   },
   exerciseBadge: {
     alignSelf: "center",
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
+    borderRadius: BorderRadius.xs,
     marginBottom: Spacing.lg,
   },
   exerciseBadgePlaceholder: {
     alignSelf: "center",
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.sm,
     marginBottom: Spacing.lg,
   },
   exerciseText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
+  },
+  tapToStartText: {
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
   },
   cardContainer: {
     alignItems: "center",
-    marginBottom: Spacing["2xl"],
+    marginBottom: Spacing.xl,
   },
   progressContainer: {
     alignItems: "center",
@@ -494,17 +520,22 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     width: "100%",
-    height: 8,
-    borderRadius: 4,
+    height: 4,
+    backgroundColor: Colors.dark.cardBorder,
+    borderRadius: 2,
     overflow: "hidden",
     marginBottom: Spacing.sm,
   },
   progressFill: {
     height: "100%",
-    borderRadius: 4,
+    backgroundColor: Colors.dark.accent,
+    borderRadius: 2,
   },
   progressText: {
-    opacity: 0.7,
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
   },
   statsRow: {
     flexDirection: "row",
@@ -515,61 +546,117 @@ const styles = StyleSheet.create({
   statItem: {
     alignItems: "center",
   },
+  statValue: {
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: 1,
+  },
+  statLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+  },
   flipButton: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     height: 60,
-    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.dark.accent,
+    borderRadius: BorderRadius.sm,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
   },
   flipButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
+    fontSize: 20,
+    fontWeight: "900",
+    letterSpacing: 4,
+    color: Colors.dark.backgroundRoot,
   },
   completeContent: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
+  finishLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 4,
+    color: Colors.dark.textSecondary,
+    marginBottom: Spacing.md,
+  },
   newRecordBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.md,
-    marginBottom: Spacing["2xl"],
-    backgroundColor: "rgba(255, 215, 0, 0.15)",
+    backgroundColor: Colors.dark.accent,
     paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.xs,
+    marginBottom: Spacing.lg,
   },
   newRecordText: {
-    color: "#FFD700",
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 2,
+    color: Colors.dark.backgroundRoot,
   },
   completeTime: {
-    fontSize: 64,
-    fontWeight: "700",
-    marginBottom: Spacing.sm,
+    fontSize: 72,
+    fontWeight: "800",
+    letterSpacing: 4,
+    color: Colors.dark.chalk,
+    marginBottom: Spacing["2xl"],
   },
   finalStatsRow: {
     flexDirection: "row",
-    gap: Spacing.lg,
+    gap: Spacing.xl,
     marginBottom: Spacing["3xl"],
   },
   finalStatCard: {
     alignItems: "center",
+    backgroundColor: Colors.dark.cardBackground,
     paddingHorizontal: Spacing["2xl"],
     paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
     minWidth: 120,
   },
-  doneButton: {
-    width: 200,
+  finalStatValue: {
+    fontSize: 32,
+    fontWeight: "800",
+    letterSpacing: 1,
+  },
+  finalStatLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    marginTop: Spacing.xs,
+  },
+  completeActions: {
+    alignItems: "center",
+    gap: Spacing.lg,
+  },
+  runAgainButton: {
+    backgroundColor: Colors.dark.accent,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing["3xl"],
+    borderRadius: BorderRadius.sm,
+  },
+  runAgainText: {
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 3,
+    color: Colors.dark.backgroundRoot,
+  },
+  viewHistoryButton: {
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+  },
+  viewHistoryText: {
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
   },
 });

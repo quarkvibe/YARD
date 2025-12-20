@@ -9,7 +9,6 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
 import { BorderRadius, Spacing, Colors } from "@/constants/theme";
 import type { CardValue } from "@/lib/storage";
 
@@ -36,7 +35,6 @@ const SUIT_SYMBOLS = {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function PlayingCard({ card, isFlipped, onFlip, disabled }: PlayingCardProps) {
-  const { theme, isDark } = useTheme();
   const flipProgress = useSharedValue(isFlipped ? 1 : 0);
   const scale = useSharedValue(1);
 
@@ -86,25 +84,21 @@ export function PlayingCard({ card, isFlipped, onFlip, disabled }: PlayingCardPr
     if (suit === "hearts" || suit === "diamonds") {
       return Colors.dark.pushups;
     }
-    return isDark ? "#FFFFFF" : "#000000";
+    return "#1A1A1A";
   };
-
-  const cardBackgroundColor = isDark ? "#FFFFFF" : "#FFFFFF";
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.card, styles.cardBack, backAnimatedStyle, { backgroundColor: theme.accent }]}>
+      <Animated.View style={[styles.card, styles.cardBack, backAnimatedStyle]}>
         <View style={styles.backPattern}>
-          <View style={[styles.backInner, { borderColor: "rgba(255,255,255,0.3)" }]}>
-            <ThemedText style={styles.backText} lightColor="#FFFFFF" darkColor="#FFFFFF">
-              DECK
-            </ThemedText>
+          <View style={styles.backInner}>
+            <ThemedText style={styles.backText}>YARD</ThemedText>
           </View>
         </View>
       </Animated.View>
 
       <AnimatedPressable
-        style={[styles.card, styles.cardFront, frontAnimatedStyle, { backgroundColor: cardBackgroundColor }]}
+        style={[styles.card, styles.cardFront, frontAnimatedStyle]}
         onPress={onFlip}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
@@ -113,43 +107,23 @@ export function PlayingCard({ card, isFlipped, onFlip, disabled }: PlayingCardPr
         {card ? (
           <>
             <View style={styles.cornerTop}>
-              <ThemedText
-                style={[styles.cornerRank, { color: getSuitColor(card.suit) }]}
-                lightColor={getSuitColor(card.suit)}
-                darkColor={getSuitColor(card.suit)}
-              >
+              <ThemedText style={[styles.cornerRank, { color: getSuitColor(card.suit) }]}>
                 {card.rank}
               </ThemedText>
-              <ThemedText
-                style={[styles.cornerSuit, { color: getSuitColor(card.suit) }]}
-                lightColor={getSuitColor(card.suit)}
-                darkColor={getSuitColor(card.suit)}
-              >
+              <ThemedText style={[styles.cornerSuit, { color: getSuitColor(card.suit) }]}>
                 {SUIT_SYMBOLS[card.suit]}
               </ThemedText>
             </View>
 
-            <ThemedText
-              style={[styles.centerSuit, { color: getSuitColor(card.suit) }]}
-              lightColor={getSuitColor(card.suit)}
-              darkColor={getSuitColor(card.suit)}
-            >
+            <ThemedText style={[styles.centerSuit, { color: getSuitColor(card.suit) }]}>
               {SUIT_SYMBOLS[card.suit]}
             </ThemedText>
 
             <View style={styles.cornerBottom}>
-              <ThemedText
-                style={[styles.cornerSuit, { color: getSuitColor(card.suit) }]}
-                lightColor={getSuitColor(card.suit)}
-                darkColor={getSuitColor(card.suit)}
-              >
+              <ThemedText style={[styles.cornerSuit, { color: getSuitColor(card.suit) }]}>
                 {SUIT_SYMBOLS[card.suit]}
               </ThemedText>
-              <ThemedText
-                style={[styles.cornerRank, { color: getSuitColor(card.suit) }]}
-                lightColor={getSuitColor(card.suit)}
-                darkColor={getSuitColor(card.suit)}
-              >
+              <ThemedText style={[styles.cornerRank, { color: getSuitColor(card.suit) }]}>
                 {card.rank}
               </ThemedText>
             </View>
@@ -162,26 +136,25 @@ export function PlayingCard({ card, isFlipped, onFlip, disabled }: PlayingCardPr
 
 const styles = StyleSheet.create({
   container: {
-    width: 200,
-    height: 280,
+    width: 180,
+    height: 260,
     position: "relative",
   },
   card: {
     position: "absolute",
     width: "100%",
     height: "100%",
-    borderRadius: BorderRadius.md,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
+    borderRadius: BorderRadius.sm,
   },
   cardBack: {
+    backgroundColor: Colors.dark.cardBackground,
+    borderWidth: 2,
+    borderColor: Colors.dark.cardBorder,
     alignItems: "center",
     justifyContent: "center",
   },
   cardFront: {
+    backgroundColor: Colors.dark.chalk,
     padding: Spacing.md,
   },
   backPattern: {
@@ -193,15 +166,17 @@ const styles = StyleSheet.create({
   backInner: {
     width: "100%",
     height: "100%",
-    borderWidth: 3,
-    borderRadius: BorderRadius.sm,
+    borderWidth: 2,
+    borderColor: Colors.dark.cardBorder,
+    borderRadius: BorderRadius.xs,
     alignItems: "center",
     justifyContent: "center",
   },
   backText: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "900",
     letterSpacing: 8,
+    color: Colors.dark.accent,
   },
   cornerTop: {
     position: "absolute",
@@ -218,7 +193,7 @@ const styles = StyleSheet.create({
   },
   cornerRank: {
     fontSize: 24,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   cornerSuit: {
     fontSize: 20,
