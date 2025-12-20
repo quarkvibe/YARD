@@ -27,6 +27,8 @@ import {
   getWorkouts,
   getBestTime,
   WorkoutRecord,
+  FlipModeId,
+  getFlipModeById,
 } from "@/lib/storage";
 
 type WorkoutState = "idle" | "active" | "paused" | "complete";
@@ -47,22 +49,29 @@ export default function WorkoutScreen() {
   const [totalSquats, setTotalSquats] = useState(0);
   const [ruleSetName, setRuleSetName] = useState("STANDARD");
   const [ruleSetId, setRuleSetId] = useState("standard");
+  const [flipModeId, setFlipModeId] = useState<FlipModeId>("freshfish");
+  const [flipModeName, setFlipModeName] = useState("FRESH FISH");
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [hapticsEnabled, setHapticsEnabled] = useState(false);
+  const [activeCards, setActiveCards] = useState<CardValue[]>([]);
+  const [activeReps, setActiveReps] = useState(0);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const buttonScale = useSharedValue(1);
 
-  const currentCard = currentCardIndex >= 0 && currentCardIndex < deck.length ? deck[currentCardIndex] : null;
+  const currentCard = activeCards.length > 0 ? activeCards[activeCards.length - 1] : null;
   const cardsRemaining = deck.length - currentCardIndex - 1;
   const cardsCompleted = currentCardIndex + 1;
 
   const loadSettings = useCallback(async () => {
     const settings = await getSettings();
     const ruleSet = getRuleSetById(settings.selectedRuleSetId);
+    const flipMode = getFlipModeById(settings.selectedFlipModeId);
     setRuleSetId(ruleSet.id);
     setRuleSetName(ruleSet.name);
+    setFlipModeId(flipMode.id);
+    setFlipModeName(flipMode.name);
     setHapticsEnabled(settings.hapticsEnabled);
 
     const workouts = await getWorkouts();
@@ -105,8 +114,11 @@ export default function WorkoutScreen() {
   const startWorkout = useCallback(async () => {
     const settings = await getSettings();
     const ruleSet = getRuleSetById(settings.selectedRuleSetId);
+    const flipMode = getFlipModeById(settings.selectedFlipModeId);
     setRuleSetId(ruleSet.id);
     setRuleSetName(ruleSet.name);
+    setFlipModeId(flipMode.id);
+    setFlipModeName(flipMode.name);
     setHapticsEnabled(settings.hapticsEnabled);
 
     const newDeck = generateDeck(ruleSet);
@@ -118,6 +130,8 @@ export default function WorkoutScreen() {
     setTotalSquats(0);
     setWorkoutState("active");
     setIsNewRecord(false);
+    setActiveCards([]);
+    setActiveReps(0);
 
     if (settings.hapticsEnabled) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -133,27 +147,85 @@ export default function WorkoutScreen() {
       startTimer();
     }
 
-    const nextIndex = currentCardIndex + 1;
-
+    let nextIndex = currentCardIndex + 1;
     if (nextIndex >= deck.length) {
       completeWorkout();
       return;
     }
 
-    const nextCard = deck[nextIndex];
-    if (nextCard.exercise === "pushups") {
-      setTotalPushups((prev) => prev + nextCard.value);
-    } else {
-      setTotalSquats((prev) => prev + nextCard.value);
+    const cardsToFlip: CardValue[] = [];
+    let totalReps = 0;
+    let pushupsToAdd = 0;
+    let squatsToAdd = 0;
+
+    if (flipModeId === "freshfish") {
+      const card = deck[nextIndex];
+      cardsToFlip.push(card);
+      totalReps = card.value;
+      if (card.exercise === "pushups") {
+        pushupsToAdd = card.value;
+      } else {
+        squatsToAdd = card.value;
+      }
+    } else if (flipModeId === "trustee") {
+      for (let i = 0; i < 2 && nextIndex + i < deck.length; i++) {
+        const card = deck[nextIndex + i];
+        cardsToFlip.push(card);
+        totalReps += card.value;
+        if (card.exercise === "pushups") {
+          pushupsToAdd += card.value;
+        } else {
+          squatsToAdd += card.value;
+        }
+      }
+      nextIndex = nextIndex + cardsToFlip.length - 1;
+    } else if (flipModeId === "og") {
+      let card = deck[nextIndex];
+      cardsToFlip.push(card);
+      totalReps = card.value;
+      if (card.exercise === "pushups") {
+        pushupsToAdd = card.value;
+      } else {
+        squatsToAdd = card.value;
+      }
+      if (totalReps < 20 && nextIndex + 1 < deck.length) {
+        const secondCard = deck[nextIndex + 1];
+        cardsToFlip.push(secondCard);
+        totalReps += secondCard.value;
+        if (secondCard.exercise === "pushups") {
+          pushupsToAdd += secondCard.value;
+        } else {
+          squatsToAdd += secondCard.value;
+        }
+        nextIndex++;
+      }
+    } else if (flipModeId === "podfather") {
+      let idx = nextIndex;
+      while (idx < deck.length && totalReps < 30) {
+        const card = deck[idx];
+        cardsToFlip.push(card);
+        totalReps += card.value;
+        if (card.exercise === "pushups") {
+          pushupsToAdd += card.value;
+        } else {
+          squatsToAdd += card.value;
+        }
+        idx++;
+      }
+      nextIndex = idx - 1;
     }
 
+    setTotalPushups((prev) => prev + pushupsToAdd);
+    setTotalSquats((prev) => prev + squatsToAdd);
+    setActiveCards(cardsToFlip);
+    setActiveReps(totalReps);
     setCurrentCardIndex(nextIndex);
     setIsCardFlipped(true);
 
     setTimeout(() => {
       setIsCardFlipped(false);
     }, 300);
-  }, [workoutState, currentCardIndex, deck, startTimer, triggerHaptic]);
+  }, [workoutState, currentCardIndex, deck, flipModeId, startTimer, triggerHaptic]);
 
   const completeWorkout = useCallback(async () => {
     stopTimer();
@@ -202,6 +274,8 @@ export default function WorkoutScreen() {
     setTotalPushups(0);
     setTotalSquats(0);
     setIsNewRecord(false);
+    setActiveCards([]);
+    setActiveReps(0);
     triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
   }, [stopTimer, triggerHaptic]);
 
@@ -224,6 +298,7 @@ export default function WorkoutScreen() {
       </View>
 
       <ThemedText style={styles.ruleSetLabel}>{ruleSetName}</ThemedText>
+      <ThemedText style={styles.flipModeLabel}>{flipModeName}</ThemedText>
 
       {bestTime !== null ? (
         <View style={styles.bestTimeContainer}>
@@ -266,19 +341,16 @@ export default function WorkoutScreen() {
         </View>
       </View>
 
-      {currentCard ? (
-        <View
-          style={[
-            styles.exerciseBadge,
-            {
-              backgroundColor:
-                currentCard.exercise === "pushups" ? Colors.dark.pushups : Colors.dark.squats,
-            },
-          ]}
-        >
+      {activeCards.length > 0 ? (
+        <View style={styles.exerciseBadge}>
           <ThemedText style={styles.exerciseText}>
-            {currentCard.exercise.toUpperCase()} x {currentCard.value}
+            {activeReps} REPS
           </ThemedText>
+          {activeCards.length > 1 ? (
+            <ThemedText style={styles.cardCountText}>
+              ({activeCards.length} CARDS)
+            </ThemedText>
+          ) : null}
         </View>
       ) : (
         <View style={styles.exerciseBadgePlaceholder}>
@@ -287,7 +359,23 @@ export default function WorkoutScreen() {
       )}
 
       <View style={styles.cardContainer}>
-        <PlayingCard card={currentCard} isFlipped={currentCardIndex >= 0} />
+        {activeCards.length > 1 ? (
+          <View style={styles.multiCardStack}>
+            {activeCards.map((card, index) => (
+              <View
+                key={`${card.suit}-${card.rank}-${index}`}
+                style={[
+                  styles.stackedCard,
+                  { marginLeft: index * 30, zIndex: index },
+                ]}
+              >
+                <PlayingCard card={card} isFlipped={true} />
+              </View>
+            ))}
+          </View>
+        ) : (
+          <PlayingCard card={currentCard} isFlipped={currentCardIndex >= 0} />
+        )}
       </View>
 
       <View style={styles.progressContainer}>
@@ -418,6 +506,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 3,
     color: Colors.dark.accent,
+    marginBottom: Spacing.xs,
+  },
+  flipModeLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
     marginBottom: Spacing.lg,
   },
   bestTimeContainer: {
@@ -491,6 +586,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.xs,
     marginBottom: Spacing.lg,
+    backgroundColor: Colors.dark.accent,
+    alignItems: "center",
   },
   exerciseBadgePlaceholder: {
     alignSelf: "center",
@@ -499,10 +596,18 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   exerciseText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "800",
     letterSpacing: 2,
-    color: Colors.dark.chalk,
+    color: Colors.dark.backgroundRoot,
+  },
+  cardCountText: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.backgroundRoot,
+    opacity: 0.8,
+    marginTop: 2,
   },
   tapToStartText: {
     fontSize: 14,
@@ -513,6 +618,14 @@ const styles = StyleSheet.create({
   cardContainer: {
     alignItems: "center",
     marginBottom: Spacing.xl,
+    minHeight: 280,
+  },
+  multiCardStack: {
+    flexDirection: "row",
+    position: "relative",
+  },
+  stackedCard: {
+    position: "absolute",
   },
   progressContainer: {
     alignItems: "center",

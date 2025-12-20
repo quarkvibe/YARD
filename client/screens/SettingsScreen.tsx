@@ -14,6 +14,8 @@ import {
   AppSettings,
   DEFAULT_RULE_SETS,
   RuleSet,
+  FLIP_MODES,
+  FlipMode,
 } from "@/lib/storage";
 
 export default function SettingsScreen() {
@@ -44,6 +46,31 @@ export default function SettingsScreen() {
     if (newSettings.hapticsEnabled) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+  };
+
+  const renderFlipModeCard = (flipMode: FlipMode) => {
+    const isSelected = settings?.selectedFlipModeId === flipMode.id;
+
+    return (
+      <Pressable
+        key={flipMode.id}
+        onPress={() => handleSettingChange("selectedFlipModeId", flipMode.id)}
+        style={[
+          styles.flipModeCard,
+          isSelected && styles.flipModeCardSelected,
+        ]}
+      >
+        <View style={styles.flipModeContent}>
+          <ThemedText style={styles.flipModeName}>{flipMode.name}</ThemedText>
+          <ThemedText style={styles.flipModeDescription}>
+            {flipMode.description}
+          </ThemedText>
+        </View>
+        {isSelected ? (
+          <Feather name="check" size={18} color={Colors.dark.accent} />
+        ) : null}
+      </Pressable>
+    );
   };
 
   const renderRuleSetCard = (ruleSet: RuleSet) => {
@@ -163,6 +190,11 @@ export default function SettingsScreen() {
         paddingHorizontal: Spacing.xl,
       }}
     >
+      <ThemedText style={styles.sectionTitle}>FLIP MODE</ThemedText>
+      <View style={styles.flipModesContainer}>
+        {FLIP_MODES.map(renderFlipModeCard)}
+      </View>
+
       <ThemedText style={styles.sectionTitle}>RULESET</ThemedText>
       {DEFAULT_RULE_SETS.map(renderRuleSetCard)}
 
@@ -229,6 +261,40 @@ const styles = StyleSheet.create({
     color: Colors.dark.textSecondary,
     marginBottom: Spacing.lg,
     marginTop: Spacing.lg,
+  },
+  flipModesContainer: {
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  flipModeCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  flipModeCardSelected: {
+    borderColor: Colors.dark.accent,
+    borderWidth: 2,
+  },
+  flipModeContent: {
+    flex: 1,
+  },
+  flipModeName: {
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
+    marginBottom: Spacing.xs,
+  },
+  flipModeDescription: {
+    fontSize: 12,
+    fontWeight: "500",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
   },
   ruleSetCard: {
     backgroundColor: Colors.dark.cardBackground,

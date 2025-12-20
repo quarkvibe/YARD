@@ -51,8 +51,40 @@ export interface RuleSet {
   };
 }
 
+export type FlipModeId = "freshfish" | "trustee" | "og" | "podfather";
+
+export interface FlipMode {
+  id: FlipModeId;
+  name: string;
+  description: string;
+}
+
+export const FLIP_MODES: FlipMode[] = [
+  {
+    id: "freshfish",
+    name: "FRESH FISH",
+    description: "One card at a time",
+  },
+  {
+    id: "trustee",
+    name: "TRUSTEE",
+    description: "2 cards at a time",
+  },
+  {
+    id: "og",
+    name: "OG",
+    description: "Flip again if under 20",
+  },
+  {
+    id: "podfather",
+    name: "POD FATHER",
+    description: "Flip while under 30",
+  },
+];
+
 export interface AppSettings {
   selectedRuleSetId: string;
+  selectedFlipModeId: FlipModeId;
   soundEnabled: boolean;
   hapticsEnabled: boolean;
 }
@@ -170,9 +202,14 @@ export const DEFAULT_RULE_SETS: RuleSet[] = [
 
 export const DEFAULT_SETTINGS: AppSettings = {
   selectedRuleSetId: "standard",
+  selectedFlipModeId: "freshfish",
   soundEnabled: false,
   hapticsEnabled: false,
 };
+
+export function getFlipModeById(id: FlipModeId): FlipMode {
+  return FLIP_MODES.find((fm) => fm.id === id) || FLIP_MODES[0];
+}
 
 export const DEFAULT_PROFILE: UserProfile = {
   displayName: "",
