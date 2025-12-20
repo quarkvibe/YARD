@@ -44,14 +44,14 @@ interface GrainDot {
 // Generate tally mark rows - realistic counting with multiple 5s and maybe a partial at end
 function generateTallyRows(seed: number = 42): TallyRow[] {
   const rows: TallyRow[] = [];
-  
+
   // Create a few rows of tallies scattered around the screen
   const rowConfigs = [
-    { x: 5, y: 8, numFives: 4, remainder: 2 },   // 22 marks
-    { x: 70, y: 25, numFives: 3, remainder: 0 },  // 15 marks
-    { x: 10, y: 55, numFives: 2, remainder: 3 },  // 13 marks
-    { x: 65, y: 75, numFives: 5, remainder: 1 },  // 26 marks
-    { x: 8, y: 88, numFives: 3, remainder: 4 },   // 19 marks
+    { x: 5, y: 8, numFives: 4, remainder: 2 }, // 22 marks
+    { x: 70, y: 25, numFives: 3, remainder: 0 }, // 15 marks
+    { x: 10, y: 55, numFives: 2, remainder: 3 }, // 13 marks
+    { x: 65, y: 75, numFives: 5, remainder: 1 }, // 26 marks
+    { x: 8, y: 88, numFives: 3, remainder: 4 }, // 19 marks
   ];
 
   rowConfigs.forEach((config, i) => {
@@ -129,11 +129,17 @@ function TallyGroup({ count, scale }: { count: number; scale: number }) {
   const markHeight = 20 * safeScale;
   const spacing = 5 * safeScale;
   const markColor = "#7a7a7a";
-  
+
   const groupWidth = Math.min(count, 4) * (markWidth + spacing);
-  
+
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", width: groupWidth + spacing }}>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        width: groupWidth + spacing,
+      }}
+    >
       {Array.from({ length: Math.min(count, 4) }).map((_, i) => (
         <View
           key={i}
@@ -165,9 +171,15 @@ function TallyGroup({ count, scale }: { count: number; scale: number }) {
 }
 
 // Row of tally groups (multiple sets of 5 in a line)
-function TallyRowComponent({ groups, scale }: { groups: number[]; scale: number }) {
+function TallyRowComponent({
+  groups,
+  scale,
+}: {
+  groups: number[];
+  scale: number;
+}) {
   const groupSpacing = 12 * scale;
-  
+
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       {groups.map((count, i) => (
