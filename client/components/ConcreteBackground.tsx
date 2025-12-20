@@ -44,33 +44,33 @@ interface GrainDot {
 // Generate procedural crack lines
 function generateCracks(seed: number = 42): CrackLine[] {
   const cracks: CrackLine[] = [];
-  const numCracks = 15;
+  const numCracks = 25;
 
   for (let i = 0; i < numCracks; i++) {
     const baseX = ((seed * (i + 1) * 17) % 100) * (SCREEN_WIDTH / 100);
     const baseY = ((seed * (i + 1) * 23) % 100) * (SCREEN_HEIGHT / 100);
 
-    // Main crack
+    // Main crack - more visible
     cracks.push({
       id: `crack-main-${i}`,
       x: baseX,
       y: baseY,
-      width: 40 + ((seed * i) % 80),
-      height: 0.5 + ((seed * i) % 10) * 0.1,
+      width: 60 + ((seed * i) % 120),
+      height: 1 + ((seed * i) % 10) * 0.2,
       rotation: `${((seed * i * 37) % 180) - 90}deg`,
-      opacity: 0.15 + ((seed * i) % 15) * 0.01,
+      opacity: 0.35 + ((seed * i) % 20) * 0.01,
     });
 
     // Branch cracks
-    if (i % 3 === 0) {
+    if (i % 2 === 0) {
       cracks.push({
         id: `crack-branch-${i}`,
-        x: baseX + 10,
-        y: baseY + 5,
-        width: 20 + ((seed * i) % 30),
-        height: 0.3 + ((seed * i) % 5) * 0.1,
+        x: baseX + 15,
+        y: baseY + 8,
+        width: 30 + ((seed * i) % 50),
+        height: 0.6 + ((seed * i) % 6) * 0.15,
         rotation: `${(seed * i * 53) % 90}deg`,
-        opacity: 0.1 + ((seed * i) % 10) * 0.01,
+        opacity: 0.25 + ((seed * i) % 15) * 0.01,
       });
     }
   }
@@ -81,12 +81,12 @@ function generateCracks(seed: number = 42): CrackLine[] {
 // Generate weathering stains
 function generateStains(seed: number = 73): StainBlob[] {
   const stains: StainBlob[] = [];
-  const numStains = 8;
+  const numStains = 12;
 
   for (let i = 0; i < numStains; i++) {
     const x = ((seed * (i + 1) * 31) % 90) * (SCREEN_WIDTH / 100);
     const y = ((seed * (i + 1) * 47) % 90) * (SCREEN_HEIGHT / 100);
-    const baseSize = 60 + ((seed * i) % 100);
+    const baseSize = 80 + ((seed * i) % 150);
 
     stains.push({
       id: `stain-${i}`,
@@ -95,7 +95,7 @@ function generateStains(seed: number = 73): StainBlob[] {
       width: baseSize * (0.8 + ((seed * i) % 50) / 100),
       height: baseSize * (0.6 + ((seed * i) % 40) / 100),
       borderRadius: baseSize / 2,
-      opacity: 0.03 + ((seed * i) % 5) * 0.01,
+      opacity: 0.08 + ((seed * i) % 8) * 0.015,
       rotation: `${(seed * i * 29) % 360}deg`,
     });
   }
@@ -106,15 +106,15 @@ function generateStains(seed: number = 73): StainBlob[] {
 // Generate fine grain texture dots
 function generateGrainDots(seed: number = 19): GrainDot[] {
   const dots: GrainDot[] = [];
-  const numDots = 200;
+  const numDots = 300;
 
   for (let i = 0; i < numDots; i++) {
     dots.push({
       id: `grain-${i}`,
       x: ((seed * (i + 1) * 13) % 100) * (SCREEN_WIDTH / 100),
       y: ((seed * (i + 1) * 17) % 100) * (SCREEN_HEIGHT / 100),
-      size: 1 + ((seed * i) % 3),
-      opacity: 0.05 + ((seed * i) % 20) * 0.01,
+      size: 1 + ((seed * i) % 4),
+      opacity: 0.1 + ((seed * i) % 25) * 0.015,
     });
   }
 
@@ -320,11 +320,11 @@ const styles = StyleSheet.create({
   },
   stainBlob: {
     position: "absolute",
-    backgroundColor: "#080808",
+    backgroundColor: "#121212",
   },
   crackLine: {
     position: "absolute",
-    backgroundColor: "#151515",
+    backgroundColor: "#252525",
   },
   vignetteTop: {
     position: "absolute",
