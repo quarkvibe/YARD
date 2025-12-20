@@ -46,10 +46,16 @@ function TallyMarks({ count }: { count: number }) {
     </View>
   );
 
+  const displayGroups = Math.min(groups, 20);
+  const hasOverflow = groups > 20;
+  
   return (
     <View style={styles.tallyContainer}>
-      {Array.from({ length: Math.min(groups, 10) }).map((_, i) => renderTallyGroup(i))}
-      {remainder > 0 ? renderPartialTally(remainder) : null}
+      {Array.from({ length: displayGroups }).map((_, i) => renderTallyGroup(i))}
+      {!hasOverflow && remainder > 0 ? renderPartialTally(remainder) : null}
+      {hasOverflow ? (
+        <ThemedText style={styles.tallyOverflow}>+{count - 100}</ThemedText>
+      ) : null}
     </View>
   );
 }
@@ -284,5 +290,11 @@ const styles = StyleSheet.create({
     top: 11,
     left: -3,
     transform: [{ rotate: "30deg" }],
+  },
+  tallyOverflow: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.dark.textSecondary,
+    alignSelf: "center",
   },
 });
