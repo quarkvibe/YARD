@@ -12,14 +12,14 @@ interface ConcreteBackgroundProps {
   accentGlow?: boolean;
 }
 
-interface CrackLine {
+interface TallyGroup {
   id: string;
   x: number;
   y: number;
-  width: number;
-  height: number;
+  count: number; // 1-5 marks
   rotation: string;
   opacity: number;
+  scale: number;
 }
 
 interface StainBlob {
@@ -41,41 +41,27 @@ interface GrainDot {
   opacity: number;
 }
 
-// Generate procedural crack lines
-function generateCracks(seed: number = 42): CrackLine[] {
-  const cracks: CrackLine[] = [];
-  const numCracks = 30;
+// Generate tally mark groups scattered across the background
+function generateTallyGroups(seed: number = 42): TallyGroup[] {
+  const tallies: TallyGroup[] = [];
+  const numGroups = 12;
 
-  for (let i = 0; i < numCracks; i++) {
-    const baseX = ((seed * (i + 1) * 17) % 100) * (SCREEN_WIDTH / 100);
-    const baseY = ((seed * (i + 1) * 23) % 100) * (SCREEN_HEIGHT / 100);
+  for (let i = 0; i < numGroups; i++) {
+    const x = ((seed * (i + 1) * 17) % 85) * (SCREEN_WIDTH / 100);
+    const y = ((seed * (i + 1) * 23) % 85) * (SCREEN_HEIGHT / 100);
 
-    // Main crack - highly visible
-    cracks.push({
-      id: `crack-main-${i}`,
-      x: baseX,
-      y: baseY,
-      width: 80 + ((seed * i) % 150),
-      height: 1.5 + ((seed * i) % 10) * 0.3,
-      rotation: `${((seed * i * 37) % 180) - 90}deg`,
-      opacity: 0.7 + ((seed * i) % 20) * 0.01,
+    tallies.push({
+      id: `tally-${i}`,
+      x,
+      y,
+      count: 1 + ((seed * i) % 5), // 1-5 marks
+      rotation: `${((seed * i * 7) % 20) - 10}deg`, // slight rotation for hand-drawn look
+      opacity: 0.15 + ((seed * i) % 10) * 0.02,
+      scale: 0.6 + ((seed * i) % 5) * 0.1,
     });
-
-    // Branch cracks
-    if (i % 2 === 0) {
-      cracks.push({
-        id: `crack-branch-${i}`,
-        x: baseX + 15,
-        y: baseY + 8,
-        width: 40 + ((seed * i) % 60),
-        height: 1 + ((seed * i) % 6) * 0.2,
-        rotation: `${(seed * i * 53) % 90}deg`,
-        opacity: 0.5 + ((seed * i) % 15) * 0.02,
-      });
-    }
   }
 
-  return cracks;
+  return tallies;
 }
 
 // Generate weathering stains
@@ -121,6 +107,41 @@ function generateGrainDots(seed: number = 19): GrainDot[] {
   return dots;
 }
 
+// Individual tally mark component
+function TallyMark({ count, scale }: { count: number; scale: number }) {
+  const markWidth = 2 * scale;
+  const markHeight = 18 * scale;
+  const spacing = 6 * scale;
+  
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      {Array.from({ length: Math.min(count, 4) }).map((_, i) => (
+        <View
+          key={i}
+          style={{
+            width: markWidth,
+            height: markHeight,
+            backgroundColor: "#4a4a4a",
+            marginRight: spacing,
+          }}
+        />
+      ))}
+      {count === 5 ? (
+        <View
+          style={{
+            position: "absolute",
+            width: markWidth,
+            height: markHeight * 1.3,
+            backgroundColor: "#4a4a4a",
+            transform: [{ rotate: "-30deg" }],
+            left: spacing * 0.5,
+          }}
+        />
+      ) : null}
+    </View>
+  );
+}
+
 export function ConcreteBackground({
   children,
   intensity = "medium",
@@ -128,8 +149,8 @@ export function ConcreteBackground({
   accentGlow = true,
 }: ConcreteBackgroundProps) {
   // Memoize generated elements
-  const cracks = useMemo(
-    () => (showCracks ? generateCracks() : []),
+  const tallyGroups = useMemo(
+    () => (showCracks ? generateTallyGroups() : []),
     [showCracks],
   );
   const stains = useMemo(() => generateStains(), []);
@@ -202,40 +223,23 @@ export function ConcreteBackground({
         ))}
       </View>
 
-      {/* Cracks layer */}
+      {/* Tally marks layer */}
       {showCracks && (
-        <View style={styles.cracksLayer} pointerEvents="none">
-          {cracks.map((crack) => (
-            <View key={crack.id}>
-              {/* Shadow/depth of crack */}
-              <View
-                style={[
-                  styles.crackLine,
-                  {
-                    left: crack.x,
-                    top: crack.y + 1,
-                    width: crack.width,
-                    height: crack.height + 1,
-                    opacity: crack.opacity * 0.3 * intensityMultiplier,
-                    backgroundColor: "#000000",
-                    transform: [{ rotate: crack.rotation }],
-                  },
-                ]}
-              />
-              {/* Main crack line */}
-              <View
-                style={[
-                  styles.crackLine,
-                  {
-                    left: crack.x,
-                    top: crack.y,
-                    width: crack.width,
-                    height: crack.height,
-                    opacity: crack.opacity * intensityMultiplier,
-                    transform: [{ rotate: crack.rotation }],
-                  },
-                ]}
-              />
+        <View style={styles.tallyLayer} pointerEvents="none">
+          {tallyGroups.map((tally) => (
+            <View
+              key={tally.id}
+              style={[
+                styles.tallyGroup,
+                {
+                  left: tally.x,
+                  top: tally.y,
+                  opacity: tally.opacity * intensityMultiplier,
+                  transform: [{ rotate: tally.rotation }],
+                },
+              ]}
+            >
+              <TallyMark count={tally.count} scale={tally.scale} />
             </View>
           ))}
         </View>
@@ -312,8 +316,11 @@ const styles = StyleSheet.create({
   stainsLayer: {
     ...StyleSheet.absoluteFillObject,
   },
-  cracksLayer: {
+  tallyLayer: {
     ...StyleSheet.absoluteFillObject,
+  },
+  tallyGroup: {
+    position: "absolute",
   },
   grainDot: {
     position: "absolute",
@@ -321,10 +328,6 @@ const styles = StyleSheet.create({
   stainBlob: {
     position: "absolute",
     backgroundColor: "#1e1e1e",
-  },
-  crackLine: {
-    position: "absolute",
-    backgroundColor: "#3a3a3a",
   },
   vignetteTop: {
     position: "absolute",
