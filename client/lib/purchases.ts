@@ -3,6 +3,7 @@ import Purchases, {
   CustomerInfo,
 } from "react-native-purchases";
 import { Platform } from "react-native";
+import Constants from "expo-constants";
 
 // RevenueCat API Keys
 const REVENUECAT_API_KEY_IOS = "appl_vMQWTMdLYvLemTIvZmHBBmIXChZ";
@@ -13,6 +14,9 @@ export const REC_YARD_ENTITLEMENT = "rec_yard_access";
 
 // Product identifiers
 export const REC_YARD_MONTHLY = "rec_yard_monthly";
+
+// Detect if running in Expo Go (no native store access)
+const isExpoGo = Constants.appOwnership === "expo";
 
 export interface SubscriptionStatus {
   isSubscribed: boolean;
@@ -26,6 +30,14 @@ export interface SubscriptionStatus {
  * Call this early in app startup (e.g., in App.tsx)
  */
 export async function initializePurchases(): Promise<void> {
+  // Skip RevenueCat in Expo Go - it doesn't have native store access
+  if (isExpoGo) {
+    console.log(
+      "[Purchases] Running in Expo Go - using development mode (subscriptions mocked)",
+    );
+    return;
+  }
+
   try {
     const apiKey =
       Platform.OS === "ios"
@@ -43,6 +55,11 @@ export async function initializePurchases(): Promise<void> {
  * Set user ID for RevenueCat (for cross-platform sync)
  */
 export async function setUserId(userId: string): Promise<void> {
+  if (isExpoGo) {
+    console.log("[Purchases] Dev mode - user ID:", userId);
+    return;
+  }
+
   try {
     await Purchases.logIn(userId);
     console.log("[Purchases] User logged in:", userId);
@@ -53,8 +70,20 @@ export async function setUserId(userId: string): Promise<void> {
 
 /**
  * Check if user has active Rec Yard subscription
+ * In Expo Go, returns subscribed=true for testing
  */
 export async function checkRecYardAccess(): Promise<SubscriptionStatus> {
+  // In Expo Go, grant access for testing
+  if (isExpoGo) {
+    console.log("[Purchases] Dev mode - granting Rec Yard access for testing");
+    return {
+      isSubscribed: true,
+      expirationDate: null,
+      willRenew: true,
+      productIdentifier: "dev_mode",
+    };
+  }
+
   try {
     const customerInfo = await Purchases.getCustomerInfo();
     const entitlement = customerInfo.entitlements.active[REC_YARD_ENTITLEMENT];
@@ -89,6 +118,11 @@ export async function checkRecYardAccess(): Promise<SubscriptionStatus> {
  * Get available packages for Rec Yard subscription
  */
 export async function getRecYardPackages(): Promise<PurchasesPackage[]> {
+  if (isExpoGo) {
+    console.log("[Purchases] Dev mode - no packages available");
+    return [];
+  }
+
   try {
     const offerings = await Purchases.getOfferings();
     const currentOffering = offerings.current;
@@ -108,8 +142,17 @@ export async function getRecYardPackages(): Promise<PurchasesPackage[]> {
  * Purchase Rec Yard subscription
  */
 export async function purchaseRecYard(
-  pkg: PurchasesPackage,
+  pkg?: PurchasesPackage,
 ): Promise<{ success: boolean; customerInfo?: CustomerInfo; error?: string }> {
+  if (isExpoGo) {
+    console.log("[Purchases] Dev mode - simulating successful purchase");
+    return { success: true };
+  }
+
+  if (!pkg) {
+    return { success: false, error: "No package provided" };
+  }
+
   try {
     const { customerInfo } = await Purchases.purchasePackage(pkg);
 
@@ -125,13 +168,22 @@ export async function purchaseRecYard(
         error: "Purchase completed but entitlement not found",
       };
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle user cancellation gracefully
-    if (error.userCancelled) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "userCancelled" in error &&
+      error.userCancelled
+    ) {
       return { success: false, error: "cancelled" };
     }
     console.error("[Purchases] Purchase failed:", error);
-    return { success: false, error: error.message || "Purchase failed" };
+    const message =
+      error && typeof error === "object" && "message" in error
+        ? (error as { message: string }).message
+        : "Purchase failed";
+    return { success: false, error: message };
   }
 }
 
@@ -143,6 +195,11 @@ export async function restorePurchases(): Promise<{
   hasRecYard: boolean;
   error?: string;
 }> {
+  if (isExpoGo) {
+    console.log("[Purchases] Dev mode - simulating restore with access");
+    return { success: true, hasRecYard: true };
+  }
+
   try {
     const customerInfo = await Purchases.restorePurchases();
     const hasAccess =

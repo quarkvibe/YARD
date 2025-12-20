@@ -8,9 +8,17 @@
     "scheme": "yard",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "owner": "yardfitness",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yardfitness.app"
+      "bundleIdentifier": "com.yardfitness.app",
+      "infoPlist": {
+        "SKAdNetworkItems": [
+          {
+            "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -45,6 +53,17 @@
     ],
     "experiments": {
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/your-project-id"
     }
   }
 }
