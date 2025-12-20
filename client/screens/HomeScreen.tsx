@@ -165,7 +165,9 @@ export default function HomeScreen() {
               onPress={() => navigation.navigate("SettingsTab")}
             >
               <ThemedText style={styles.configLabel}>SUPERSET MODE</ThemedText>
-              <ThemedText style={styles.configValue}>{supersetModeName}</ThemedText>
+              <ThemedText style={styles.configValue}>
+                {supersetModeName}
+              </ThemedText>
             </Pressable>
           </Animated.View>
         ) : null}

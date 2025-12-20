@@ -72,6 +72,37 @@ export interface DbBadge {
 // AUTH HELPERS
 // ============================================
 
+/**
+ * Get or create an anonymous session
+ * This allows users to use Rec Yard immediately
+ * They can link Apple Sign In later to sync across devices
+ */
+export async function ensureAuthenticated(): Promise<string | null> {
+  try {
+    // Check for existing session
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (session?.user?.id) {
+      return session.user.id;
+    }
+
+    // Create anonymous session
+    const { data, error } = await supabase.auth.signInAnonymously();
+
+    if (error) {
+      console.error("[Supabase] Anonymous auth failed:", error);
+      return null;
+    }
+
+    return data.user?.id || null;
+  } catch (error) {
+    console.error("[Supabase] Auth error:", error);
+    return null;
+  }
+}
+
 export async function signInWithApple(): Promise<{ error: Error | null }> {
   // Apple Sign In will be implemented with expo-apple-authentication
   // For now, return a placeholder
@@ -218,7 +249,9 @@ export async function getLeaderboard(
   weekId?: string,
   limit: number = 50,
 ): Promise<
-  Array<DbWorkoutSubmission & { profile: Pick<DbProfile, "handle" | "photo_url" | "is_verified"> }>
+  (DbWorkoutSubmission & {
+    profile: Pick<DbProfile, "handle" | "photo_url" | "is_verified">;
+  })[]
 > {
   let query = supabase
     .from("workout_submissions")
@@ -333,8 +366,10 @@ export async function sendCallout(
 }
 
 export async function getMyCallouts(profileId: string): Promise<{
-  sent: Array<DbCallout & { to_profile: Pick<DbProfile, "handle" | "photo_url"> }>;
-  received: Array<DbCallout & { from_profile: Pick<DbProfile, "handle" | "photo_url"> }>;
+  sent: (DbCallout & { to_profile: Pick<DbProfile, "handle" | "photo_url"> })[];
+  received: (DbCallout & {
+    from_profile: Pick<DbProfile, "handle" | "photo_url">;
+  })[];
 }> {
   const [sentResult, receivedResult] = await Promise.all([
     supabase
@@ -449,4 +484,3 @@ export function getCurrentWeekId(): string {
   const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
   return `${year}-W${weekNumber.toString().padStart(2, "0")}`;
 }
-

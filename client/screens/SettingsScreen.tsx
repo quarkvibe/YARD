@@ -111,11 +111,15 @@ export default function SettingsScreen() {
     return (
       <Pressable
         key={supersetMode.id}
-        onPress={() => handleSettingChange("selectedSupersetModeId", supersetMode.id)}
+        onPress={() =>
+          handleSettingChange("selectedSupersetModeId", supersetMode.id)
+        }
         style={[styles.flipModeCard, isSelected && styles.flipModeCardSelected]}
       >
         <View style={styles.flipModeContent}>
-          <ThemedText style={styles.flipModeName}>{supersetMode.name}</ThemedText>
+          <ThemedText style={styles.flipModeName}>
+            {supersetMode.name}
+          </ThemedText>
           <ThemedText style={styles.flipModeDescription}>
             {supersetMode.description}
           </ThemedText>

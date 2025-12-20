@@ -111,7 +111,11 @@ export const FLIP_MODES: FlipMode[] = [
 ];
 
 // Superset-specific modes (only shown when SUPERSET exercise type is selected)
-export type SupersetModeId = "alternating" | "split2" | "split4" | "splitunder20";
+export type SupersetModeId =
+  | "alternating"
+  | "split2"
+  | "split4"
+  | "splitunder20";
 
 export interface SupersetMode {
   id: SupersetModeId;
