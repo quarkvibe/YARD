@@ -110,10 +110,43 @@ export const FLIP_MODES: FlipMode[] = [
   },
 ];
 
+// Superset-specific modes (only shown when SUPERSET exercise type is selected)
+export type SupersetModeId = "alternating" | "split2" | "split4" | "splitunder20";
+
+export interface SupersetMode {
+  id: SupersetModeId;
+  name: string;
+  description: string;
+}
+
+export const SUPERSET_MODES: SupersetMode[] = [
+  {
+    id: "alternating",
+    name: "ALTERNATING",
+    description: "Squats then pushups, back and forth",
+  },
+  {
+    id: "split2",
+    name: "SPLIT 2",
+    description: "Draw 2 cards, split exercises",
+  },
+  {
+    id: "split4",
+    name: "SPLIT 4",
+    description: "Draw 4 cards, split exercises",
+  },
+  {
+    id: "splitunder20",
+    name: "SPLIT UNDER 20",
+    description: "Keep drawing if under 20 reps",
+  },
+];
+
 export interface AppSettings {
   selectedRuleSetId: string;
   selectedFlipModeId: FlipModeId;
   selectedExerciseType: ExerciseType;
+  selectedSupersetModeId: SupersetModeId;
   soundEnabled: boolean;
   hapticsEnabled: boolean;
 }
@@ -207,6 +240,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   selectedRuleSetId: "misdemeanor",
   selectedFlipModeId: "freshfish",
   selectedExerciseType: "superset",
+  selectedSupersetModeId: "alternating",
   soundEnabled: false,
   hapticsEnabled: false,
 };
@@ -217,6 +251,10 @@ export function getExerciseTypeById(id: ExerciseType): ExerciseTypeOption {
 
 export function getFlipModeById(id: FlipModeId): FlipMode {
   return FLIP_MODES.find((fm) => fm.id === id) || FLIP_MODES[0];
+}
+
+export function getSupersetModeById(id: SupersetModeId): SupersetMode {
+  return SUPERSET_MODES.find((sm) => sm.id === id) || SUPERSET_MODES[0];
 }
 
 export const DEFAULT_PROFILE: UserProfile = {
