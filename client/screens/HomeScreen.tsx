@@ -146,10 +146,10 @@ export default function HomeScreen() {
 
           <Pressable
             style={styles.linkButton}
-            onPress={() => navigation.navigate("RecTimeTab")}
+            onPress={() => navigation.navigate("RecYardTab")}
           >
             <Feather name="award" size={18} color={theme.textSecondary} />
-            <ThemedText style={styles.linkText}>REC TIME</ThemedText>
+            <ThemedText style={styles.linkText}>REC YARD</ThemedText>
           </Pressable>
 
           <Pressable

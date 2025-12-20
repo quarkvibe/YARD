@@ -6,7 +6,7 @@ import { Platform, StyleSheet, View } from "react-native";
 import HomeScreen from "@/screens/HomeScreen";
 import WorkoutScreen from "@/screens/WorkoutScreen";
 import HistoryScreen from "@/screens/HistoryScreen";
-import RecTimeScreen from "@/screens/RecTimeScreen";
+import RecYardScreen from "@/screens/RecYardScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
 import { useTheme } from "@/hooks/useTheme";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
@@ -16,7 +16,7 @@ export type MainTabParamList = {
   HomeTab: undefined;
   WorkoutTab: undefined;
   HistoryTab: undefined;
-  RecTimeTab: undefined;
+  RecYardTab: undefined;
   SettingsTab: undefined;
 };
 
@@ -94,11 +94,11 @@ export default function MainTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="RecTimeTab"
-        component={RecTimeScreen}
+        name="RecYardTab"
+        component={RecYardScreen}
         options={{
-          title: "Rec Time",
-          headerTitle: "REC TIME",
+          title: "Rec Yard",
+          headerTitle: "REC YARD",
           tabBarIcon: ({ color, size }) => (
             <Feather name="award" size={size} color={color} />
           ),
