@@ -30,8 +30,13 @@ import Animated, {
 
 import { ThemedText } from "@/components/ThemedText";
 import { ConcreteBackground } from "@/components/ConcreteBackground";
+import { YardRulesModal } from "@/components/YardRulesModal";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { formatDuration } from "@/lib/storage";
+import {
+  formatDuration,
+  hasAcceptedYardRules,
+  acceptYardRules,
+} from "@/lib/storage";
 import { useRecYard, formatTimeAgo } from "@/hooks/useRecYard";
 import type { LeaderboardEntry } from "@/hooks/useRecYard";
 import {
@@ -102,6 +107,10 @@ export default function RecYardScreen() {
   const [activeTab, setActiveTab] = useState<TabType>("home");
   const [refreshing, setRefreshing] = useState(false);
 
+  // YARD Rules modal state
+  const [showRulesModal, setShowRulesModal] = useState(false);
+  const [hasAcceptedRules, setHasAcceptedRules] = useState(false);
+
   // Trash talk modal state
   const [showCalloutModal, setShowCalloutModal] = useState(false);
   const [calloutTarget, setCalloutTarget] = useState<LeaderboardEntry | null>(
@@ -117,9 +126,14 @@ export default function RecYardScreen() {
   // Calculate days remaining
   const daysRemaining = getDaysUntilChallengeEnd();
 
-  // Refresh on focus
+  // Check rules acceptance and refresh on focus
   useFocusEffect(
     useCallback(() => {
+      const checkRules = async () => {
+        const accepted = await hasAcceptedYardRules();
+        setHasAcceptedRules(accepted);
+      };
+      checkRules();
       initialize();
     }, [initialize]),
   );
@@ -130,7 +144,25 @@ export default function RecYardScreen() {
     setRefreshing(false);
   };
 
+  const handleAcceptRules = async () => {
+    await acceptYardRules();
+    setHasAcceptedRules(true);
+    setShowRulesModal(false);
+    // Now proceed with the purchase
+    handleUnlock();
+  };
+
+  const handleDeclineRules = () => {
+    setShowRulesModal(false);
+  };
+
   const handleUnlock = async () => {
+    // Check if user has accepted the YARD rules first
+    if (!hasAcceptedRules) {
+      setShowRulesModal(true);
+      return;
+    }
+
     setIsPurchasing(true);
 
     try {
@@ -2008,6 +2040,13 @@ export default function RecYardScreen() {
       </View>
 
       {renderCalloutModal()}
+
+      {/* YARD Rules Agreement Modal */}
+      <YardRulesModal
+        visible={showRulesModal}
+        onAccept={handleAcceptRules}
+        onDecline={handleDeclineRules}
+      />
     </ConcreteBackground>
   );
 }

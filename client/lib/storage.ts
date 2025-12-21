@@ -4,6 +4,7 @@ const STORAGE_KEYS = {
   WORKOUTS: "@yard/workouts",
   SETTINGS: "@yard/settings",
   PROFILE: "@yard/profile",
+  YARD_RULES_ACCEPTED: "@yard/rules_accepted",
 } as const;
 
 export interface CardValue {
@@ -370,6 +371,24 @@ export async function saveProfile(profile: UserProfile): Promise<void> {
     await AsyncStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
   } catch (error) {
     console.error("Error saving profile:", error);
+  }
+}
+
+export async function hasAcceptedYardRules(): Promise<boolean> {
+  try {
+    const data = await AsyncStorage.getItem(STORAGE_KEYS.YARD_RULES_ACCEPTED);
+    return data === "true";
+  } catch (error) {
+    console.error("Error checking yard rules:", error);
+    return false;
+  }
+}
+
+export async function acceptYardRules(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEYS.YARD_RULES_ACCEPTED, "true");
+  } catch (error) {
+    console.error("Error saving yard rules acceptance:", error);
   }
 }
 
