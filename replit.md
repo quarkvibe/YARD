@@ -6,7 +6,7 @@ YARD is a brutally simple, masculine fitness app inspired by prison/military PT 
 
 **Monetization:**
 - **$4.99 one-time download** (configured in App Store Connect / Google Play Console)
-- **$1.99/month Rec Yard subscription** (competitive mode with leaderboards, profiles, social features)
+- **$2.99/month Rec Yard subscription** (competitive mode with leaderboards, profiles, social features)
 
 ## Brand Principles
 - **Extremely simple**: "Flip. Move. Finish."
