@@ -12,8 +12,8 @@ const REVENUECAT_API_KEY_ANDROID = ""; // Add Android key when Google Play is co
 // Entitlement identifier from RevenueCat dashboard
 export const REC_YARD_ENTITLEMENT = "rec_yard_access";
 
-// Product identifiers
-export const REC_YARD_MONTHLY = "rec_yard_monthly";
+// Product identifiers (must match RevenueCat dashboard)
+export const REC_YARD_PRODUCT = "rec_yard_access";
 
 // Detect if running in Expo Go (no native store access)
 const isExpoGo = Constants.appOwnership === "expo";
