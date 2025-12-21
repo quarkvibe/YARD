@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import { View, StyleSheet, FlatList, Pressable, Share } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
@@ -15,6 +15,7 @@ import {
   formatDuration,
   WorkoutRecord,
   DEFAULT_RULE_SETS,
+  getProfile,
 } from "@/lib/storage";
 
 export default function HistoryScreen() {
@@ -39,6 +40,44 @@ export default function HistoryScreen() {
       times[ruleSet.id] = getBestTime(loadedWorkouts, ruleSet.id);
     }
     setBestTimes(times);
+  };
+
+  const handleShareWorkout = async (workout: WorkoutRecord) => {
+    try {
+      const profile = await getProfile();
+      const handle = profile.handle ? `@${profile.handle}` : "";
+      const socials = [
+        profile.instagram && `📸 @${profile.instagram}`,
+        profile.tiktok && `🎵 @${profile.tiktok}`,
+        profile.twitter && `🐦 @${profile.twitter}`,
+      ]
+        .filter(Boolean)
+        .join(" | ");
+
+      let message = `🏋️ YARD WORKOUT\n\n`;
+      message += `📅 ${formatDate(workout.date)}\n`;
+      message += `⏱️ Time: ${formatDuration(workout.duration)}\n`;
+      message += `💪 Pushups: ${workout.totalPushups}\n`;
+      message += `🦵 Squats: ${workout.totalSquats}\n`;
+      message += `📋 Mode: ${workout.ruleSetName}\n`;
+
+      if (workout.isPracticeMode) {
+        message += `🎯 Practice Mode Verified\n`;
+      }
+
+      if (handle) {
+        message += `\n${handle}`;
+      }
+      if (socials) {
+        message += `\n${socials}`;
+      }
+
+      message += `\n\n🏋️ Download YARD Fitness and start your sentence!`;
+
+      await Share.share({ message });
+    } catch (error) {
+      console.error("Share failed:", error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -113,6 +152,15 @@ export default function HistoryScreen() {
           </ThemedText>
         </View>
       )}
+
+      {/* Share Button */}
+      <Pressable
+        style={styles.shareItemButton}
+        onPress={() => handleShareWorkout(item)}
+      >
+        <Feather name="share-2" size={14} color={Colors.dark.accent} />
+        <ThemedText style={styles.shareItemButtonText}>SHARE</ThemedText>
+      </Pressable>
     </Animated.View>
   );
 
@@ -308,5 +356,21 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 1,
     color: Colors.dark.textSecondary,
+  },
+  shareItemButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderTopWidth: 1,
+    borderTopColor: Colors.dark.cardBorder,
+    paddingTop: Spacing.md,
+    marginTop: Spacing.md,
+    gap: Spacing.xs,
+  },
+  shareItemButtonText: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.accent,
   },
 });

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { View, StyleSheet, Pressable, Alert } from "react-native";
+import { View, StyleSheet, Pressable, Alert, Share } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import {
@@ -39,6 +39,8 @@ import {
   ExerciseType,
   SupersetModeId,
   getSupersetModeById,
+  getProfile,
+  UserProfile,
 } from "@/lib/storage";
 
 type WorkoutState = "idle" | "active" | "paused" | "complete";
@@ -675,6 +677,50 @@ export default function WorkoutScreen() {
     buttonScale.value = withSpring(1, { damping: 15, stiffness: 150 });
   };
 
+  const handleShareWorkout = async () => {
+    try {
+      const profile = await getProfile();
+      const handle = profile.handle ? `@${profile.handle}` : "";
+      const socials = [
+        profile.instagram && `📸 @${profile.instagram}`,
+        profile.tiktok && `🎵 @${profile.tiktok}`,
+        profile.twitter && `🐦 @${profile.twitter}`,
+      ]
+        .filter(Boolean)
+        .join(" | ");
+
+      const exerciseEmoji =
+        exerciseType === "pushups"
+          ? "💪"
+          : exerciseType === "squats"
+            ? "🦵"
+            : "🔥";
+
+      let message = `${exerciseEmoji} YARD WORKOUT COMPLETE!\n\n`;
+      message += `⏱️ Time: ${formatDuration(timer)}\n`;
+      message += `💪 Pushups: ${totalPushups}\n`;
+      message += `🦵 Squats: ${totalSquats}\n`;
+      message += `📋 Mode: ${ruleSetName}\n`;
+
+      if (isNewRecord) {
+        message += `\n🏆 NEW PERSONAL RECORD!\n`;
+      }
+
+      if (handle) {
+        message += `\n${handle}`;
+      }
+      if (socials) {
+        message += `\n${socials}`;
+      }
+
+      message += `\n\n🏋️ Download YARD Fitness and start your sentence!`;
+
+      await Share.share({ message });
+    } catch (error) {
+      console.error("Share failed:", error);
+    }
+  };
+
   const animatedButtonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
   }));
@@ -1127,6 +1173,26 @@ export default function WorkoutScreen() {
           <ThemedText style={styles.viewHistoryText}>VIEW HISTORY</ThemedText>
         </Pressable>
       </View>
+
+      {/* Share Button - Always Available */}
+      <Pressable style={styles.shareWorkoutButton} onPress={handleShareWorkout}>
+        <Feather name="share-2" size={20} color={Colors.dark.backgroundRoot} />
+        <ThemedText style={styles.shareWorkoutButtonText}>
+          SHARE YOUR TIME
+        </ThemedText>
+      </Pressable>
+
+      {!isOfficialRecYardSubmission && competitiveMode && (
+        <ThemedText style={styles.practiceModeSavedText}>
+          🎯 Practice time saved to personal records
+        </ThemedText>
+      )}
+
+      {isOfficialRecYardSubmission && (
+        <ThemedText style={styles.officialSubmittedText}>
+          🏆 Official time submitted to Rec Yard leaderboard!
+        </ThemedText>
+      )}
     </Animated.View>
   );
 
@@ -1630,5 +1696,40 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     marginTop: 2,
     textAlign: "center",
+  },
+
+  // Share Button Styles
+  shareWorkoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.dark.accent,
+    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    marginTop: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  shareWorkoutButtonText: {
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 2,
+    color: Colors.dark.backgroundRoot,
+  },
+  practiceModeSavedText: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.accent,
+    textAlign: "center",
+    marginTop: Spacing.md,
+  },
+  officialSubmittedText: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.squats,
+    textAlign: "center",
+    marginTop: Spacing.md,
   },
 });

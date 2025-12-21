@@ -183,6 +183,14 @@ export interface SetInterval {
 
 export interface UserProfile {
   displayName: string;
+  handle: string;
+  bio: string;
+  instagram: string;
+  tiktok: string;
+  twitter: string;
+  youtube: string;
+  discord: string;
+  threads: string;
 }
 
 export const DEFAULT_RULE_SETS: RuleSet[] = [
@@ -297,6 +305,14 @@ export function getSupersetModeById(id: SupersetModeId): SupersetMode {
 
 export const DEFAULT_PROFILE: UserProfile = {
   displayName: "",
+  handle: "",
+  bio: "",
+  instagram: "",
+  tiktok: "",
+  twitter: "",
+  youtube: "",
+  discord: "",
+  threads: "",
 };
 
 export async function getWorkouts(): Promise<WorkoutRecord[]> {
