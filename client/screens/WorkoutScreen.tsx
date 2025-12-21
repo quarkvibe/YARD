@@ -23,6 +23,7 @@ import Animated, {
 import { ThemedText } from "@/components/ThemedText";
 import { ConcreteBackground } from "@/components/ConcreteBackground";
 import { PlayingCard } from "@/components/PlayingCard";
+import { DeckStack } from "@/components/DeckStack";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import {
   CardValue,
@@ -41,6 +42,9 @@ import {
   getSupersetModeById,
   getProfile,
   UserProfile,
+  getDeckStyleById,
+  DeckStyle,
+  DECK_STYLES,
 } from "@/lib/storage";
 
 type WorkoutState = "idle" | "active" | "paused" | "complete";
@@ -75,6 +79,7 @@ export default function WorkoutScreen() {
   const [alternatingExercise, setAlternatingExercise] = useState<
     "pushups" | "squats"
   >("squats");
+  const [deckStyle, setDeckStyle] = useState<DeckStyle>(DECK_STYLES[0]);
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [hapticsEnabled, setHapticsEnabled] = useState(false);
@@ -143,6 +148,9 @@ export default function WorkoutScreen() {
     setCompetitiveMode(settings.competitiveMode);
     // Reset alternating state when settings reload
     setAlternatingExercise("squats");
+    // Load deck style
+    const loadedDeckStyle = getDeckStyleById(settings.selectedDeckStyleId);
+    setDeckStyle(loadedDeckStyle);
 
     const workouts = await getWorkouts();
     const best = getBestTime(workouts, ruleSet.id);
@@ -774,7 +782,7 @@ export default function WorkoutScreen() {
             </ThemedText>
           </View>
           <View style={styles.cardContainer}>
-            <PlayingCard card={card} isFlipped={true} />
+            <PlayingCard card={card} isFlipped={true} deckStyleId={deckStyle.id} />
           </View>
         </>
       );
@@ -813,7 +821,7 @@ export default function WorkoutScreen() {
                       { marginLeft: index > 0 ? -30 : 0 },
                     ]}
                   >
-                    <PlayingCard card={card} isFlipped={true} size="small" />
+                    <PlayingCard card={card} isFlipped={true} size="small" deckStyleId={deckStyle.id} />
                   </Animated.View>
                 ))}
               </View>
@@ -840,7 +848,7 @@ export default function WorkoutScreen() {
                       { marginLeft: index > 0 ? -30 : 0 },
                     ]}
                   >
-                    <PlayingCard card={card} isFlipped={true} size="small" />
+                    <PlayingCard card={card} isFlipped={true} size="small" deckStyleId={deckStyle.id} />
                   </Animated.View>
                 ))}
               </View>
@@ -885,7 +893,7 @@ export default function WorkoutScreen() {
                   },
                 ]}
               >
-                <PlayingCard card={card} isFlipped={true} size="small" />
+                <PlayingCard card={card} isFlipped={true} size="small" deckStyleId={deckStyle.id} />
               </Animated.View>
             ))}
           </View>
@@ -913,7 +921,11 @@ export default function WorkoutScreen() {
       )}
 
       <View style={styles.deckPreview}>
-        <PlayingCard card={null} isFlipped={false} />
+        <DeckStack
+          cardsRemaining={52}
+          totalCards={52}
+          deckStyleId={deckStyle.id}
+        />
       </View>
 
       <ThemedText style={styles.ruleSetLabel}>{ruleSetName}</ThemedText>
@@ -1009,7 +1021,11 @@ export default function WorkoutScreen() {
             </ThemedText>
           </View>
           <View style={styles.cardContainer}>
-            <PlayingCard card={null} isFlipped={false} />
+            <DeckStack
+              cardsRemaining={cardsRemaining}
+              totalCards={52}
+              deckStyleId={deckStyle.id}
+            />
           </View>
         </>
       )}
