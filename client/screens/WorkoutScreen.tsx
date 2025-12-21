@@ -808,6 +808,45 @@ export default function WorkoutScreen() {
         </View>
       ) : null}
 
+      {/* Competition Tracking Toggle */}
+      <Pressable
+        onPress={() => {
+          setCompetitiveMode(!competitiveMode);
+          triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
+        }}
+        style={[
+          styles.competitionToggle,
+          competitiveMode && styles.competitionToggleActive,
+        ]}
+      >
+        <Feather
+          name={competitiveMode ? "award" : "clock"}
+          size={18}
+          color={
+            competitiveMode ? Colors.dark.backgroundRoot : Colors.dark.accent
+          }
+        />
+        <ThemedText
+          style={[
+            styles.competitionToggleText,
+            competitiveMode && styles.competitionToggleTextActive,
+          ]}
+        >
+          {competitiveMode ? "COMPETITION MODE" : "TRACK SETS"}
+        </ThemedText>
+        <View
+          style={[
+            styles.competitionIndicator,
+            competitiveMode && styles.competitionIndicatorActive,
+          ]}
+        />
+      </Pressable>
+      {competitiveMode && (
+        <ThemedText style={styles.competitionHint}>
+          Track work/rest times for each set
+        </ThemedText>
+      )}
+
       <AnimatedPressable
         onPress={startWorkout}
         onPressIn={handleButtonPressIn}
@@ -1452,5 +1491,48 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     letterSpacing: 3,
     color: Colors.dark.backgroundRoot,
+  },
+  // Competition toggle styles
+  competitionToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.accent,
+    marginBottom: Spacing.md,
+    backgroundColor: "transparent",
+  },
+  competitionToggleActive: {
+    backgroundColor: Colors.dark.accent,
+    borderColor: Colors.dark.accent,
+  },
+  competitionToggleText: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.accent,
+  },
+  competitionToggleTextActive: {
+    color: Colors.dark.backgroundRoot,
+  },
+  competitionIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.dark.cardBorder,
+  },
+  competitionIndicatorActive: {
+    backgroundColor: Colors.dark.backgroundRoot,
+  },
+  competitionHint: {
+    fontSize: 10,
+    fontWeight: "500",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+    marginBottom: Spacing.xl,
+    textAlign: "center",
   },
 });
