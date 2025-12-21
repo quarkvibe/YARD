@@ -10,7 +10,8 @@ import Animated, {
 
 import { ThemedText } from "@/components/ThemedText";
 import { BorderRadius, Spacing, Colors } from "@/constants/theme";
-import type { CardValue } from "@/lib/storage";
+import type { CardValue, DeckStyleId, DeckStyle } from "@/lib/storage";
+import { getDeckStyleById } from "@/lib/storage";
 
 type CardSize = "small" | "medium" | "large";
 
@@ -20,6 +21,7 @@ interface PlayingCardProps {
   onFlip?: () => void;
   disabled?: boolean;
   size?: CardSize;
+  deckStyleId?: DeckStyleId;
 }
 
 const springConfig: WithSpringConfig = {
@@ -80,9 +82,11 @@ export function PlayingCard({
   onFlip,
   disabled,
   size = "medium",
+  deckStyleId = "yard",
 }: PlayingCardProps) {
   const flipProgress = useSharedValue(isFlipped ? 1 : 0);
   const scale = useSharedValue(1);
+  const deckStyle = getDeckStyleById(deckStyleId);
 
   const dimensions = CARD_DIMENSIONS[size];
   const typography = TYPOGRAPHY_SCALES[size];
@@ -136,30 +140,32 @@ export function PlayingCard({
           styles.card,
           styles.cardBack,
           cardContainerStyle,
+          { backgroundColor: deckStyle.backColor, borderColor: deckStyle.accentColor },
           backAnimatedStyle,
         ]}
       >
         <View style={styles.backPattern}>
-          <View style={styles.backInner}>
+          <View style={[styles.backInner, { borderColor: deckStyle.accentColor }]}>
             <ThemedText
               style={[
                 styles.backText,
                 {
                   fontSize: typography.backText,
                   letterSpacing: typography.backLetterSpacing,
+                  color: deckStyle.textColor,
                 },
               ]}
             >
-              YARD
+              {deckStyle.name}
             </ThemedText>
           </View>
         </View>
 
         {/* Decorative border lines */}
-        <View style={styles.backBorderTop} />
-        <View style={styles.backBorderBottom} />
-        <View style={styles.backBorderLeft} />
-        <View style={styles.backBorderRight} />
+        <View style={[styles.backBorderTop, { backgroundColor: deckStyle.accentColor }]} />
+        <View style={[styles.backBorderBottom, { backgroundColor: deckStyle.accentColor }]} />
+        <View style={[styles.backBorderLeft, { backgroundColor: deckStyle.accentColor }]} />
+        <View style={[styles.backBorderRight, { backgroundColor: deckStyle.accentColor }]} />
       </Animated.View>
 
       {/* Card Front */}
