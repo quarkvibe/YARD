@@ -52,7 +52,12 @@ import {
   sendCallout,
   getTrashTalkByCategory,
 } from "@/lib/recyard";
-import { checkRecYardAccess, restorePurchases } from "@/lib/purchases";
+import {
+  checkRecYardAccess,
+  restorePurchases,
+  getRecYardPackages,
+  purchaseRecYard,
+} from "@/lib/purchases";
 
 type TabType = "leaderboard" | "beef" | "profile";
 
@@ -136,9 +141,40 @@ export default function RecYardScreen() {
   };
 
   const handleUnlock = async () => {
-    // For MVP testing, just unlock directly
-    // In production, this would use RevenueCat
-    setIsSubscribed(true);
+    setIsPurchasing(true);
+
+    try {
+      // Get available packages from RevenueCat
+      const packages = await getRecYardPackages();
+
+      if (packages.length === 0) {
+        // If no packages available (dev mode or config issue), allow access
+        console.log("[RecYard] No packages available - granting dev access");
+        setIsSubscribed(true);
+        setIsPurchasing(false);
+        return;
+      }
+
+      // Purchase the first available package (monthly subscription)
+      const result = await purchaseRecYard(packages[0]);
+
+      if (result.success) {
+        setIsSubscribed(true);
+        Alert.alert(
+          "WELCOME TO THE YARD",
+          "Your subscription is now active. Get after it!",
+        );
+      } else if (result.error === "cancelled") {
+        // User cancelled - do nothing
+      } else {
+        Alert.alert("PURCHASE FAILED", result.error || "Please try again.");
+      }
+    } catch (error) {
+      console.error("[RecYard] Purchase error:", error);
+      Alert.alert("ERROR", "Something went wrong. Please try again.");
+    }
+
+    setIsPurchasing(false);
   };
 
   const handleRestore = async () => {
