@@ -156,11 +156,111 @@ export const SUPERSET_MODES: SupersetMode[] = [
 
 export type RestAlertType = "haptic" | "sound" | "both" | "none";
 
+export type DeckStyleId = 
+  | "yard"
+  | "military"
+  | "prison"
+  | "vintage"
+  | "geometric"
+  | "dayofdead"
+  | "samurai"
+  | "anime";
+
+export interface DeckStyle {
+  id: DeckStyleId;
+  name: string;
+  description: string;
+  previewImage: string;
+  backColor: string;
+  accentColor: string;
+  textColor: string;
+}
+
+export const DECK_STYLES: DeckStyle[] = [
+  {
+    id: "yard",
+    name: "YARD",
+    description: "Original prison yard design",
+    previewImage: "yard_app_icon_tally_marks.png",
+    backColor: "#1A1A1A",
+    accentColor: "#FF6B35",
+    textColor: "#FF6B35",
+  },
+  {
+    id: "military",
+    name: "TACTICAL",
+    description: "Military operator style",
+    previewImage: "military_tactical_deck_cards.png",
+    backColor: "#2D3B2D",
+    accentColor: "#8B7355",
+    textColor: "#C4B998",
+  },
+  {
+    id: "prison",
+    name: "LOCKUP",
+    description: "Gritty concrete aesthetic",
+    previewImage: "prison_yard_deck_cards.png",
+    backColor: "#252525",
+    accentColor: "#FF6B35",
+    textColor: "#888888",
+  },
+  {
+    id: "vintage",
+    name: "CASINO",
+    description: "Classic vintage elegance",
+    previewImage: "classic_vintage_casino_cards.png",
+    backColor: "#4A1515",
+    accentColor: "#D4AF37",
+    textColor: "#D4AF37",
+  },
+  {
+    id: "geometric",
+    name: "NEON",
+    description: "Modern minimalist",
+    previewImage: "modern_geometric_deck_cards.png",
+    backColor: "#0A0A0A",
+    accentColor: "#00D4FF",
+    textColor: "#00D4FF",
+  },
+  {
+    id: "dayofdead",
+    name: "CALAVERA",
+    description: "Day of the Dead skulls",
+    previewImage: "day_of_dead_skull_cards.png",
+    backColor: "#1A0A1A",
+    accentColor: "#FF69B4",
+    textColor: "#FFB347",
+  },
+  {
+    id: "samurai",
+    name: "RONIN",
+    description: "Japanese warrior style",
+    previewImage: "japanese_samurai_deck_cards.png",
+    backColor: "#1A1A2E",
+    accentColor: "#C41E3A",
+    textColor: "#D4AF37",
+  },
+  {
+    id: "anime",
+    name: "KAWAII",
+    description: "Anime schoolgirl deck",
+    previewImage: "anime_schoolgirl_deck_cards.png",
+    backColor: "#2A2A4A",
+    accentColor: "#FF69B4",
+    textColor: "#FFB6C1",
+  },
+];
+
+export function getDeckStyleById(id: DeckStyleId): DeckStyle {
+  return DECK_STYLES.find((ds) => ds.id === id) || DECK_STYLES[0];
+}
+
 export interface AppSettings {
   selectedRuleSetId: string;
   selectedFlipModeId: FlipModeId;
   selectedExerciseType: ExerciseType;
   selectedSupersetModeId: SupersetModeId;
+  selectedDeckStyleId: DeckStyleId;
   soundEnabled: boolean;
   hapticsEnabled: boolean;
   // Rest timer settings
@@ -280,6 +380,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   selectedFlipModeId: "freshfish",
   selectedExerciseType: "superset",
   selectedSupersetModeId: "alternating",
+  selectedDeckStyleId: "yard",
   soundEnabled: false,
   hapticsEnabled: false,
   // Rest timer defaults
