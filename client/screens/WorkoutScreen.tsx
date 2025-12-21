@@ -319,10 +319,15 @@ export default function WorkoutScreen() {
 
     // Initialize set/rest tracking
     // Force competitive mode ON for official Rec Yard submissions
-    setCompetitiveMode(isOfficialRecYardSubmission || settings.competitiveMode);
-    setRestTimerEnabled(
-      isOfficialRecYardSubmission || settings.restTimerEnabled,
-    );
+    // Preserve the current UI state (user may have toggled practice mode on)
+    if (isOfficialRecYardSubmission) {
+      setCompetitiveMode(true);
+      setRestTimerEnabled(true);
+    } else {
+      // Don't override - keep whatever the user toggled in the UI
+      // Only set from settings on initial load (handled in loadSettings)
+      setRestTimerEnabled(settings.restTimerEnabled);
+    }
     setRestTimerDuration(settings.restTimerDuration);
     setRestAlertType(settings.restAlertType);
     setIntervals([]);
