@@ -31,73 +31,73 @@ const DECK_IMAGES: Record<string, any> = {
 const FACE_CARD_IMAGES: Record<string, Record<string, any>> = {
   yard: {
     "10": require("../../attached_assets/generated_images/yard_deck_10_card.png"),
-    "J": require("../../attached_assets/generated_images/yard_deck_jack_card.png"),
-    "Q": require("../../attached_assets/generated_images/yard_deck_queen_card.png"),
-    "K": require("../../attached_assets/generated_images/yard_deck_king_card.png"),
-    "A": require("../../attached_assets/generated_images/yard_deck_ace_card.png"),
+    J: require("../../attached_assets/generated_images/yard_deck_jack_card.png"),
+    Q: require("../../attached_assets/generated_images/yard_deck_queen_card.png"),
+    K: require("../../attached_assets/generated_images/yard_deck_king_card.png"),
+    A: require("../../attached_assets/generated_images/yard_deck_ace_card.png"),
   },
   military: {
     "10": require("../../attached_assets/generated_images/tactical_deck_10_card.png"),
-    "J": require("../../attached_assets/generated_images/tactical_deck_jack_card.png"),
-    "Q": require("../../attached_assets/generated_images/tactical_deck_queen_card.png"),
-    "K": require("../../attached_assets/generated_images/tactical_deck_king_card.png"),
-    "A": require("../../attached_assets/generated_images/tactical_deck_ace_card.png"),
+    J: require("../../attached_assets/generated_images/tactical_deck_jack_card.png"),
+    Q: require("../../attached_assets/generated_images/tactical_deck_queen_card.png"),
+    K: require("../../attached_assets/generated_images/tactical_deck_king_card.png"),
+    A: require("../../attached_assets/generated_images/tactical_deck_ace_card.png"),
   },
   prison: {
     "10": require("../../attached_assets/generated_images/lockup_deck_10_card.png"),
-    "J": require("../../attached_assets/generated_images/lockup_deck_jack_card.png"),
-    "Q": require("../../attached_assets/generated_images/lockup_deck_queen_card.png"),
-    "K": require("../../attached_assets/generated_images/lockup_deck_king_card.png"),
-    "A": require("../../attached_assets/generated_images/lockup_deck_ace_card.png"),
+    J: require("../../attached_assets/generated_images/lockup_deck_jack_card.png"),
+    Q: require("../../attached_assets/generated_images/lockup_deck_queen_card.png"),
+    K: require("../../attached_assets/generated_images/lockup_deck_king_card.png"),
+    A: require("../../attached_assets/generated_images/lockup_deck_ace_card.png"),
   },
   vintage: {
     "10": require("../../attached_assets/generated_images/casino_deck_10_card.png"),
-    "J": require("../../attached_assets/generated_images/casino_deck_jack_card.png"),
-    "Q": require("../../attached_assets/generated_images/casino_deck_queen_card.png"),
-    "K": require("../../attached_assets/generated_images/casino_deck_king_card.png"),
-    "A": require("../../attached_assets/generated_images/casino_deck_ace_card.png"),
+    J: require("../../attached_assets/generated_images/casino_deck_jack_card.png"),
+    Q: require("../../attached_assets/generated_images/casino_deck_queen_card.png"),
+    K: require("../../attached_assets/generated_images/casino_deck_king_card.png"),
+    A: require("../../attached_assets/generated_images/casino_deck_ace_card.png"),
   },
   geometric: {
     "10": require("../../attached_assets/generated_images/neon_deck_10_card.png"),
-    "J": require("../../attached_assets/generated_images/neon_deck_jack_card.png"),
-    "Q": require("../../attached_assets/generated_images/neon_deck_queen_card.png"),
-    "K": require("../../attached_assets/generated_images/neon_deck_king_card.png"),
-    "A": require("../../attached_assets/generated_images/neon_deck_ace_card.png"),
+    J: require("../../attached_assets/generated_images/neon_deck_jack_card.png"),
+    Q: require("../../attached_assets/generated_images/neon_deck_queen_card.png"),
+    K: require("../../attached_assets/generated_images/neon_deck_king_card.png"),
+    A: require("../../attached_assets/generated_images/neon_deck_ace_card.png"),
   },
   dayofdead: {
     "10": require("../../attached_assets/generated_images/calavera_deck_10_card.png"),
-    "J": require("../../attached_assets/generated_images/calavera_deck_jack_card.png"),
-    "Q": require("../../attached_assets/generated_images/calavera_deck_queen_card.png"),
-    "K": require("../../attached_assets/generated_images/calavera_deck_king_card.png"),
-    "A": require("../../attached_assets/generated_images/calavera_deck_ace_card.png"),
+    J: require("../../attached_assets/generated_images/calavera_deck_jack_card.png"),
+    Q: require("../../attached_assets/generated_images/calavera_deck_queen_card.png"),
+    K: require("../../attached_assets/generated_images/calavera_deck_king_card.png"),
+    A: require("../../attached_assets/generated_images/calavera_deck_ace_card.png"),
   },
   samurai: {
     "10": require("../../attached_assets/generated_images/ronin_deck_10_card.png"),
-    "J": require("../../attached_assets/generated_images/ronin_deck_jack_card.png"),
-    "Q": require("../../attached_assets/generated_images/ronin_deck_queen_card.png"),
-    "K": require("../../attached_assets/generated_images/ronin_deck_king_card.png"),
-    "A": require("../../attached_assets/generated_images/ronin_deck_ace_card.png"),
+    J: require("../../attached_assets/generated_images/ronin_deck_jack_card.png"),
+    Q: require("../../attached_assets/generated_images/ronin_deck_queen_card.png"),
+    K: require("../../attached_assets/generated_images/ronin_deck_king_card.png"),
+    A: require("../../attached_assets/generated_images/ronin_deck_ace_card.png"),
   },
   anime: {
     "10": require("../../attached_assets/generated_images/kawaii_deck_10_card.png"),
-    "J": require("../../attached_assets/generated_images/kawaii_deck_jack_card.png"),
-    "Q": require("../../attached_assets/generated_images/kawaii_deck_queen_card.png"),
-    "K": require("../../attached_assets/generated_images/kawaii_deck_king_card.png"),
-    "A": require("../../attached_assets/generated_images/kawaii_deck_ace_card.png"),
+    J: require("../../attached_assets/generated_images/kawaii_deck_jack_card.png"),
+    Q: require("../../attached_assets/generated_images/kawaii_deck_queen_card.png"),
+    K: require("../../attached_assets/generated_images/kawaii_deck_king_card.png"),
+    A: require("../../attached_assets/generated_images/kawaii_deck_ace_card.png"),
   },
   cosplay: {
     "10": require("../../attached_assets/generated_images/cosplay_deck_10_card.png"),
-    "J": require("../../attached_assets/generated_images/cosplay_deck_jack_card.png"),
-    "Q": require("../../attached_assets/generated_images/cosplay_deck_queen_card.png"),
-    "K": require("../../attached_assets/generated_images/cosplay_deck_king_card.png"),
-    "A": require("../../attached_assets/generated_images/cosplay_deck_ace_card.png"),
+    J: require("../../attached_assets/generated_images/cosplay_deck_jack_card.png"),
+    Q: require("../../attached_assets/generated_images/cosplay_deck_queen_card.png"),
+    K: require("../../attached_assets/generated_images/cosplay_deck_king_card.png"),
+    A: require("../../attached_assets/generated_images/cosplay_deck_ace_card.png"),
   },
   hunters: {
     "10": require("../../attached_assets/generated_images/hunters_deck_ten_face_card.png"),
-    "J": require("../../attached_assets/generated_images/hunters_deck_jack_face_card.png"),
-    "Q": require("../../attached_assets/generated_images/hunters_deck_queen_face_card.png"),
-    "K": require("../../attached_assets/generated_images/hunters_deck_king_face_card.png"),
-    "A": require("../../attached_assets/generated_images/hunters_deck_ace_face_card.png"),
+    J: require("../../attached_assets/generated_images/hunters_deck_jack_face_card.png"),
+    Q: require("../../attached_assets/generated_images/hunters_deck_queen_face_card.png"),
+    K: require("../../attached_assets/generated_images/hunters_deck_king_face_card.png"),
+    A: require("../../attached_assets/generated_images/hunters_deck_ace_face_card.png"),
   },
 };
 
@@ -238,7 +238,10 @@ export function PlayingCard({
           styles.card,
           styles.cardBack,
           cardContainerStyle,
-          { backgroundColor: deckStyle.backColor, borderColor: deckStyle.accentColor },
+          {
+            backgroundColor: deckStyle.backColor,
+            borderColor: deckStyle.accentColor,
+          },
           backAnimatedStyle,
         ]}
       >
@@ -268,10 +271,30 @@ export function PlayingCard({
         </ImageBackground>
 
         {/* Decorative border lines */}
-        <View style={[styles.backBorderTop, { backgroundColor: deckStyle.accentColor }]} />
-        <View style={[styles.backBorderBottom, { backgroundColor: deckStyle.accentColor }]} />
-        <View style={[styles.backBorderLeft, { backgroundColor: deckStyle.accentColor }]} />
-        <View style={[styles.backBorderRight, { backgroundColor: deckStyle.accentColor }]} />
+        <View
+          style={[
+            styles.backBorderTop,
+            { backgroundColor: deckStyle.accentColor },
+          ]}
+        />
+        <View
+          style={[
+            styles.backBorderBottom,
+            { backgroundColor: deckStyle.accentColor },
+          ]}
+        />
+        <View
+          style={[
+            styles.backBorderLeft,
+            { backgroundColor: deckStyle.accentColor },
+          ]}
+        />
+        <View
+          style={[
+            styles.backBorderRight,
+            { backgroundColor: deckStyle.accentColor },
+          ]}
+        />
       </Animated.View>
 
       {/* Card Front */}
@@ -280,7 +303,11 @@ export function PlayingCard({
           styles.card,
           styles.cardFront,
           cardContainerStyle,
-          { padding: hasFaceCardImage(deckStyleId, card?.rank || "") ? 0 : cornerPadding },
+          {
+            padding: hasFaceCardImage(deckStyleId, card?.rank || "")
+              ? 0
+              : cornerPadding,
+          },
           frontAnimatedStyle,
         ]}
       >
@@ -296,7 +323,12 @@ export function PlayingCard({
               {/* Overlay with rank, suit and rep value */}
               <View style={styles.faceCardOverlay}>
                 {/* Top left corner */}
-                <View style={[styles.faceCornerTop, { top: cornerPadding, left: cornerPadding }]}>
+                <View
+                  style={[
+                    styles.faceCornerTop,
+                    { top: cornerPadding, left: cornerPadding },
+                  ]}
+                >
                   <ThemedText
                     style={[
                       styles.faceCornerRank,
@@ -308,7 +340,10 @@ export function PlayingCard({
                   <ThemedText
                     style={[
                       styles.faceCornerSuit,
-                      { fontSize: typography.cornerSuit - 4, color: getSuitColor(card.suit) },
+                      {
+                        fontSize: typography.cornerSuit - 4,
+                        color: getSuitColor(card.suit),
+                      },
                     ]}
                   >
                     {SUIT_SYMBOLS[card.suit]}
@@ -316,11 +351,19 @@ export function PlayingCard({
                 </View>
 
                 {/* Bottom right corner (rotated) */}
-                <View style={[styles.faceCornerBottom, { bottom: cornerPadding, right: cornerPadding }]}>
+                <View
+                  style={[
+                    styles.faceCornerBottom,
+                    { bottom: cornerPadding, right: cornerPadding },
+                  ]}
+                >
                   <ThemedText
                     style={[
                       styles.faceCornerSuit,
-                      { fontSize: typography.cornerSuit - 4, color: getSuitColor(card.suit) },
+                      {
+                        fontSize: typography.cornerSuit - 4,
+                        color: getSuitColor(card.suit),
+                      },
                     ]}
                   >
                     {SUIT_SYMBOLS[card.suit]}
@@ -337,7 +380,9 @@ export function PlayingCard({
 
                 {/* Rep value badge */}
                 <View style={styles.faceRepBadge}>
-                  <ThemedText style={styles.faceRepValue}>{card.value}</ThemedText>
+                  <ThemedText style={styles.faceRepValue}>
+                    {card.value}
+                  </ThemedText>
                 </View>
               </View>
             </ImageBackground>

@@ -1,5 +1,13 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { View, StyleSheet, Pressable, Alert, Share, Platform, Modal } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Alert,
+  Share,
+  Platform,
+  Modal,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import {
@@ -801,7 +809,11 @@ export default function WorkoutScreen() {
             </ThemedText>
           </View>
           <View style={styles.cardContainer}>
-            <PlayingCard card={card} isFlipped={true} deckStyleId={deckStyle.id} />
+            <PlayingCard
+              card={card}
+              isFlipped={true}
+              deckStyleId={deckStyle.id}
+            />
           </View>
         </>
       );
@@ -840,7 +852,12 @@ export default function WorkoutScreen() {
                       { marginLeft: index > 0 ? -30 : 0 },
                     ]}
                   >
-                    <PlayingCard card={card} isFlipped={true} size="small" deckStyleId={deckStyle.id} />
+                    <PlayingCard
+                      card={card}
+                      isFlipped={true}
+                      size="small"
+                      deckStyleId={deckStyle.id}
+                    />
                   </Animated.View>
                 ))}
               </View>
@@ -867,7 +884,12 @@ export default function WorkoutScreen() {
                       { marginLeft: index > 0 ? -30 : 0 },
                     ]}
                   >
-                    <PlayingCard card={card} isFlipped={true} size="small" deckStyleId={deckStyle.id} />
+                    <PlayingCard
+                      card={card}
+                      isFlipped={true}
+                      size="small"
+                      deckStyleId={deckStyle.id}
+                    />
                   </Animated.View>
                 ))}
               </View>
@@ -912,7 +934,12 @@ export default function WorkoutScreen() {
                   },
                 ]}
               >
-                <PlayingCard card={card} isFlipped={true} size="small" deckStyleId={deckStyle.id} />
+                <PlayingCard
+                  card={card}
+                  isFlipped={true}
+                  size="small"
+                  deckStyleId={deckStyle.id}
+                />
               </Animated.View>
             ))}
           </View>

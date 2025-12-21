@@ -185,7 +185,6 @@ export default function HomeScreen() {
           </AnimatedPressable>
         </Animated.View>
 
-
         {totalWorkouts > 0 ? (
           <Animated.View
             entering={FadeIn.delay(400)}

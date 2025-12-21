@@ -156,7 +156,7 @@ export const SUPERSET_MODES: SupersetMode[] = [
 
 export type RestAlertType = "haptic" | "sound" | "both" | "none";
 
-export type DeckStyleId = 
+export type DeckStyleId =
   | "yard"
   | "military"
   | "prison"
@@ -306,6 +306,7 @@ export interface UserProfile {
   displayName: string;
   handle: string;
   bio: string;
+  photoUri?: string;
   instagram: string;
   tiktok: string;
   twitter: string;

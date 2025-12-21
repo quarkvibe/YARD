@@ -551,7 +551,10 @@ export default function RecYardScreen() {
         </Pressable>
       </Animated.View>
 
-      <Animated.View entering={FadeIn.delay(500)} style={styles.freeFeatureSection}>
+      <Animated.View
+        entering={FadeIn.delay(500)}
+        style={styles.freeFeatureSection}
+      >
         <ThemedText style={styles.freeFeatureTitle}>FREE FEATURES</ThemedText>
         <ThemedText style={styles.freeFeatureText}>
           Share workouts from History tab{"\n"}

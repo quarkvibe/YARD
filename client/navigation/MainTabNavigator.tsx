@@ -7,6 +7,7 @@ import HomeScreen from "@/screens/HomeScreen";
 import WorkoutScreen from "@/screens/WorkoutScreen";
 import HistoryScreen from "@/screens/HistoryScreen";
 import RecYardScreen from "@/screens/RecYardScreen";
+import ProfileScreen from "@/screens/ProfileScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
 import { Colors, Spacing } from "@/constants/theme";
 
@@ -15,6 +16,7 @@ export type MainTabParamList = {
   WorkoutTab: { officialRecYardSubmission?: boolean } | undefined;
   HistoryTab: undefined;
   RecYardTab: undefined;
+  ProfileTab: undefined;
   SettingsTab: undefined;
 };
 
@@ -95,6 +97,17 @@ export default function MainTabNavigator() {
           headerTitle: "REC YARD",
           tabBarIcon: ({ color, size }) => (
             <Feather name="award" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="ProfileTab"
+        component={ProfileScreen}
+        options={{
+          title: "Profile",
+          headerTitle: "PROFILE",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="user" size={size} color={color} />
           ),
         }}
       />

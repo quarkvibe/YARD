@@ -38,17 +38,23 @@ export function DeckStack({
   const progress = totalCards > 0 ? cardsRemaining / totalCards : 1;
   const visibleLayers = Math.max(1, Math.ceil(progress * STACK_LAYERS));
 
-  const dimensions = size === "small" 
-    ? { width: 50, height: 70, offset: 1.5 }
-    : { width: 80, height: 112, offset: 2 };
+  const dimensions =
+    size === "small"
+      ? { width: 50, height: 70, offset: 1.5 }
+      : { width: 80, height: 112, offset: 2 };
 
   return (
-    <View style={[styles.container, { width: dimensions.width + 12, height: dimensions.height + 12 }]}>
+    <View
+      style={[
+        styles.container,
+        { width: dimensions.width + 12, height: dimensions.height + 12 },
+      ]}
+    >
       {Array.from({ length: visibleLayers }).map((_, index) => {
         const layerIndex = visibleLayers - 1 - index;
         const offset = layerIndex * dimensions.offset;
-        const opacity = 1 - (layerIndex * 0.15);
-        
+        const opacity = 1 - layerIndex * 0.15;
+
         return (
           <Animated.View
             key={index}
@@ -78,7 +84,7 @@ export function DeckStack({
                   <ThemedText
                     style={[
                       styles.deckText,
-                      { 
+                      {
                         color: deckStyle.textColor,
                         fontSize: size === "small" ? 8 : 12,
                         letterSpacing: size === "small" ? 1 : 2,
@@ -96,10 +102,17 @@ export function DeckStack({
           </Animated.View>
         );
       })}
-      
+
       {cardsRemaining > 0 && (
-        <View style={[styles.countBadge, { backgroundColor: deckStyle.accentColor }]}>
-          <ThemedText style={[styles.countText, { fontSize: size === "small" ? 10 : 12 }]}>
+        <View
+          style={[
+            styles.countBadge,
+            { backgroundColor: deckStyle.accentColor },
+          ]}
+        >
+          <ThemedText
+            style={[styles.countText, { fontSize: size === "small" ? 10 : 12 }]}
+          >
             {cardsRemaining}
           </ThemedText>
         </View>

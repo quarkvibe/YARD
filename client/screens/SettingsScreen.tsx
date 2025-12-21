@@ -1,14 +1,5 @@
 import React, { useState, useCallback } from "react";
-import {
-  ScrollView,
-  View,
-  StyleSheet,
-  Switch,
-  Pressable,
-  TextInput,
-  Share,
-  Alert,
-} from "react-native";
+import { ScrollView, View, StyleSheet, Switch, Pressable } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
@@ -30,9 +21,6 @@ import {
   ExerciseTypeOption,
   SUPERSET_MODES,
   SupersetMode,
-  UserProfile,
-  getProfile,
-  saveProfile,
   DECK_STYLES,
   DeckStyle,
 } from "@/lib/storage";
@@ -42,9 +30,7 @@ export default function SettingsScreen() {
   const navigation = useNavigation<{ navigate: (screen: string) => void }>();
 
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [showRuleDetails, setShowRuleDetails] = useState<string | null>(null);
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   const handleStartWorkout = () => {
     navigation.navigate("WorkoutTab");
@@ -53,8 +39,6 @@ export default function SettingsScreen() {
   const loadData = useCallback(async () => {
     const loadedSettings = await getSettings();
     setSettings(loadedSettings);
-    const loadedProfile = await getProfile();
-    setProfile(loadedProfile);
   }, []);
 
   useFocusEffect(
@@ -72,32 +56,6 @@ export default function SettingsScreen() {
 
     if (newSettings.hapticsEnabled) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-  };
-
-  const handleProfileChange = async (key: keyof UserProfile, value: string) => {
-    if (!profile) return;
-
-    const newProfile = { ...profile, [key]: value };
-    setProfile(newProfile);
-    await saveProfile(newProfile);
-  };
-
-  const handleShareProfile = async () => {
-    if (!profile || !profile.handle) {
-      Alert.alert(
-        "SET UP PROFILE",
-        "Add your handle first to share your profile!",
-      );
-      return;
-    }
-
-    try {
-      await Share.share({
-        message: `💪 Follow my fitness journey on YARD! @${profile.handle}\n\n🏋️ Download YARD Fitness and start your sentence today!`,
-      });
-    } catch (error) {
-      console.error("Share failed:", error);
     }
   };
 
@@ -186,25 +144,41 @@ export default function SettingsScreen() {
         onPress={() => handleSettingChange("selectedDeckStyleId", deckStyle.id)}
         style={[
           styles.deckStyleCard,
-          { backgroundColor: deckStyle.backColor, borderColor: deckStyle.accentColor },
+          {
+            backgroundColor: deckStyle.backColor,
+            borderColor: deckStyle.accentColor,
+          },
           isSelected && styles.deckStyleCardSelected,
         ]}
       >
-        <View style={[styles.deckStyleInner, { borderColor: deckStyle.accentColor }]}>
+        <View
+          style={[
+            styles.deckStyleInner,
+            { borderColor: deckStyle.accentColor },
+          ]}
+        >
           <ThemedText
             style={[styles.deckStyleName, { color: deckStyle.textColor }]}
           >
             {deckStyle.name}
           </ThemedText>
           <ThemedText
-            style={[styles.deckStyleDescription, { color: deckStyle.textColor, opacity: 0.7 }]}
+            style={[
+              styles.deckStyleDescription,
+              { color: deckStyle.textColor, opacity: 0.7 },
+            ]}
             numberOfLines={1}
           >
             {deckStyle.description}
           </ThemedText>
         </View>
         {isSelected && (
-          <View style={[styles.deckStyleCheck, { backgroundColor: deckStyle.accentColor }]}>
+          <View
+            style={[
+              styles.deckStyleCheck,
+              { backgroundColor: deckStyle.accentColor },
+            ]}
+          >
             <Feather name="check" size={12} color="#0b0b0b" />
           </View>
         )}
@@ -488,207 +462,6 @@ export default function SettingsScreen() {
             </>
           )}
         </View>
-
-        {/* Profile Section */}
-        <ThemedText style={styles.sectionHeader}>YOUR PROFILE</ThemedText>
-
-        <View style={styles.profileCard}>
-          <ThemedText style={styles.profileHint}>
-            Set up your profile to share workouts on social media
-          </ThemedText>
-
-          {/* Handle */}
-          <View style={styles.profileInputGroup}>
-            <ThemedText style={styles.profileInputLabel}>HANDLE</ThemedText>
-            <View style={styles.handleInputRow}>
-              <ThemedText style={styles.handlePrefix}>@</ThemedText>
-              <TextInput
-                style={styles.handleTextInput}
-                value={profile?.handle || ""}
-                onChangeText={(text) =>
-                  handleProfileChange(
-                    "handle",
-                    text.toUpperCase().replace(/[^A-Z0-9_]/g, ""),
-                  )
-                }
-                placeholder="YOUR_HANDLE"
-                placeholderTextColor={Colors.dark.textSecondary}
-                maxLength={20}
-                autoCapitalize="characters"
-              />
-            </View>
-          </View>
-
-          {/* Display Name */}
-          <View style={styles.profileInputGroup}>
-            <ThemedText style={styles.profileInputLabel}>
-              DISPLAY NAME
-            </ThemedText>
-            <TextInput
-              style={styles.profileTextInput}
-              value={profile?.displayName || ""}
-              onChangeText={(text) => handleProfileChange("displayName", text)}
-              placeholder="Your Name"
-              placeholderTextColor={Colors.dark.textSecondary}
-              maxLength={30}
-            />
-          </View>
-
-          {/* Social Links - Collapsible */}
-          <Pressable
-            style={styles.socialLinksToggle}
-            onPress={() => setIsEditingProfile(!isEditingProfile)}
-          >
-            <ThemedText style={styles.socialLinksToggleText}>
-              SOCIAL LINKS
-            </ThemedText>
-            <Feather
-              name={isEditingProfile ? "chevron-up" : "chevron-down"}
-              size={18}
-              color={Colors.dark.accent}
-            />
-          </Pressable>
-
-          {isEditingProfile && (
-            <View style={styles.socialLinksSection}>
-              {/* Instagram */}
-              <View style={styles.socialInputRow}>
-                <ThemedText style={styles.socialIcon}>📸</ThemedText>
-                <TextInput
-                  style={styles.socialTextInput}
-                  value={profile?.instagram || ""}
-                  onChangeText={(text) =>
-                    handleProfileChange("instagram", text)
-                  }
-                  placeholder="Instagram username"
-                  placeholderTextColor={Colors.dark.textSecondary}
-                  maxLength={30}
-                  autoCapitalize="none"
-                />
-              </View>
-
-              {/* TikTok */}
-              <View style={styles.socialInputRow}>
-                <ThemedText style={styles.socialIcon}>🎵</ThemedText>
-                <TextInput
-                  style={styles.socialTextInput}
-                  value={profile?.tiktok || ""}
-                  onChangeText={(text) => handleProfileChange("tiktok", text)}
-                  placeholder="TikTok username"
-                  placeholderTextColor={Colors.dark.textSecondary}
-                  maxLength={30}
-                  autoCapitalize="none"
-                />
-              </View>
-
-              {/* Twitter/X */}
-              <View style={styles.socialInputRow}>
-                <ThemedText style={styles.socialIcon}>🐦</ThemedText>
-                <TextInput
-                  style={styles.socialTextInput}
-                  value={profile?.twitter || ""}
-                  onChangeText={(text) => handleProfileChange("twitter", text)}
-                  placeholder="X / Twitter username"
-                  placeholderTextColor={Colors.dark.textSecondary}
-                  maxLength={30}
-                  autoCapitalize="none"
-                />
-              </View>
-
-              {/* YouTube */}
-              <View style={styles.socialInputRow}>
-                <ThemedText style={styles.socialIcon}>📺</ThemedText>
-                <TextInput
-                  style={styles.socialTextInput}
-                  value={profile?.youtube || ""}
-                  onChangeText={(text) => handleProfileChange("youtube", text)}
-                  placeholder="YouTube username"
-                  placeholderTextColor={Colors.dark.textSecondary}
-                  maxLength={30}
-                  autoCapitalize="none"
-                />
-              </View>
-
-              {/* Discord */}
-              <View style={styles.socialInputRow}>
-                <ThemedText style={styles.socialIcon}>💬</ThemedText>
-                <TextInput
-                  style={styles.socialTextInput}
-                  value={profile?.discord || ""}
-                  onChangeText={(text) => handleProfileChange("discord", text)}
-                  placeholder="Discord username"
-                  placeholderTextColor={Colors.dark.textSecondary}
-                  maxLength={40}
-                  autoCapitalize="none"
-                />
-              </View>
-
-              {/* Threads */}
-              <View style={styles.socialInputRow}>
-                <ThemedText style={styles.socialIcon}>🧵</ThemedText>
-                <TextInput
-                  style={styles.socialTextInput}
-                  value={profile?.threads || ""}
-                  onChangeText={(text) => handleProfileChange("threads", text)}
-                  placeholder="Threads username"
-                  placeholderTextColor={Colors.dark.textSecondary}
-                  maxLength={30}
-                  autoCapitalize="none"
-                />
-              </View>
-            </View>
-          )}
-
-          {/* Share Profile Button */}
-          <Pressable
-            style={styles.shareProfileButton}
-            onPress={handleShareProfile}
-          >
-            <Feather
-              name="share-2"
-              size={18}
-              color={Colors.dark.backgroundRoot}
-            />
-            <ThemedText style={styles.shareProfileButtonText}>
-              SHARE PROFILE
-            </ThemedText>
-          </Pressable>
-        </View>
-
-        {/* Practice Mode */}
-        <ThemedText style={styles.sectionHeader}>REC YARD PRACTICE</ThemedText>
-
-        <View style={styles.preferencesCard}>
-          <View style={styles.preferenceItem}>
-            <View style={styles.preferenceInfo}>
-              <Feather name="target" size={18} color={Colors.dark.accent} />
-              <View>
-                <ThemedText style={styles.preferenceLabel}>
-                  PRACTICE MODE DEFAULT
-                </ThemedText>
-                <ThemedText style={styles.preferenceHint}>
-                  Always start with set tracking enabled
-                </ThemedText>
-              </View>
-            </View>
-            <Switch
-              value={settings.competitiveMode}
-              onValueChange={(value) =>
-                handleSettingChange("competitiveMode", value)
-              }
-              trackColor={{
-                false: Colors.dark.cardBorder,
-                true: Colors.dark.accent,
-              }}
-              thumbColor={Colors.dark.chalk}
-            />
-          </View>
-        </View>
-
-        <ThemedText style={styles.competitiveModeHint}>
-          Practice times are saved locally and marked as verified.{"\n"}
-          Join the Rec Yard to post official times to the leaderboard.
-        </ThemedText>
 
         <ThemedText style={styles.versionText}>VERSION 1.0.0</ThemedText>
 
@@ -1003,119 +776,6 @@ const styles = StyleSheet.create({
     color: Colors.dark.textSecondary,
     marginTop: 2,
   },
-  competitiveModeHint: {
-    fontSize: 11,
-    fontWeight: "500",
-    letterSpacing: 1,
-    color: Colors.dark.accent,
-    textAlign: "center",
-    marginTop: Spacing.sm,
-    paddingHorizontal: Spacing.lg,
-  },
-
-  // Profile Section Styles
-  profileCard: {
-    backgroundColor: Colors.dark.cardBackground,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-  },
-  profileHint: {
-    fontSize: 11,
-    fontWeight: "500",
-    letterSpacing: 1,
-    color: Colors.dark.textSecondary,
-    textAlign: "center",
-    marginBottom: Spacing.lg,
-  },
-  profileInputGroup: {
-    marginBottom: Spacing.md,
-  },
-  profileInputLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 2,
-    color: Colors.dark.accent,
-    marginBottom: Spacing.xs,
-  },
-  profileTextInput: {
-    backgroundColor: Colors.dark.backgroundRoot,
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    fontSize: 14,
-    fontWeight: "600",
-    letterSpacing: 1,
-    color: Colors.dark.chalk,
-  },
-  handleInputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.dark.backgroundRoot,
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
-    paddingHorizontal: Spacing.md,
-  },
-  handlePrefix: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: Colors.dark.accent,
-    marginRight: 2,
-  },
-  handleTextInput: {
-    flex: 1,
-    paddingVertical: Spacing.sm,
-    fontSize: 14,
-    fontWeight: "600",
-    letterSpacing: 1,
-    color: Colors.dark.chalk,
-  },
-  socialLinksToggle: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: Spacing.md,
-    marginTop: Spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: Colors.dark.cardBorder,
-  },
-  socialLinksToggleText: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 2,
-    color: Colors.dark.accent,
-  },
-  socialLinksSection: {
-    paddingTop: Spacing.sm,
-  },
-  socialInputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: Spacing.sm,
-    gap: Spacing.sm,
-  },
-  socialIcon: {
-    fontSize: 18,
-    width: 28,
-    textAlign: "center",
-  },
-  socialTextInput: {
-    flex: 1,
-    backgroundColor: Colors.dark.backgroundRoot,
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    fontSize: 13,
-    fontWeight: "500",
-    color: Colors.dark.chalk,
-  },
   deckStylesContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -1164,21 +824,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-  },
-  shareProfileButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.dark.accent,
-    borderRadius: BorderRadius.sm,
-    paddingVertical: Spacing.md,
-    marginTop: Spacing.lg,
-    gap: Spacing.sm,
-  },
-  shareProfileButtonText: {
-    fontSize: 14,
-    fontWeight: "800",
-    letterSpacing: 2,
-    color: Colors.dark.backgroundRoot,
   },
 });

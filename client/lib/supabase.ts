@@ -1,8 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || "https://swjxfgglhlkhwtwtxhas.supabase.co";
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3anhmZ2dsaGxraHd0d3R4aGFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc0NjIwMzgsImV4cCI6MjA2MzAzODAzOH0.CH-bJDqRZStPFbphpiC8-miPivWO_hxZQr6bV2daaSI";
+const SUPABASE_URL =
+  process.env.EXPO_PUBLIC_SUPABASE_URL ||
+  "https://swjxfgglhlkhwtwtxhas.supabase.co";
+const SUPABASE_ANON_KEY =
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3anhmZ2dsaGxraHd0d3R4aGFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc0NjIwMzgsImV4cCI6MjA2MzAzODAzOH0.CH-bJDqRZStPFbphpiC8-miPivWO_hxZQr6bV2daaSI";
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {

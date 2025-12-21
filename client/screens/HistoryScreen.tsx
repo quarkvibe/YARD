@@ -110,11 +110,7 @@ export default function HistoryScreen() {
           {/* Practice Mode Icon */}
           {item.isPracticeMode ? (
             <View style={styles.practiceModeBadge}>
-              <Feather
-                name="target"
-                size={12}
-                color={Colors.dark.accent}
-              />
+              <Feather name="target" size={12} color={Colors.dark.accent} />
             </View>
           ) : null}
           {/* Official Submission Icon */}
