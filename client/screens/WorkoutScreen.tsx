@@ -2,7 +2,13 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import { View, StyleSheet, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+  RouteProp,
+} from "@react-navigation/native";
+import type { MainTabParamList } from "@/navigation/MainTabNavigator";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
@@ -43,6 +49,11 @@ export default function WorkoutScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<{ navigate: (screen: string) => void }>();
+  const route = useRoute<RouteProp<MainTabParamList, "WorkoutTab">>();
+
+  // Check if this is an official Rec Yard submission
+  const isOfficialRecYardSubmission =
+    route.params?.officialRecYardSubmission ?? false;
 
   const [workoutState, setWorkoutState] = useState<WorkoutState>("idle");
   const [deck, setDeck] = useState<CardValue[]>([]);
@@ -296,8 +307,11 @@ export default function WorkoutScreen() {
     setAlternatingExercise("squats"); // Start with squats for alternating mode
 
     // Initialize set/rest tracking
-    setCompetitiveMode(settings.competitiveMode);
-    setRestTimerEnabled(settings.restTimerEnabled);
+    // Force competitive mode ON for official Rec Yard submissions
+    setCompetitiveMode(isOfficialRecYardSubmission || settings.competitiveMode);
+    setRestTimerEnabled(
+      isOfficialRecYardSubmission || settings.restTimerEnabled,
+    );
     setRestTimerDuration(settings.restTimerDuration);
     setRestAlertType(settings.restAlertType);
     setIntervals([]);
@@ -310,7 +324,7 @@ export default function WorkoutScreen() {
     if (settings.hapticsEnabled) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-  }, []);
+  }, [isOfficialRecYardSubmission]);
 
   const completeWorkout = useCallback(async () => {
     stopTimer();
@@ -338,7 +352,7 @@ export default function WorkoutScreen() {
       cardsCompleted: currentCardIndex + 1,
       // Practice mode data for personal tracking
       isPracticeMode: competitiveMode,
-      isOfficialSubmission: false, // Only true when submitted to Rec Yard
+      isOfficialSubmission: isOfficialRecYardSubmission, // True when submitted from Rec Yard
       intervals: competitiveMode ? intervals : undefined,
       totalWorkTime: competitiveMode ? totalWorkTime : undefined,
       totalRestTime: competitiveMode ? totalRestTime : undefined,
@@ -346,6 +360,52 @@ export default function WorkoutScreen() {
     };
 
     await saveWorkout(workoutRecord);
+
+    // Submit to Rec Yard leaderboard if this is an official submission
+    if (isOfficialRecYardSubmission && currentCardIndex + 1 === 52) {
+      try {
+        const { supabase } = await import("@/lib/supabase");
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (session) {
+          // Get user's profile
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("user_id", session.user.id)
+            .single();
+
+          if (profile) {
+            // Calculate week ID
+            const now = new Date();
+            const year = now.getFullYear();
+            const startOfYear = new Date(year, 0, 1);
+            const days = Math.floor(
+              (now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000),
+            );
+            const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+            const weekId = `${year}-W${weekNumber.toString().padStart(2, "0")}`;
+
+            // Submit to leaderboard
+            await supabase.from("workout_submissions").insert({
+              profile_id: profile.id,
+              time: timer,
+              exercise_type: exerciseType,
+              intensity: ruleSetId,
+              flip_mode: flipModeId,
+              total_pushups: totalPushups,
+              total_squats: totalSquats,
+              cards_completed: 52,
+              week_id: weekId,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("[WorkoutScreen] Failed to submit to Rec Yard:", err);
+      }
+    }
 
     if (bestTime === null || timer < bestTime) {
       setIsNewRecord(true);
@@ -366,6 +426,7 @@ export default function WorkoutScreen() {
     triggerNotificationHaptic,
     competitiveMode,
     intervals,
+    isOfficialRecYardSubmission,
   ]);
 
   const flipCard = useCallback(async () => {
@@ -793,6 +854,18 @@ export default function WorkoutScreen() {
       exiting={FadeOut}
       style={styles.centerContent}
     >
+      {/* Official Rec Yard Submission Banner */}
+      {isOfficialRecYardSubmission && (
+        <View style={styles.officialSubmissionBanner}>
+          <ThemedText style={styles.officialSubmissionText}>
+            🏆 OFFICIAL REC YARD CHALLENGE
+          </ThemedText>
+          <ThemedText style={styles.officialSubmissionSubtext}>
+            Your time will be posted to the leaderboard
+          </ThemedText>
+        </View>
+      )}
+
       <View style={styles.deckPreview}>
         <PlayingCard card={null} isFlipped={false} />
       </View>
@@ -809,34 +882,36 @@ export default function WorkoutScreen() {
         </View>
       ) : null}
 
-      {/* Rec Yard Practice Mode Toggle */}
-      <Pressable
-        onPress={() => {
-          setCompetitiveMode(!competitiveMode);
-          triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
-        }}
-        style={[
-          styles.competitionToggle,
-          competitiveMode && styles.competitionToggleActive,
-        ]}
-      >
-        <Feather
-          name={competitiveMode ? "target" : "clock"}
-          size={18}
-          color={
-            competitiveMode ? Colors.dark.backgroundRoot : Colors.dark.accent
-          }
-        />
-        <ThemedText
+      {/* Rec Yard Practice Mode Toggle - hidden for official submissions */}
+      {!isOfficialRecYardSubmission && (
+        <Pressable
+          onPress={() => {
+            setCompetitiveMode(!competitiveMode);
+            triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
+          }}
           style={[
-            styles.competitionToggleText,
-            competitiveMode && styles.competitionToggleTextActive,
+            styles.competitionToggle,
+            competitiveMode && styles.competitionToggleActive,
           ]}
         >
-          {competitiveMode ? "🎯 REC YARD PRACTICE" : "PRACTICE MODE"}
-        </ThemedText>
-      </Pressable>
-      {competitiveMode && (
+          <Feather
+            name={competitiveMode ? "target" : "clock"}
+            size={18}
+            color={
+              competitiveMode ? Colors.dark.backgroundRoot : Colors.dark.accent
+            }
+          />
+          <ThemedText
+            style={[
+              styles.competitionToggleText,
+              competitiveMode && styles.competitionToggleTextActive,
+            ]}
+          >
+            {competitiveMode ? "🎯 REC YARD PRACTICE" : "PRACTICE MODE"}
+          </ThemedText>
+        </Pressable>
+      )}
+      {competitiveMode && !isOfficialRecYardSubmission && (
         <ThemedText style={styles.competitionHint}>
           Track sets • Tap SET DONE after each • Saved to personal records
         </ThemedText>
@@ -1528,6 +1603,32 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     color: Colors.dark.textSecondary,
     marginBottom: Spacing.xl,
+    textAlign: "center",
+  },
+
+  // Official Rec Yard Submission Banner
+  officialSubmissionBanner: {
+    backgroundColor: Colors.dark.accent,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.sm,
+    marginBottom: Spacing.lg,
+    alignItems: "center",
+  },
+  officialSubmissionText: {
+    fontSize: 14,
+    fontWeight: "900",
+    letterSpacing: 2,
+    color: Colors.dark.backgroundRoot,
+    textAlign: "center",
+  },
+  officialSubmissionSubtext: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.backgroundRoot,
+    opacity: 0.8,
+    marginTop: 2,
     textAlign: "center",
   },
 });

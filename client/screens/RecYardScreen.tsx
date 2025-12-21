@@ -47,7 +47,13 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { supabase } from "@/lib/supabase";
 
-type TabType = "leaderboard" | "beef" | "profile";
+type TabType =
+  | "home"
+  | "leaderboards"
+  | "challenges"
+  | "beef"
+  | "barbershop"
+  | "profile";
 
 // Navigation types
 type MainTabParamList = {
@@ -88,7 +94,12 @@ export default function RecYardScreen() {
   const [editDisplayName, setEditDisplayName] = useState("");
   const [editBio, setEditBio] = useState("");
   const [editInstagram, setEditInstagram] = useState("");
-  const [activeTab, setActiveTab] = useState<TabType>("leaderboard");
+  const [editTiktok, setEditTiktok] = useState("");
+  const [editTwitter, setEditTwitter] = useState("");
+  const [editYoutube, setEditYoutube] = useState("");
+  const [editDiscord, setEditDiscord] = useState("");
+  const [editThreads, setEditThreads] = useState("");
+  const [activeTab, setActiveTab] = useState<TabType>("home");
   const [refreshing, setRefreshing] = useState(false);
 
   // Trash talk modal state
@@ -207,7 +218,14 @@ export default function RecYardScreen() {
       handle: editHandle.toUpperCase().replace(/[^A-Z0-9_]/g, ""),
       displayName: editDisplayName,
       bio: editBio,
-      instagram: editInstagram,
+      socialLinks: {
+        instagram: editInstagram || undefined,
+        tiktok: editTiktok || undefined,
+        twitter: editTwitter || undefined,
+        youtube: editYoutube || undefined,
+        discord: editDiscord || undefined,
+        threads: editThreads || undefined,
+      },
     });
 
     if (success) {
@@ -225,15 +243,17 @@ export default function RecYardScreen() {
     }
 
     Alert.alert(
-      "CLOCK IN",
-      `Join the "${weeklyChallenge.exerciseType.toUpperCase()} ${weeklyChallenge.intensity.toUpperCase()}" challenge?\n\nComplete a workout to submit your time to the leaderboard!`,
+      "CLOCK IN 🏋️",
+      `Join the "${weeklyChallenge.exerciseType.toUpperCase()} ${weeklyChallenge.intensity.toUpperCase()}" challenge?\n\n• Your time will be submitted to the leaderboard\n• Practice Mode will be auto-enabled\n• SET DONE tracking is required`,
       [
         { text: "CANCEL", style: "cancel" },
         {
           text: "LET'S GO",
           onPress: () => {
-            // Navigate to workout screen
-            navigation.navigate("WorkoutTab");
+            // Navigate to workout screen with official submission flag
+            navigation.navigate("WorkoutTab", {
+              officialRecYardSubmission: true,
+            });
           },
         },
       ],
@@ -332,7 +352,12 @@ export default function RecYardScreen() {
       setEditHandle(profile.handle);
       setEditDisplayName(profile.displayName);
       setEditBio(profile.bio);
-      setEditInstagram(profile.instagram);
+      setEditInstagram(profile.socialLinks.instagram || "");
+      setEditTiktok(profile.socialLinks.tiktok || "");
+      setEditTwitter(profile.socialLinks.twitter || "");
+      setEditYoutube(profile.socialLinks.youtube || "");
+      setEditDiscord(profile.socialLinks.discord || "");
+      setEditThreads(profile.socialLinks.threads || "");
     }
     setIsEditingProfile(true);
   };
@@ -573,16 +598,43 @@ export default function RecYardScreen() {
   // ============================================
 
   const renderTabBar = () => (
-    <View style={styles.tabBar}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.tabBarScroll}
+      contentContainerStyle={styles.tabBar}
+    >
+      {/* HOME */}
       <Pressable
-        style={[styles.tab, activeTab === "leaderboard" && styles.tabActive]}
-        onPress={() => setActiveTab("leaderboard")}
+        style={[styles.tab, activeTab === "home" && styles.tabActive]}
+        onPress={() => setActiveTab("home")}
+      >
+        <Feather
+          name="home"
+          size={16}
+          color={
+            activeTab === "home"
+              ? Colors.dark.accent
+              : Colors.dark.textSecondary
+          }
+        />
+        <ThemedText
+          style={[styles.tabText, activeTab === "home" && styles.tabTextActive]}
+        >
+          HOME
+        </ThemedText>
+      </Pressable>
+
+      {/* LEADERBOARDS */}
+      <Pressable
+        style={[styles.tab, activeTab === "leaderboards" && styles.tabActive]}
+        onPress={() => setActiveTab("leaderboards")}
       >
         <Feather
           name="award"
-          size={18}
+          size={16}
           color={
-            activeTab === "leaderboard"
+            activeTab === "leaderboards"
               ? Colors.dark.accent
               : Colors.dark.textSecondary
           }
@@ -590,13 +642,38 @@ export default function RecYardScreen() {
         <ThemedText
           style={[
             styles.tabText,
-            activeTab === "leaderboard" && styles.tabTextActive,
+            activeTab === "leaderboards" && styles.tabTextActive,
           ]}
         >
-          BOARD
+          BOARDS
         </ThemedText>
       </Pressable>
 
+      {/* CHALLENGES */}
+      <Pressable
+        style={[styles.tab, activeTab === "challenges" && styles.tabActive]}
+        onPress={() => setActiveTab("challenges")}
+      >
+        <Feather
+          name="target"
+          size={16}
+          color={
+            activeTab === "challenges"
+              ? Colors.dark.accent
+              : Colors.dark.textSecondary
+          }
+        />
+        <ThemedText
+          style={[
+            styles.tabText,
+            activeTab === "challenges" && styles.tabTextActive,
+          ]}
+        >
+          CHALLENGE
+        </ThemedText>
+      </Pressable>
+
+      {/* BEEF */}
       <Pressable
         style={[styles.tab, activeTab === "beef" && styles.tabActive]}
         onPress={() => setActiveTab("beef")}
@@ -618,13 +695,30 @@ export default function RecYardScreen() {
         )}
       </Pressable>
 
+      {/* BARBER SHOP */}
+      <Pressable
+        style={[styles.tab, activeTab === "barbershop" && styles.tabActive]}
+        onPress={() => setActiveTab("barbershop")}
+      >
+        <ThemedText style={styles.beefEmoji}>💈</ThemedText>
+        <ThemedText
+          style={[
+            styles.tabText,
+            activeTab === "barbershop" && styles.tabTextActive,
+          ]}
+        >
+          SHOP
+        </ThemedText>
+      </Pressable>
+
+      {/* PROFILE */}
       <Pressable
         style={[styles.tab, activeTab === "profile" && styles.tabActive]}
         onPress={() => setActiveTab("profile")}
       >
         <Feather
           name="user"
-          size={18}
+          size={16}
           color={
             activeTab === "profile"
               ? Colors.dark.accent
@@ -637,15 +731,439 @@ export default function RecYardScreen() {
             activeTab === "profile" && styles.tabTextActive,
           ]}
         >
-          PROFILE
+          ME
         </ThemedText>
       </Pressable>
+    </ScrollView>
+  );
+
+  // ============================================
+  // RENDER: HOME TAB
+  // ============================================
+
+  const renderHomeTab = () => (
+    <ScrollView
+      style={styles.homeContainer}
+      contentContainerStyle={{ paddingBottom: Spacing.xl }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Welcome Banner */}
+      <Animated.View entering={FadeIn} style={styles.welcomeBanner}>
+        <ThemedText style={styles.welcomeEmoji}>🏋️</ThemedText>
+        <ThemedText style={styles.welcomeTitle}>WELCOME TO THE YARD</ThemedText>
+        <ThemedText style={styles.welcomeSubtitle}>
+          @{profile?.handle || "INMATE"}
+        </ThemedText>
+      </Animated.View>
+
+      {/* Quick Stats */}
+      <View style={styles.homeStatsGrid}>
+        <View style={styles.homeStatCard}>
+          <ThemedText style={styles.homeStatValue}>
+            {profile?.totalWorkouts || 0}
+          </ThemedText>
+          <ThemedText style={styles.homeStatLabel}>WORKOUTS</ThemedText>
+        </View>
+        <View style={styles.homeStatCard}>
+          <ThemedText style={styles.homeStatValue}>
+            {profile?.bestTime ? formatDuration(profile.bestTime) : "--:--"}
+          </ThemedText>
+          <ThemedText style={styles.homeStatLabel}>BEST TIME</ThemedText>
+        </View>
+        <View style={styles.homeStatCard}>
+          <ThemedText style={styles.homeStatValue}>
+            #
+            {leaderboard.findIndex((l) => l.profileId === profile?.id) + 1 ||
+              "--"}
+          </ThemedText>
+          <ThemedText style={styles.homeStatLabel}>RANK</ThemedText>
+        </View>
+        <View style={styles.homeStatCard}>
+          <ThemedText style={styles.homeStatValue}>
+            {profile?.currentStreak || 0}
+          </ThemedText>
+          <ThemedText style={styles.homeStatLabel}>STREAK 🔥</ThemedText>
+        </View>
+      </View>
+
+      {/* Quick Actions */}
+      <ThemedText style={styles.homeSectionTitle}>QUICK ACTIONS</ThemedText>
+
+      <Pressable
+        style={styles.homeActionButton}
+        onPress={() => navigation.navigate("WorkoutTab")}
+      >
+        <Feather name="play-circle" size={24} color={Colors.dark.accent} />
+        <View style={styles.homeActionContent}>
+          <ThemedText style={styles.homeActionTitle}>START WORKOUT</ThemedText>
+          <ThemedText style={styles.homeActionDesc}>
+            Enable Practice Mode to submit to leaderboard
+          </ThemedText>
+        </View>
+        <Feather
+          name="chevron-right"
+          size={20}
+          color={Colors.dark.textSecondary}
+        />
+      </Pressable>
+
+      <Pressable
+        style={styles.homeActionButton}
+        onPress={() => setActiveTab("leaderboards")}
+      >
+        <Feather name="award" size={24} color={Colors.dark.squats} />
+        <View style={styles.homeActionContent}>
+          <ThemedText style={styles.homeActionTitle}>
+            VIEW LEADERBOARDS
+          </ThemedText>
+          <ThemedText style={styles.homeActionDesc}>
+            See rankings across all modes
+          </ThemedText>
+        </View>
+        <Feather
+          name="chevron-right"
+          size={20}
+          color={Colors.dark.textSecondary}
+        />
+      </Pressable>
+
+      <Pressable
+        style={styles.homeActionButton}
+        onPress={() => setActiveTab("challenges")}
+      >
+        <Feather name="target" size={24} color={Colors.dark.pushups} />
+        <View style={styles.homeActionContent}>
+          <ThemedText style={styles.homeActionTitle}>
+            WEEKLY CHALLENGE
+          </ThemedText>
+          <ThemedText style={styles.homeActionDesc}>
+            {daysRemaining}D left • {weeklyChallenge?.participantCount || 0}{" "}
+            participants
+          </ThemedText>
+        </View>
+        <Feather
+          name="chevron-right"
+          size={20}
+          color={Colors.dark.textSecondary}
+        />
+      </Pressable>
+
+      {/* Recent Activity Preview */}
+      {receivedCallouts.length > 0 && (
+        <>
+          <ThemedText style={styles.homeSectionTitle}>
+            INCOMING HEAT 🔥
+          </ThemedText>
+          <Pressable
+            style={styles.homeActionButton}
+            onPress={() => setActiveTab("beef")}
+          >
+            <ThemedText style={{ fontSize: 24 }}>💢</ThemedText>
+            <View style={styles.homeActionContent}>
+              <ThemedText style={styles.homeActionTitle}>
+                {receivedCallouts.filter((c) => !c.responded).length} CALLOUTS
+              </ThemedText>
+              <ThemedText style={styles.homeActionDesc}>
+                People are talking...
+              </ThemedText>
+            </View>
+            <Feather
+              name="chevron-right"
+              size={20}
+              color={Colors.dark.textSecondary}
+            />
+          </Pressable>
+        </>
+      )}
+    </ScrollView>
+  );
+
+  // ============================================
+  // RENDER: LEADERBOARDS TAB
+  // ============================================
+
+  const [leaderboardFilter, setLeaderboardFilter] = useState<
+    "all" | "pushups" | "squats" | "superset"
+  >("all");
+  const [difficultyFilter, setDifficultyFilter] = useState<
+    "all" | "misdemeanor" | "standard" | "lifer"
+  >("all");
+
+  const renderLeaderboardsTab = () => (
+    <View style={styles.leaderboardContainer}>
+      {/* Filter Tabs */}
+      <View style={styles.filterRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {["all", "pushups", "squats", "superset"].map((filter) => (
+            <Pressable
+              key={filter}
+              style={[
+                styles.filterChip,
+                leaderboardFilter === filter && styles.filterChipActive,
+              ]}
+              onPress={() => setLeaderboardFilter(filter as any)}
+            >
+              <ThemedText
+                style={[
+                  styles.filterChipText,
+                  leaderboardFilter === filter && styles.filterChipTextActive,
+                ]}
+              >
+                {filter.toUpperCase()}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Difficulty Filter */}
+      <View style={styles.filterRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {["all", "misdemeanor", "standard", "lifer"].map((filter) => (
+            <Pressable
+              key={filter}
+              style={[
+                styles.filterChipSmall,
+                difficultyFilter === filter && styles.filterChipActive,
+              ]}
+              onPress={() => setDifficultyFilter(filter as any)}
+            >
+              <ThemedText
+                style={[
+                  styles.filterChipTextSmall,
+                  difficultyFilter === filter && styles.filterChipTextActive,
+                ]}
+              >
+                {filter.toUpperCase()}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Leaderboard Header */}
+      <View style={styles.leaderboardHeader}>
+        <ThemedText style={styles.leaderboardTitle}>
+          {leaderboardFilter === "all"
+            ? "ALL MODES"
+            : leaderboardFilter.toUpperCase()}
+        </ThemedText>
+        <View style={styles.verifiedLegend}>
+          <Feather name="check-circle" size={12} color={Colors.dark.accent} />
+          <ThemedText style={styles.verifiedLegendText}>VERIFIED</ThemedText>
+        </View>
+      </View>
+
+      {/* Leaderboard List */}
+      <FlatList
+        data={leaderboard.filter((item) => {
+          if (
+            leaderboardFilter !== "all" &&
+            item.exerciseType !== leaderboardFilter
+          ) {
+            return false;
+          }
+          if (
+            difficultyFilter !== "all" &&
+            item.intensity !== difficultyFilter
+          ) {
+            return false;
+          }
+          return true;
+        })}
+        keyExtractor={(item) => item.profileId + item.id}
+        renderItem={renderLeaderboardItem}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Spacing.xl }}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <ThemedText style={styles.emptyStateText}>
+              No entries yet. Be the first!
+            </ThemedText>
+          </View>
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.dark.accent}
+          />
+        }
+      />
     </View>
   );
 
   // ============================================
-  // RENDER: LEADERBOARD TAB
+  // RENDER: CHALLENGES TAB
   // ============================================
+
+  const renderChallengesTab = () => (
+    <ScrollView
+      style={styles.challengesContainer}
+      contentContainerStyle={{ paddingBottom: Spacing.xl }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Current Weekly Challenge */}
+      {weeklyChallenge && (
+        <Animated.View entering={FadeIn} style={styles.challengeCardLarge}>
+          <View style={styles.challengeHeader}>
+            <View style={styles.challengeLabelBadge}>
+              <ThemedText style={styles.challengeLabelText}>
+                THIS WEEK
+              </ThemedText>
+            </View>
+            <View style={styles.challengeTimer}>
+              <Feather name="clock" size={14} color={Colors.dark.accent} />
+              <ThemedText style={styles.challengeTimerText}>
+                {daysRemaining}D LEFT
+              </ThemedText>
+            </View>
+          </View>
+
+          <ThemedText style={styles.challengeTitleLarge}>
+            {weeklyChallenge.title || "WEEKLY CHALLENGE"}
+          </ThemedText>
+
+          <ThemedText style={styles.challengeRuleset}>
+            {weeklyChallenge.intensity.toUpperCase()} •{" "}
+            {weeklyChallenge.exerciseType.toUpperCase()}
+          </ThemedText>
+
+          <View style={styles.challengeStatsLarge}>
+            <View style={styles.challengeStatLarge}>
+              <ThemedText style={styles.challengeStatValueLarge}>
+                {weeklyChallenge.participantCount}
+              </ThemedText>
+              <ThemedText style={styles.challengeStatLabel}>
+                PARTICIPANTS
+              </ThemedText>
+            </View>
+            <View style={styles.challengeStatLarge}>
+              <ThemedText style={styles.challengeStatValueLarge}>
+                {weeklyChallenge.topTime
+                  ? formatDuration(weeklyChallenge.topTime)
+                  : "--:--"}
+              </ThemedText>
+              <ThemedText style={styles.challengeStatLabel}>
+                TOP TIME
+              </ThemedText>
+            </View>
+          </View>
+
+          <Pressable style={styles.clockInButtonLarge} onPress={handleClockIn}>
+            <Feather
+              name="play"
+              size={20}
+              color={Colors.dark.backgroundRoot}
+              style={{ marginRight: 8 }}
+            />
+            <ThemedText style={styles.clockInButtonTextLarge}>
+              JOIN THIS CHALLENGE
+            </ThemedText>
+          </Pressable>
+        </Animated.View>
+      )}
+
+      {/* Challenge Rules */}
+      <View style={styles.challengeRulesCard}>
+        <ThemedText style={styles.challengeRulesTitle}>HOW IT WORKS</ThemedText>
+        <View style={styles.challengeRule}>
+          <ThemedText style={styles.challengeRuleNumber}>1</ThemedText>
+          <ThemedText style={styles.challengeRuleText}>
+            Enable Practice Mode before starting
+          </ThemedText>
+        </View>
+        <View style={styles.challengeRule}>
+          <ThemedText style={styles.challengeRuleNumber}>2</ThemedText>
+          <ThemedText style={styles.challengeRuleText}>
+            Complete all 52 cards with SET DONE tracking
+          </ThemedText>
+        </View>
+        <View style={styles.challengeRule}>
+          <ThemedText style={styles.challengeRuleNumber}>3</ThemedText>
+          <ThemedText style={styles.challengeRuleText}>
+            Your time is automatically submitted
+          </ThemedText>
+        </View>
+      </View>
+    </ScrollView>
+  );
+
+  // ============================================
+  // RENDER: BARBER SHOP TAB
+  // ============================================
+
+  const renderBarberShopTab = () => (
+    <ScrollView
+      style={styles.barberShopContainer}
+      contentContainerStyle={{ paddingBottom: Spacing.xl }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Header */}
+      <Animated.View entering={FadeIn} style={styles.barberShopHeader}>
+        <ThemedText style={styles.barberShopEmoji}>💈</ThemedText>
+        <ThemedText style={styles.barberShopTitle}>THE BARBER SHOP</ThemedText>
+        <ThemedText style={styles.barberShopSubtitle}>
+          Where the real talk happens
+        </ThemedText>
+      </Animated.View>
+
+      {/* Discord Link */}
+      <Pressable
+        style={styles.discordCard}
+        onPress={() => {
+          Alert.alert(
+            "JOIN THE DISCORD",
+            "Connect with the YARD community on Discord!",
+            [
+              { text: "CANCEL", style: "cancel" },
+              {
+                text: "JOIN NOW",
+                onPress: () => {
+                  // Would open Discord link
+                  // Linking.openURL('https://discord.gg/yard');
+                },
+              },
+            ],
+          );
+        }}
+      >
+        <View style={styles.discordIconContainer}>
+          <ThemedText style={styles.discordIcon}>💬</ThemedText>
+        </View>
+        <View style={styles.discordContent}>
+          <ThemedText style={styles.discordTitle}>YARD DISCORD</ThemedText>
+          <ThemedText style={styles.discordDesc}>
+            Chat, share tips, find workout partners
+          </ThemedText>
+        </View>
+        <Feather name="external-link" size={20} color={Colors.dark.accent} />
+      </Pressable>
+
+      {/* Community Guidelines */}
+      <View style={styles.guidelinesCard}>
+        <ThemedText style={styles.guidelinesTitle}>YARD RULES</ThemedText>
+        <View style={styles.guideline}>
+          <ThemedText style={styles.guidelineEmoji}>💪</ThemedText>
+          <ThemedText style={styles.guidelineText}>
+            Respect the grind - everyone starts somewhere
+          </ThemedText>
+        </View>
+        <View style={styles.guideline}>
+          <ThemedText style={styles.guidelineEmoji}>🤝</ThemedText>
+          <ThemedText style={styles.guidelineText}>
+            Keep it real - no fake times, no shortcuts
+          </ThemedText>
+        </View>
+        <View style={styles.guideline}>
+          <ThemedText style={styles.guidelineEmoji}>🔥</ThemedText>
+          <ThemedText style={styles.guidelineText}>
+            Talk your trash - but back it up
+          </ThemedText>
+        </View>
+      </View>
+    </ScrollView>
+  );
 
   const renderLeaderboardItem = ({
     item,
@@ -696,150 +1214,6 @@ export default function RecYardScreen() {
         </Pressable>
       </View>
     </Animated.View>
-  );
-
-  const renderLeaderboardTab = () => (
-    <View style={styles.leaderboardContainer}>
-      {/* Quick Actions Dashboard */}
-      <Animated.View entering={FadeIn} style={styles.quickActionsCard}>
-        <View style={styles.quickActionsRow}>
-          {/* Your Rank */}
-          <View style={styles.quickActionItem}>
-            <ThemedText style={styles.quickActionLabel}>YOUR RANK</ThemedText>
-            <ThemedText style={styles.quickActionValue}>
-              {profile
-                ? leaderboard.findIndex((l) => l.profileId === profile.id) +
-                    1 || "--"
-                : "--"}
-            </ThemedText>
-          </View>
-
-          {/* Practice Times */}
-          <View style={styles.quickActionItem}>
-            <ThemedText style={styles.quickActionLabel}>PRACTICE</ThemedText>
-            <ThemedText style={styles.quickActionValue}>
-              {profile?.totalWorkouts || 0}
-            </ThemedText>
-          </View>
-
-          {/* Best Time */}
-          <View style={styles.quickActionItem}>
-            <ThemedText style={styles.quickActionLabel}>BEST</ThemedText>
-            <ThemedText style={styles.quickActionValue}>
-              {profile?.bestTime ? formatDuration(profile.bestTime) : "--:--"}
-            </ThemedText>
-          </View>
-        </View>
-
-        {/* Submit Official Time Button */}
-        <Pressable
-          style={styles.submitOfficialButton}
-          onPress={() => {
-            Alert.alert(
-              "SUBMIT OFFICIAL TIME",
-              "Complete a workout with Rec Yard Practice Mode enabled to submit an official time to the leaderboard.\n\n• Tap 'Practice Mode' before starting\n• Complete all 52 cards\n• Your time will be submitted automatically",
-              [
-                { text: "GOT IT", style: "default" },
-                {
-                  text: "START WORKOUT",
-                  onPress: () => navigation.navigate("WorkoutTab"),
-                },
-              ],
-            );
-          }}
-        >
-          <Feather
-            name="upload"
-            size={16}
-            color={Colors.dark.accent}
-            style={{ marginRight: 8 }}
-          />
-          <ThemedText style={styles.submitOfficialButtonText}>
-            POST OFFICIAL TIME
-          </ThemedText>
-        </Pressable>
-      </Animated.View>
-
-      {/* Weekly Challenge Card */}
-      {weeklyChallenge && (
-        <Animated.View entering={FadeIn} style={styles.challengeCard}>
-          <View style={styles.challengeHeader}>
-            <ThemedText style={styles.challengeLabel}>
-              WEEKLY CHALLENGE
-            </ThemedText>
-            <View style={styles.challengeTimer}>
-              <Feather name="clock" size={14} color={Colors.dark.accent} />
-              <ThemedText style={styles.challengeTimerText}>
-                {daysRemaining}D LEFT
-              </ThemedText>
-            </View>
-          </View>
-
-          <ThemedText style={styles.challengeRuleset}>
-            {weeklyChallenge.intensity.toUpperCase()} •{" "}
-            {weeklyChallenge.exerciseType.toUpperCase()}
-          </ThemedText>
-
-          <View style={styles.challengeStats}>
-            <View style={styles.challengeStat}>
-              <ThemedText style={styles.challengeStatValue}>
-                {weeklyChallenge.participantCount}
-              </ThemedText>
-              <ThemedText style={styles.challengeStatLabel}>
-                PARTICIPANTS
-              </ThemedText>
-            </View>
-            <View style={styles.challengeStat}>
-              <ThemedText style={styles.challengeStatValue}>
-                {weeklyChallenge.topTime
-                  ? formatDuration(weeklyChallenge.topTime)
-                  : "--:--"}
-              </ThemedText>
-              <ThemedText style={styles.challengeStatLabel}>
-                TOP TIME
-              </ThemedText>
-            </View>
-          </View>
-
-          <Pressable style={styles.clockInButton} onPress={handleClockIn}>
-            <Feather
-              name="play"
-              size={16}
-              color={Colors.dark.backgroundRoot}
-              style={{ marginRight: 8 }}
-            />
-            <ThemedText style={styles.clockInButtonText}>
-              JOIN CHALLENGE
-            </ThemedText>
-          </Pressable>
-        </Animated.View>
-      )}
-
-      {/* Leaderboard Header */}
-      <View style={styles.leaderboardHeader}>
-        <ThemedText style={styles.leaderboardTitle}>LEADERBOARD</ThemedText>
-        <View style={styles.verifiedLegend}>
-          <Feather name="check-circle" size={12} color={Colors.dark.accent} />
-          <ThemedText style={styles.verifiedLegendText}>VERIFIED</ThemedText>
-        </View>
-      </View>
-
-      {/* Leaderboard List */}
-      <FlatList
-        data={leaderboard}
-        keyExtractor={(item) => item.profileId}
-        renderItem={renderLeaderboardItem}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Spacing.xl }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={Colors.dark.accent}
-          />
-        }
-      />
-    </View>
   );
 
   // ============================================
@@ -1091,6 +1465,11 @@ export default function RecYardScreen() {
             />
           </View>
 
+          {/* SOCIAL LINKS SECTION */}
+          <ThemedText style={styles.socialSectionTitle}>
+            SOCIAL LINKS
+          </ThemedText>
+
           <View style={styles.inputGroup}>
             <ThemedText style={styles.inputLabel}>INSTAGRAM</ThemedText>
             <View style={styles.handleInputContainer}>
@@ -1099,6 +1478,85 @@ export default function RecYardScreen() {
                 style={styles.handleInput}
                 value={editInstagram}
                 onChangeText={setEditInstagram}
+                placeholder="username"
+                placeholderTextColor={Colors.dark.textSecondary}
+                maxLength={30}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>TIKTOK</ThemedText>
+            <View style={styles.handleInputContainer}>
+              <ThemedText style={styles.handlePrefix}>@</ThemedText>
+              <TextInput
+                style={styles.handleInput}
+                value={editTiktok}
+                onChangeText={setEditTiktok}
+                placeholder="username"
+                placeholderTextColor={Colors.dark.textSecondary}
+                maxLength={30}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>X / TWITTER</ThemedText>
+            <View style={styles.handleInputContainer}>
+              <ThemedText style={styles.handlePrefix}>@</ThemedText>
+              <TextInput
+                style={styles.handleInput}
+                value={editTwitter}
+                onChangeText={setEditTwitter}
+                placeholder="username"
+                placeholderTextColor={Colors.dark.textSecondary}
+                maxLength={30}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>YOUTUBE</ThemedText>
+            <View style={styles.handleInputContainer}>
+              <ThemedText style={styles.handlePrefix}>@</ThemedText>
+              <TextInput
+                style={styles.handleInput}
+                value={editYoutube}
+                onChangeText={setEditYoutube}
+                placeholder="username"
+                placeholderTextColor={Colors.dark.textSecondary}
+                maxLength={30}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>DISCORD</ThemedText>
+            <TextInput
+              style={styles.textInput}
+              value={editDiscord}
+              onChangeText={setEditDiscord}
+              placeholder="username#0000"
+              placeholderTextColor={Colors.dark.textSecondary}
+              maxLength={30}
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>THREADS</ThemedText>
+            <View style={styles.handleInputContainer}>
+              <ThemedText style={styles.handlePrefix}>@</ThemedText>
+              <TextInput
+                style={styles.handleInput}
+                value={editThreads}
+                onChangeText={setEditThreads}
+                placeholder="username"
+                placeholderTextColor={Colors.dark.textSecondary}
                 maxLength={30}
                 autoCapitalize="none"
               />
@@ -1234,16 +1692,71 @@ export default function RecYardScreen() {
         </View>
 
         {/* Social Links */}
-        {profile.instagram && (
+        {(profile.socialLinks.instagram ||
+          profile.socialLinks.tiktok ||
+          profile.socialLinks.twitter ||
+          profile.socialLinks.youtube ||
+          profile.socialLinks.discord ||
+          profile.socialLinks.threads) && (
           <View style={styles.socialSection}>
             <ThemedText style={styles.sectionTitle}>SOCIAL</ThemedText>
             <View style={styles.socialCard}>
-              <View style={styles.socialItem}>
-                <Feather name="instagram" size={20} color={Colors.dark.chalk} />
-                <ThemedText style={styles.socialHandle}>
-                  @{profile.instagram}
-                </ThemedText>
-              </View>
+              {profile.socialLinks.instagram && (
+                <Pressable style={styles.socialItem}>
+                  <ThemedText style={styles.socialIcon}>📸</ThemedText>
+                  <ThemedText style={styles.socialLabel}>INSTAGRAM</ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    @{profile.socialLinks.instagram}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {profile.socialLinks.tiktok && (
+                <Pressable style={styles.socialItem}>
+                  <ThemedText style={styles.socialIcon}>🎵</ThemedText>
+                  <ThemedText style={styles.socialLabel}>TIKTOK</ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    @{profile.socialLinks.tiktok}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {profile.socialLinks.twitter && (
+                <Pressable style={styles.socialItem}>
+                  <ThemedText style={styles.socialIcon}>🐦</ThemedText>
+                  <ThemedText style={styles.socialLabel}>
+                    X / TWITTER
+                  </ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    @{profile.socialLinks.twitter}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {profile.socialLinks.youtube && (
+                <Pressable style={styles.socialItem}>
+                  <ThemedText style={styles.socialIcon}>📺</ThemedText>
+                  <ThemedText style={styles.socialLabel}>YOUTUBE</ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    @{profile.socialLinks.youtube}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {profile.socialLinks.discord && (
+                <Pressable style={styles.socialItem}>
+                  <ThemedText style={styles.socialIcon}>💬</ThemedText>
+                  <ThemedText style={styles.socialLabel}>DISCORD</ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    {profile.socialLinks.discord}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {profile.socialLinks.threads && (
+                <Pressable style={styles.socialItem}>
+                  <ThemedText style={styles.socialIcon}>🧵</ThemedText>
+                  <ThemedText style={styles.socialLabel}>THREADS</ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    @{profile.socialLinks.threads}
+                  </ThemedText>
+                </Pressable>
+              )}
             </View>
           </View>
         )}
@@ -1486,8 +1999,11 @@ export default function RecYardScreen() {
         ]}
       >
         {renderTabBar()}
-        {activeTab === "leaderboard" && renderLeaderboardTab()}
+        {activeTab === "home" && renderHomeTab()}
+        {activeTab === "leaderboards" && renderLeaderboardsTab()}
+        {activeTab === "challenges" && renderChallengesTab()}
         {activeTab === "beef" && renderBeefTab()}
+        {activeTab === "barbershop" && renderBarberShopTab()}
         {activeTab === "profile" && renderProfileTab()}
       </View>
 
@@ -1721,10 +2237,14 @@ const styles = StyleSheet.create({
   },
 
   // Tab Bar
+  tabBarScroll: {
+    flexGrow: 0,
+    marginBottom: Spacing.md,
+  },
   tabBar: {
     flexDirection: "row",
     gap: Spacing.sm,
-    marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing.xs,
   },
   tab: {
     flex: 1,
@@ -2687,5 +3207,376 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     backgroundColor: Colors.dark.cardBorder,
+  },
+
+  // ============================================
+  // HOME TAB STYLES
+  // ============================================
+  homeContainer: {
+    flex: 1,
+  },
+  welcomeBanner: {
+    alignItems: "center",
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.dark.accent,
+    padding: Spacing.xl,
+    marginBottom: Spacing.lg,
+  },
+  welcomeEmoji: {
+    fontSize: 48,
+    marginBottom: Spacing.md,
+  },
+  welcomeTitle: {
+    fontSize: 24,
+    fontWeight: "900",
+    letterSpacing: 4,
+    color: Colors.dark.chalk,
+    textAlign: "center",
+  },
+  welcomeSubtitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.accent,
+    marginTop: Spacing.xs,
+  },
+  homeStatsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+    marginBottom: Spacing.xl,
+  },
+  homeStatCard: {
+    flex: 1,
+    minWidth: "45%",
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    padding: Spacing.lg,
+    alignItems: "center",
+  },
+  homeStatValue: {
+    fontSize: 24,
+    fontWeight: "800",
+    letterSpacing: 1,
+    color: Colors.dark.chalk,
+  },
+  homeStatLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    marginTop: Spacing.xs,
+  },
+  homeSectionTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 3,
+    color: Colors.dark.accent,
+    marginBottom: Spacing.md,
+    marginTop: Spacing.md,
+  },
+  homeActionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
+    gap: Spacing.md,
+  },
+  homeActionContent: {
+    flex: 1,
+  },
+  homeActionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 1,
+    color: Colors.dark.chalk,
+  },
+  homeActionDesc: {
+    fontSize: 11,
+    color: Colors.dark.textSecondary,
+    marginTop: 2,
+  },
+
+  // ============================================
+  // LEADERBOARDS TAB STYLES
+  // ============================================
+  filterRow: {
+    marginBottom: Spacing.sm,
+  },
+  filterChip: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    marginRight: Spacing.sm,
+  },
+  filterChipActive: {
+    backgroundColor: Colors.dark.accent,
+    borderColor: Colors.dark.accent,
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+  },
+  filterChipTextActive: {
+    color: Colors.dark.backgroundRoot,
+  },
+  filterChipSmall: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    backgroundColor: "transparent",
+    borderRadius: BorderRadius.xs,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    marginRight: Spacing.sm,
+  },
+  filterChipTextSmall: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+  },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing["2xl"],
+  },
+  emptyStateText: {
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+  },
+
+  // ============================================
+  // CHALLENGES TAB STYLES
+  // ============================================
+  challengesContainer: {
+    flex: 1,
+  },
+  challengeCardLarge: {
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.md,
+    borderWidth: 2,
+    borderColor: Colors.dark.accent,
+    padding: Spacing.xl,
+    marginBottom: Spacing.lg,
+  },
+  challengeLabelBadge: {
+    backgroundColor: Colors.dark.accent,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.xs,
+  },
+  challengeLabelText: {
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 2,
+    color: Colors.dark.backgroundRoot,
+  },
+  challengeTitleLarge: {
+    fontSize: 22,
+    fontWeight: "900",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.xs,
+  },
+  challengeStatsLarge: {
+    flexDirection: "row",
+    gap: Spacing.xl,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  challengeStatLarge: {
+    alignItems: "center",
+  },
+  challengeStatValueLarge: {
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: 1,
+    color: Colors.dark.chalk,
+  },
+  clockInButtonLarge: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.dark.accent,
+    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.lg,
+  },
+  clockInButtonTextLarge: {
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 2,
+    color: Colors.dark.backgroundRoot,
+  },
+  challengeRulesCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    padding: Spacing.lg,
+  },
+  challengeRulesTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
+    marginBottom: Spacing.lg,
+  },
+  challengeRule: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+  challengeRuleNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.dark.accent,
+    textAlign: "center",
+    lineHeight: 24,
+    fontSize: 12,
+    fontWeight: "800",
+    color: Colors.dark.backgroundRoot,
+  },
+  challengeRuleText: {
+    flex: 1,
+    fontSize: 13,
+    color: Colors.dark.textSecondary,
+    lineHeight: 20,
+  },
+
+  // ============================================
+  // BARBER SHOP TAB STYLES
+  // ============================================
+  barberShopContainer: {
+    flex: 1,
+  },
+  barberShopHeader: {
+    alignItems: "center",
+    paddingVertical: Spacing.xl,
+    marginBottom: Spacing.lg,
+  },
+  barberShopEmoji: {
+    fontSize: 64,
+    marginBottom: Spacing.md,
+  },
+  barberShopTitle: {
+    fontSize: 28,
+    fontWeight: "900",
+    letterSpacing: 4,
+    color: Colors.dark.chalk,
+    textAlign: "center",
+  },
+  barberShopSubtitle: {
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    marginTop: Spacing.xs,
+  },
+  discordCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#5865F2",
+    borderRadius: BorderRadius.md,
+    padding: Spacing.xl,
+    marginBottom: Spacing.lg,
+    gap: Spacing.lg,
+  },
+  discordIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  discordIcon: {
+    fontSize: 24,
+  },
+  discordContent: {
+    flex: 1,
+  },
+  discordTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 2,
+    color: "#FFFFFF",
+  },
+  discordDesc: {
+    fontSize: 12,
+    color: "rgba(255, 255, 255, 0.8)",
+    marginTop: 2,
+  },
+  guidelinesCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    padding: Spacing.lg,
+  },
+  guidelinesTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
+    marginBottom: Spacing.lg,
+  },
+  guideline: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+  guidelineEmoji: {
+    fontSize: 20,
+    width: 28,
+    textAlign: "center",
+  },
+  guidelineText: {
+    flex: 1,
+    fontSize: 13,
+    color: Colors.dark.textSecondary,
+    lineHeight: 20,
+  },
+
+  // ============================================
+  // ENHANCED SOCIAL LINKS STYLES
+  // ============================================
+  socialSectionTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 3,
+    color: Colors.dark.accent,
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.md,
+  },
+  socialIcon: {
+    fontSize: 18,
+    width: 28,
+    textAlign: "center",
+  },
+  socialLabel: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
   },
 });

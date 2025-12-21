@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS profiles (
   instagram VARCHAR(30) DEFAULT '',
   twitter VARCHAR(30) DEFAULT '',
   tiktok VARCHAR(30) DEFAULT '',
+  youtube VARCHAR(30) DEFAULT '',
+  discord VARCHAR(40) DEFAULT '',
+  threads VARCHAR(30) DEFAULT '',
   
   -- Stats (denormalized for fast reads)
   total_workouts INTEGER DEFAULT 0 CHECK (total_workouts >= 0),

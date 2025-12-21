@@ -26,6 +26,11 @@ export interface DbProfile {
   bio: string;
   photo_url: string | null;
   instagram: string;
+  tiktok: string;
+  twitter: string;
+  youtube: string;
+  discord: string;
+  threads: string;
   total_workouts: number;
   best_time: number | null;
   current_streak: number;

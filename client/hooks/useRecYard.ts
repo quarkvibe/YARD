@@ -40,13 +40,22 @@ export interface Badge {
   earnedAt: string;
 }
 
+export interface SocialLinks {
+  instagram?: string;
+  tiktok?: string;
+  twitter?: string;
+  youtube?: string;
+  discord?: string;
+  threads?: string;
+}
+
 export interface RecYardProfile {
   id: string;
   handle: string;
   displayName: string;
   bio: string;
   photoUrl: string | null;
-  instagram: string;
+  socialLinks: SocialLinks;
   totalWorkouts: number;
   bestTime: number | null;
   currentStreak: number;
@@ -218,8 +227,24 @@ export function useRecYard() {
         if (updates.displayName !== undefined)
           dbUpdates.display_name = updates.displayName;
         if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
-        if (updates.instagram !== undefined)
-          dbUpdates.instagram = updates.instagram;
+        if (updates.photoUrl !== undefined)
+          dbUpdates.photo_url = updates.photoUrl;
+
+        // Handle social links - flatten to database columns
+        if (updates.socialLinks !== undefined) {
+          if (updates.socialLinks.instagram !== undefined)
+            dbUpdates.instagram = updates.socialLinks.instagram || "";
+          if (updates.socialLinks.tiktok !== undefined)
+            dbUpdates.tiktok = updates.socialLinks.tiktok || "";
+          if (updates.socialLinks.twitter !== undefined)
+            dbUpdates.twitter = updates.socialLinks.twitter || "";
+          if (updates.socialLinks.youtube !== undefined)
+            dbUpdates.youtube = updates.socialLinks.youtube || "";
+          if (updates.socialLinks.discord !== undefined)
+            dbUpdates.discord = updates.socialLinks.discord || "";
+          if (updates.socialLinks.threads !== undefined)
+            dbUpdates.threads = updates.socialLinks.threads || "";
+        }
 
         const { error: updateError } = await supabase
           .from("profiles")
@@ -231,7 +256,15 @@ export function useRecYard() {
           return false;
         }
 
-        setProfile({ ...profile, ...updates });
+        // Update local state with merged social links
+        const updatedProfile = { ...profile, ...updates };
+        if (updates.socialLinks) {
+          updatedProfile.socialLinks = {
+            ...profile.socialLinks,
+            ...updates.socialLinks,
+          };
+        }
+        setProfile(updatedProfile);
         return true;
       } catch (err) {
         console.error("[useRecYard] Update profile error:", err);
@@ -549,7 +582,14 @@ export function useRecYard() {
       displayName: dbProfile.display_name || dbProfile.handle,
       bio: dbProfile.bio || "",
       photoUrl: dbProfile.photo_url,
-      instagram: dbProfile.instagram || "",
+      socialLinks: {
+        instagram: dbProfile.instagram || undefined,
+        tiktok: dbProfile.tiktok || undefined,
+        twitter: dbProfile.twitter || undefined,
+        youtube: dbProfile.youtube || undefined,
+        discord: dbProfile.discord || undefined,
+        threads: dbProfile.threads || undefined,
+      },
       totalWorkouts: dbProfile.total_workouts,
       bestTime: dbProfile.best_time,
       currentStreak: dbProfile.current_streak,
