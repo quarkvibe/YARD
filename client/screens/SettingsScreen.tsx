@@ -76,6 +76,8 @@ export default function SettingsScreen() {
             styles.exerciseTypeName,
             isSelected && styles.exerciseTypeNameSelected,
           ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
         >
           {exerciseType.name}
         </ThemedText>
@@ -352,11 +354,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.dark.cardBackground,
     paddingVertical: Spacing.lg,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.sm,
     borderWidth: 1,
     borderColor: Colors.dark.cardBorder,
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: 60,
   },
   exerciseTypeCardSelected: {
     borderColor: Colors.dark.accent,
@@ -364,10 +368,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.cardBackground,
   },
   exerciseTypeName: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "700",
-    letterSpacing: 2,
+    letterSpacing: 1,
     color: Colors.dark.textSecondary,
+    textAlign: "center",
   },
   exerciseTypeNameSelected: {
     color: Colors.dark.accent,
