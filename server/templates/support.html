@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support - YARD</title>
+  <meta name="description" content="Get help with YARD - Deck of Cards Workout App">
+  <meta name="theme-color" content="#0B0B0B">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0B0B0B;
+      --bg-elevated: #141414;
+      --text: #E8E4D9;
+      --text-muted: #6B6B6B;
+      --accent: #D4A574;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 48px;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--text);
+    }
+
+    h1 {
+      font-size: 48px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 18px;
+      margin-bottom: 48px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .contact-card {
+      background: var(--bg-elevated);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 32px;
+      margin: 32px 0;
+    }
+
+    .contact-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .contact-card p {
+      margin-bottom: 0;
+    }
+
+    .contact-card a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .contact-card a:hover {
+      text-decoration: underline;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 24px 0;
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-question {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .faq-answer {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 24px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    .footer-copy {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 48px 20px;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="/" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15,18 9,12 15,6"/>
+      </svg>
+      Back to YARD
+    </a>
+
+    <h1>Support</h1>
+    <p class="subtitle">Questions about YARD? We're here to help.</p>
+
+    <div class="contact-card">
+      <h3>Contact Us</h3>
+      <p>Email: <a href="mailto:support@flipmovefinish.now">support@flipmovefinish.now</a></p>
+    </div>
+
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+      <p class="faq-question">How does the deck of cards workout work?</p>
+      <p class="faq-answer">Each card in the deck represents a number of reps. Number cards (2-10) are face value, Jacks/Queens/Kings are 10 reps, and Aces are 15 reps. Flip a card, do the reps, flip the next. Complete all 52 cards as fast as you can.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-question">What exercises are included?</p>
+      <p class="faq-answer">YARD focuses on two bodyweight movements: pushups and squats. In Superset mode, spades and clubs are pushups while hearts and diamonds are squats. You can also do all pushups or all squats.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-question">What are the intensity levels?</p>
+      <p class="faq-answer">Misdemeanor is standard (396 total reps). Hard Time is 1.5x multiplier (594 reps). Lifer is 2x multiplier (792 reps). Pick based on your fitness level.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-question">What is Rec Yard?</p>
+      <p class="faq-answer">Rec Yard is our optional subscription ($2.99/month) that adds competitive features: global leaderboards, weekly challenges, verified times, and social features. The core workout is fully functional without it.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-question">How do I cancel my Rec Yard subscription?</p>
+      <p class="faq-answer">Subscriptions are managed through your device's app store. On iOS, go to Settings, tap your name, tap Subscriptions, and select YARD. On Android, open Google Play, tap Menu, then Subscriptions.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-question">Is my data private?</p>
+      <p class="faq-answer">Yes. YARD stores all workout data locally on your device. We don't collect or have access to your workout history, settings, or personal information. See our Privacy Policy for details.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-question">The app crashed or isn't working correctly. What do I do?</p>
+      <p class="faq-answer">Try closing and reopening the app. If the problem persists, reinstalling usually fixes it. Contact us at the email above if you continue to experience issues.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-question">Can I request a refund?</p>
+      <p class="faq-answer">Refunds are handled by Apple (App Store) or Google (Play Store). Visit their support pages to request a refund for your purchase.</p>
+    </div>
+
+    <footer>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/support">Support</a>
+      </div>
+      <p class="footer-copy">YARD - Flip. Move. Finish.</p>
+    </footer>
+  </div>
+
+</body>
+</html>
