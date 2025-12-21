@@ -24,6 +24,12 @@ export interface WorkoutRecord {
   totalPushups: number;
   totalSquats: number;
   cardsCompleted: number;
+  // Competitive mode data for anti-cheat
+  isCompetitive?: boolean;
+  intervals?: SetInterval[];
+  totalWorkTime?: number; // Total time doing reps
+  totalRestTime?: number; // Total rest time
+  averageRestTime?: number; // Average rest between sets
 }
 
 export interface RuleSet {
@@ -146,6 +152,8 @@ export const SUPERSET_MODES: SupersetMode[] = [
   },
 ];
 
+export type RestAlertType = "haptic" | "sound" | "both" | "none";
+
 export interface AppSettings {
   selectedRuleSetId: string;
   selectedFlipModeId: FlipModeId;
@@ -153,6 +161,23 @@ export interface AppSettings {
   selectedSupersetModeId: SupersetModeId;
   soundEnabled: boolean;
   hapticsEnabled: boolean;
+  // Rest timer settings
+  restTimerEnabled: boolean;
+  restTimerDuration: number; // seconds (30, 45, 60, 90, 120)
+  restAlertType: RestAlertType;
+  // Competitive mode - mandatory set/rest tracking for Rec Yard
+  competitiveMode: boolean;
+}
+
+// Set interval data for anti-cheat verification
+export interface SetInterval {
+  setNumber: number;
+  cardIndex: number;
+  reps: number;
+  exercise: "pushups" | "squats";
+  workTime: number; // milliseconds to complete the set
+  restTime: number; // milliseconds of rest after this set
+  timestamp: number; // when this set was completed
 }
 
 export interface UserProfile {
@@ -247,7 +272,15 @@ export const DEFAULT_SETTINGS: AppSettings = {
   selectedSupersetModeId: "alternating",
   soundEnabled: false,
   hapticsEnabled: false,
+  // Rest timer defaults
+  restTimerEnabled: false,
+  restTimerDuration: 60, // 1 minute default
+  restAlertType: "haptic",
+  // Competitive mode off by default
+  competitiveMode: false,
 };
+
+export const REST_TIMER_OPTIONS = [30, 45, 60, 90, 120] as const;
 
 export function getExerciseTypeById(id: ExerciseType): ExerciseTypeOption {
   return EXERCISE_TYPES.find((et) => et.id === id) || EXERCISE_TYPES[2];

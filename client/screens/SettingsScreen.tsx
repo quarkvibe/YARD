@@ -304,6 +304,144 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
+        {/* Rest Timer Settings */}
+        <ThemedText style={styles.sectionHeader}>REST TIMER</ThemedText>
+
+        <View style={styles.preferencesCard}>
+          <View style={styles.preferenceItem}>
+            <View style={styles.preferenceInfo}>
+              <Feather name="clock" size={18} color={Colors.dark.chalk} />
+              <ThemedText style={styles.preferenceLabel}>REST TIMER</ThemedText>
+            </View>
+            <Switch
+              value={settings.restTimerEnabled}
+              onValueChange={(value) =>
+                handleSettingChange("restTimerEnabled", value)
+              }
+              trackColor={{
+                false: Colors.dark.cardBorder,
+                true: Colors.dark.accent,
+              }}
+              thumbColor={Colors.dark.chalk}
+            />
+          </View>
+
+          {settings.restTimerEnabled && (
+            <>
+              <View style={styles.divider} />
+
+              <View style={styles.preferenceItem}>
+                <View style={styles.preferenceInfo}>
+                  <ThemedText style={styles.preferenceLabel}>
+                    REST DURATION
+                  </ThemedText>
+                </View>
+                <View style={styles.durationOptions}>
+                  {[30, 45, 60, 90, 120].map((seconds) => (
+                    <Pressable
+                      key={seconds}
+                      onPress={() =>
+                        handleSettingChange("restTimerDuration", seconds)
+                      }
+                      style={[
+                        styles.durationOption,
+                        settings.restTimerDuration === seconds &&
+                          styles.durationOptionSelected,
+                      ]}
+                    >
+                      <ThemedText
+                        style={[
+                          styles.durationOptionText,
+                          settings.restTimerDuration === seconds &&
+                            styles.durationOptionTextSelected,
+                        ]}
+                      >
+                        {seconds}s
+                      </ThemedText>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.preferenceItem}>
+                <View style={styles.preferenceInfo}>
+                  <ThemedText style={styles.preferenceLabel}>
+                    ALERT TYPE
+                  </ThemedText>
+                </View>
+                <View style={styles.alertOptions}>
+                  {[
+                    { id: "haptic", icon: "smartphone", label: "HAPTIC" },
+                    { id: "sound", icon: "volume-2", label: "SOUND" },
+                    { id: "both", icon: "bell", label: "BOTH" },
+                  ].map((option) => (
+                    <Pressable
+                      key={option.id}
+                      onPress={() =>
+                        handleSettingChange("restAlertType", option.id)
+                      }
+                      style={[
+                        styles.alertOption,
+                        settings.restAlertType === option.id &&
+                          styles.alertOptionSelected,
+                      ]}
+                    >
+                      <Feather
+                        name={option.icon as any}
+                        size={14}
+                        color={
+                          settings.restAlertType === option.id
+                            ? Colors.dark.backgroundRoot
+                            : Colors.dark.chalk
+                        }
+                      />
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            </>
+          )}
+        </View>
+
+        {/* Competitive Mode */}
+        <ThemedText style={styles.sectionHeader}>COMPETITIVE MODE</ThemedText>
+
+        <View style={styles.preferencesCard}>
+          <View style={styles.preferenceItem}>
+            <View style={styles.preferenceInfo}>
+              <Feather name="award" size={18} color={Colors.dark.accent} />
+              <View>
+                <ThemedText style={styles.preferenceLabel}>
+                  REC YARD MODE
+                </ThemedText>
+                <ThemedText style={styles.preferenceHint}>
+                  Track each set for leaderboard
+                </ThemedText>
+              </View>
+            </View>
+            <Switch
+              value={settings.competitiveMode}
+              onValueChange={(value) =>
+                handleSettingChange("competitiveMode", value)
+              }
+              trackColor={{
+                false: Colors.dark.cardBorder,
+                true: Colors.dark.accent,
+              }}
+              thumbColor={Colors.dark.chalk}
+            />
+          </View>
+        </View>
+
+        {settings.competitiveMode && (
+          <ThemedText style={styles.competitiveModeHint}>
+            In Rec Yard Mode, you must tap &quot;SET DONE&quot; after each set.
+            Your work/rest times are tracked for anti-cheat verification.
+          </ThemedText>
+        )}
+
         <ThemedText style={styles.versionText}>VERSION 1.0.0</ThemedText>
 
         <View style={styles.startWorkoutContainer}>
@@ -572,5 +710,58 @@ const styles = StyleSheet.create({
   startWorkoutContainer: {
     marginTop: Spacing.xl,
     marginBottom: Spacing.lg,
+  },
+  // Rest timer styles
+  durationOptions: {
+    flexDirection: "row",
+    gap: Spacing.xs,
+  },
+  durationOption: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.xs,
+    backgroundColor: Colors.dark.cardBorder,
+  },
+  durationOptionSelected: {
+    backgroundColor: Colors.dark.accent,
+  },
+  durationOptionText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: Colors.dark.textSecondary,
+  },
+  durationOptionTextSelected: {
+    color: Colors.dark.backgroundRoot,
+  },
+  alertOptions: {
+    flexDirection: "row",
+    gap: Spacing.xs,
+  },
+  alertOption: {
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.xs,
+    backgroundColor: Colors.dark.cardBorder,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  alertOptionSelected: {
+    backgroundColor: Colors.dark.accent,
+  },
+  preferenceHint: {
+    fontSize: 10,
+    fontWeight: "500",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+    marginTop: 2,
+  },
+  competitiveModeHint: {
+    fontSize: 11,
+    fontWeight: "500",
+    letterSpacing: 1,
+    color: Colors.dark.accent,
+    textAlign: "center",
+    marginTop: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
   },
 });

@@ -65,11 +65,42 @@ export default function WorkoutScreen() {
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [hapticsEnabled, setHapticsEnabled] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [soundEnabled, setSoundEnabled] = useState(false);
   const [activeCards, setActiveCards] = useState<CardValue[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeReps, setActiveReps] = useState(0);
 
+  // Set/Rest tracking state
+  const [competitiveMode, setCompetitiveMode] = useState(false);
+  const [restTimerEnabled, setRestTimerEnabled] = useState(false);
+  const [restTimerDuration, setRestTimerDuration] = useState(60);
+  const [restAlertType, setRestAlertType] = useState<
+    "haptic" | "sound" | "both" | "none"
+  >("haptic");
+  const [workoutPhase, setWorkoutPhase] = useState<"working" | "resting">(
+    "working",
+  );
+  const [restTimer, setRestTimer] = useState(0);
+  const [setStartTime, setSetStartTime] = useState<number>(0);
+  const [intervals, setIntervals] = useState<
+    {
+      setNumber: number;
+      cardIndex: number;
+      reps: number;
+      exercise: "pushups" | "squats";
+      workTime: number;
+      restTime: number;
+      timestamp: number;
+    }[]
+  >([]);
+  const [currentSetReps, setCurrentSetReps] = useState(0);
+  const [currentSetExercise, setCurrentSetExercise] = useState<
+    "pushups" | "squats"
+  >("pushups");
+
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const restTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const buttonScale = useSharedValue(1);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -91,6 +122,12 @@ export default function WorkoutScreen() {
     setSupersetModeName(supersetMode.name);
     setExerciseType(settings.selectedExerciseType);
     setHapticsEnabled(settings.hapticsEnabled);
+    setSoundEnabled(settings.soundEnabled);
+    // Set/Rest timer settings
+    setRestTimerEnabled(settings.restTimerEnabled);
+    setRestTimerDuration(settings.restTimerDuration);
+    setRestAlertType(settings.restAlertType);
+    setCompetitiveMode(settings.competitiveMode);
     // Reset alternating state when settings reload
     setAlternatingExercise("squats");
 
@@ -154,6 +191,84 @@ export default function WorkoutScreen() {
     }
   }, []);
 
+  // Rest timer functions
+  const startRestTimer = useCallback(() => {
+    if (restTimerRef.current) return;
+    const restStartTime = Date.now();
+    setRestTimer(0);
+
+    restTimerRef.current = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - restStartTime) / 1000);
+      setRestTimer(elapsed);
+
+      // Check if rest time is up (for countdown mode)
+      if (restTimerEnabled && elapsed >= restTimerDuration) {
+        // Trigger alert
+        if (restAlertType === "haptic" || restAlertType === "both") {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        }
+        // Sound alert would go here if we had audio
+      }
+    }, 100);
+  }, [restTimerEnabled, restTimerDuration, restAlertType]);
+
+  const stopRestTimer = useCallback(() => {
+    if (restTimerRef.current) {
+      clearInterval(restTimerRef.current);
+      restTimerRef.current = null;
+    }
+  }, []);
+
+  // Complete a set (in competitive mode, called when user presses "SET DONE")
+  const completeSet = useCallback(() => {
+    const now = Date.now();
+    const workTime = now - setStartTime;
+
+    // Record this interval
+    const newInterval = {
+      setNumber: intervals.length + 1,
+      cardIndex: currentCardIndex,
+      reps: currentSetReps,
+      exercise: currentSetExercise,
+      workTime,
+      restTime: 0, // Will be updated when next set starts
+      timestamp: now,
+    };
+
+    setIntervals((prev) => [...prev, newInterval]);
+    setWorkoutPhase("resting");
+    startRestTimer();
+
+    triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
+  }, [
+    setStartTime,
+    intervals.length,
+    currentCardIndex,
+    currentSetReps,
+    currentSetExercise,
+    startRestTimer,
+    triggerHaptic,
+  ]);
+
+  // End rest and prepare for next set
+  const endRest = useCallback(() => {
+    stopRestTimer();
+
+    // Update the last interval with rest time
+    if (intervals.length > 0) {
+      const lastRestTime = restTimer * 1000;
+      setIntervals((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1].restTime = lastRestTime;
+        return updated;
+      });
+    }
+
+    setRestTimer(0);
+    setWorkoutPhase("working");
+    setSetStartTime(Date.now());
+  }, [stopRestTimer, intervals.length, restTimer]);
+
   const startWorkout = useCallback(async () => {
     const settings = await getSettings();
     const ruleSet = getRuleSetById(settings.selectedRuleSetId);
@@ -180,6 +295,18 @@ export default function WorkoutScreen() {
     setActiveReps(0);
     setAlternatingExercise("squats"); // Start with squats for alternating mode
 
+    // Initialize set/rest tracking
+    setCompetitiveMode(settings.competitiveMode);
+    setRestTimerEnabled(settings.restTimerEnabled);
+    setRestTimerDuration(settings.restTimerDuration);
+    setRestAlertType(settings.restAlertType);
+    setIntervals([]);
+    setWorkoutPhase("working");
+    setRestTimer(0);
+    setSetStartTime(Date.now());
+    setCurrentSetReps(0);
+    setCurrentSetExercise("pushups");
+
     if (settings.hapticsEnabled) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
@@ -187,9 +314,16 @@ export default function WorkoutScreen() {
 
   const completeWorkout = useCallback(async () => {
     stopTimer();
+    stopRestTimer();
     setWorkoutState("complete");
 
     triggerNotificationHaptic(Haptics.NotificationFeedbackType.Success);
+
+    // Calculate interval stats for competitive mode
+    const totalWorkTime = intervals.reduce((sum, i) => sum + i.workTime, 0);
+    const totalRestTime = intervals.reduce((sum, i) => sum + i.restTime, 0);
+    const averageRestTime =
+      intervals.length > 0 ? totalRestTime / intervals.length : 0;
 
     const workoutRecord: WorkoutRecord = {
       id: Date.now().toString(),
@@ -202,6 +336,12 @@ export default function WorkoutScreen() {
       totalPushups,
       totalSquats,
       cardsCompleted: currentCardIndex + 1,
+      // Competitive mode data for anti-cheat verification
+      isCompetitive: competitiveMode,
+      intervals: competitiveMode ? intervals : undefined,
+      totalWorkTime: competitiveMode ? totalWorkTime : undefined,
+      totalRestTime: competitiveMode ? totalRestTime : undefined,
+      averageRestTime: competitiveMode ? averageRestTime : undefined,
     };
 
     await saveWorkout(workoutRecord);
@@ -221,16 +361,25 @@ export default function WorkoutScreen() {
     currentCardIndex,
     bestTime,
     stopTimer,
+    stopRestTimer,
     triggerNotificationHaptic,
+    competitiveMode,
+    intervals,
   ]);
 
   const flipCard = useCallback(async () => {
     if (workoutState !== "active") return;
 
+    // In competitive mode during rest phase, end rest first
+    if (competitiveMode && workoutPhase === "resting") {
+      endRest();
+    }
+
     triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
 
     if (currentCardIndex === -1) {
       startTimer();
+      setSetStartTime(Date.now());
     }
 
     let nextIndex = currentCardIndex + 1;
@@ -384,6 +533,14 @@ export default function WorkoutScreen() {
     setActiveCards(cardsToFlip);
     setActiveReps(totalReps);
     setCurrentCardIndex(nextIndex);
+
+    // Track current set for competitive mode
+    setCurrentSetReps(totalReps);
+    setCurrentSetExercise(pushupsToAdd > squatsToAdd ? "pushups" : "squats");
+    if (!competitiveMode) {
+      // In non-competitive mode, start timing for this set
+      setSetStartTime(Date.now());
+    }
   }, [
     workoutState,
     currentCardIndex,
@@ -395,6 +552,9 @@ export default function WorkoutScreen() {
     startTimer,
     triggerHaptic,
     completeWorkout,
+    competitiveMode,
+    workoutPhase,
+    endRest,
   ]);
 
   const pauseWorkout = useCallback(() => {
@@ -730,21 +890,81 @@ export default function WorkoutScreen() {
         </View>
       </View>
 
-      <AnimatedPressable
-        onPress={flipCard}
-        onPressIn={handleButtonPressIn}
-        onPressOut={handleButtonPressOut}
-        disabled={workoutState === "paused"}
-        style={[
-          styles.flipButton,
-          { opacity: workoutState === "paused" ? 0.5 : 1 },
-          animatedButtonStyle,
-        ]}
-      >
-        <ThemedText style={styles.flipButtonText}>
-          {cardsRemaining === 0 ? "FINISH" : "FLIP"}
-        </ThemedText>
-      </AnimatedPressable>
+      {/* Rest Timer Display (when resting in competitive mode) */}
+      {competitiveMode && workoutPhase === "resting" && (
+        <Animated.View entering={FadeIn} style={styles.restTimerContainer}>
+          <ThemedText style={styles.restTimerLabel}>REST TIME</ThemedText>
+          <ThemedText style={styles.restTimerValue}>
+            {formatDuration(restTimer)}
+          </ThemedText>
+          {restTimerEnabled && (
+            <View style={styles.restTimerProgress}>
+              <View
+                style={[
+                  styles.restTimerFill,
+                  {
+                    width: `${Math.min(100, (restTimer / restTimerDuration) * 100)}%`,
+                    backgroundColor:
+                      restTimer >= restTimerDuration
+                        ? Colors.dark.accent
+                        : Colors.dark.squats,
+                  },
+                ]}
+              />
+            </View>
+          )}
+          <ThemedText style={styles.restTimerHint}>
+            TAP FLIP WHEN READY
+          </ThemedText>
+        </Animated.View>
+      )}
+
+      {/* Button Area */}
+      {competitiveMode &&
+      workoutPhase === "working" &&
+      activeCards.length > 0 ? (
+        <View style={styles.buttonRow}>
+          <AnimatedPressable
+            onPress={completeSet}
+            onPressIn={handleButtonPressIn}
+            onPressOut={handleButtonPressOut}
+            disabled={workoutState === "paused"}
+            style={[
+              styles.setDoneButton,
+              { opacity: workoutState === "paused" ? 0.5 : 1 },
+              animatedButtonStyle,
+            ]}
+          >
+            <Feather
+              name="check"
+              size={20}
+              color={Colors.dark.backgroundRoot}
+              style={{ marginRight: 8 }}
+            />
+            <ThemedText style={styles.setDoneButtonText}>SET DONE</ThemedText>
+          </AnimatedPressable>
+        </View>
+      ) : (
+        <AnimatedPressable
+          onPress={flipCard}
+          onPressIn={handleButtonPressIn}
+          onPressOut={handleButtonPressOut}
+          disabled={workoutState === "paused"}
+          style={[
+            styles.flipButton,
+            { opacity: workoutState === "paused" ? 0.5 : 1 },
+            animatedButtonStyle,
+          ]}
+        >
+          <ThemedText style={styles.flipButtonText}>
+            {cardsRemaining === 0
+              ? "FINISH"
+              : workoutPhase === "resting"
+                ? "NEXT SET"
+                : "FLIP"}
+          </ThemedText>
+        </AnimatedPressable>
+      )}
     </Animated.View>
   );
 
@@ -1164,5 +1384,73 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.cardBorder,
     alignSelf: "center",
     opacity: 0.5,
+  },
+  // Rest timer styles
+  restTimerContainer: {
+    alignItems: "center",
+    marginBottom: Spacing.xl,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: BorderRadius.sm,
+    borderWidth: 2,
+    borderColor: Colors.dark.squats,
+  },
+  restTimerLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.squats,
+    marginBottom: Spacing.xs,
+  },
+  restTimerValue: {
+    fontSize: 48,
+    fontWeight: "900",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
+    fontVariant: ["tabular-nums"],
+  },
+  restTimerProgress: {
+    width: "100%",
+    height: 4,
+    backgroundColor: Colors.dark.cardBorder,
+    borderRadius: 2,
+    marginTop: Spacing.md,
+    overflow: "hidden",
+  },
+  restTimerFill: {
+    height: "100%",
+    borderRadius: 2,
+  },
+  restTimerHint: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    marginTop: Spacing.md,
+  },
+  // Button row for competitive mode
+  buttonRow: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+  setDoneButton: {
+    flex: 1,
+    height: 60,
+    backgroundColor: Colors.dark.squats,
+    borderRadius: BorderRadius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+  },
+  setDoneButtonText: {
+    fontSize: 18,
+    fontWeight: "900",
+    letterSpacing: 3,
+    color: Colors.dark.backgroundRoot,
   },
 });
