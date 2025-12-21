@@ -33,6 +33,8 @@ import {
   UserProfile,
   getProfile,
   saveProfile,
+  DECK_STYLES,
+  DeckStyle,
 } from "@/lib/storage";
 
 export default function SettingsScreen() {
@@ -175,6 +177,41 @@ export default function SettingsScreen() {
     );
   };
 
+  const renderDeckStyleCard = (deckStyle: DeckStyle) => {
+    const isSelected = settings?.selectedDeckStyleId === deckStyle.id;
+
+    return (
+      <Pressable
+        key={deckStyle.id}
+        onPress={() => handleSettingChange("selectedDeckStyleId", deckStyle.id)}
+        style={[
+          styles.deckStyleCard,
+          { backgroundColor: deckStyle.backColor, borderColor: deckStyle.accentColor },
+          isSelected && styles.deckStyleCardSelected,
+        ]}
+      >
+        <View style={[styles.deckStyleInner, { borderColor: deckStyle.accentColor }]}>
+          <ThemedText
+            style={[styles.deckStyleName, { color: deckStyle.textColor }]}
+          >
+            {deckStyle.name}
+          </ThemedText>
+          <ThemedText
+            style={[styles.deckStyleDescription, { color: deckStyle.textColor, opacity: 0.7 }]}
+            numberOfLines={1}
+          >
+            {deckStyle.description}
+          </ThemedText>
+        </View>
+        {isSelected && (
+          <View style={[styles.deckStyleCheck, { backgroundColor: deckStyle.accentColor }]}>
+            <Feather name="check" size={12} color="#0b0b0b" />
+          </View>
+        )}
+      </Pressable>
+    );
+  };
+
   const renderRuleSetCard = (ruleSet: RuleSet) => {
     const isSelected = settings?.selectedRuleSetId === ruleSet.id;
     const isExpanded = showRuleDetails === ruleSet.id;
@@ -270,6 +307,11 @@ export default function SettingsScreen() {
         <ThemedText style={styles.sectionTitle}>FLIP MODE</ThemedText>
         <View style={styles.flipModesContainer}>
           {FLIP_MODES.map(renderFlipModeCard)}
+        </View>
+
+        <ThemedText style={styles.sectionTitle}>DECK STYLE</ThemedText>
+        <View style={styles.deckStylesContainer}>
+          {DECK_STYLES.map(renderDeckStyleCard)}
         </View>
 
         <ThemedText style={styles.sectionHeader}>APP SETTINGS</ThemedText>
@@ -1073,6 +1115,55 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "500",
     color: Colors.dark.chalk,
+  },
+  deckStylesContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  deckStyleCard: {
+    width: "48%",
+    aspectRatio: 1.4,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    padding: Spacing.sm,
+    position: "relative",
+  },
+  deckStyleCardSelected: {
+    borderWidth: 2,
+  },
+  deckStyleInner: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: BorderRadius.xs,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: Spacing.sm,
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+  },
+  deckStyleName: {
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 2,
+    textAlign: "center",
+    marginBottom: 2,
+  },
+  deckStyleDescription: {
+    fontSize: 9,
+    fontWeight: "500",
+    letterSpacing: 0.5,
+    textAlign: "center",
+  },
+  deckStyleCheck: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
   shareProfileButton: {
     flexDirection: "row",
