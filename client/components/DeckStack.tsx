@@ -15,6 +15,7 @@ const DECK_IMAGES: Record<string, any> = {
   dayofdead: require("../../attached_assets/generated_images/day_of_dead_skull_cards.png"),
   samurai: require("../../attached_assets/generated_images/japanese_samurai_deck_cards.png"),
   anime: require("../../attached_assets/generated_images/anime_schoolgirl_deck_cards.png"),
+  cosplay: require("../../attached_assets/generated_images/cosplay_deck_back_design.png"),
   hunters: require("../../attached_assets/generated_images/anime_hunters_demon_fighting_deck.png"),
 };
 

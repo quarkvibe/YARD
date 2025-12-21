@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { View, StyleSheet, Pressable, Alert, Share } from "react-native";
+import { View, StyleSheet, Pressable, Alert, Share, Platform, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import {
@@ -91,6 +91,7 @@ export default function WorkoutScreen() {
 
   // Set/Rest tracking state
   const [competitiveMode, setCompetitiveMode] = useState(false);
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false);
   const [restTimerEnabled, setRestTimerEnabled] = useState(false);
   const [restTimerDuration, setRestTimerDuration] = useState(60);
   const [restAlertType, setRestAlertType] = useState<
@@ -659,23 +660,36 @@ export default function WorkoutScreen() {
   const resetDeck = useCallback(() => {
     // Show confirmation if workout is in progress
     if (workoutState === "active" || workoutState === "paused") {
-      Alert.alert(
-        "QUIT WORKOUT",
-        "Your progress will be lost. Are you sure?",
-        [
-          { text: "CANCEL", style: "cancel" },
-          {
-            text: "QUIT",
-            style: "destructive",
-            onPress: performReset,
-          },
-        ],
-        { cancelable: true },
-      );
+      if (Platform.OS === "web") {
+        setShowQuitConfirm(true);
+      } else {
+        Alert.alert(
+          "QUIT WORKOUT",
+          "Your progress will be lost. Are you sure?",
+          [
+            { text: "CANCEL", style: "cancel" },
+            {
+              text: "QUIT",
+              style: "destructive",
+              onPress: performReset,
+            },
+          ],
+          { cancelable: true },
+        );
+      }
     } else {
       performReset();
     }
   }, [workoutState, performReset]);
+
+  const confirmQuit = useCallback(() => {
+    setShowQuitConfirm(false);
+    performReset();
+  }, [performReset]);
+
+  const cancelQuit = useCallback(() => {
+    setShowQuitConfirm(false);
+  }, []);
 
   const handleButtonPressIn = () => {
     buttonScale.value = withSpring(0.95, { damping: 15, stiffness: 150 });
@@ -1233,6 +1247,30 @@ export default function WorkoutScreen() {
           : null}
         {workoutState === "complete" ? renderCompleteState() : null}
       </View>
+
+      <Modal
+        visible={showQuitConfirm}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={cancelQuit}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <ThemedText style={styles.modalTitle}>QUIT WORKOUT</ThemedText>
+            <ThemedText style={styles.modalMessage}>
+              Your progress will be lost. Are you sure?
+            </ThemedText>
+            <View style={styles.modalButtons}>
+              <Pressable style={styles.modalCancelButton} onPress={cancelQuit}>
+                <ThemedText style={styles.modalCancelText}>CANCEL</ThemedText>
+              </Pressable>
+              <Pressable style={styles.modalQuitButton} onPress={confirmQuit}>
+                <ThemedText style={styles.modalQuitText}>QUIT</ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ConcreteBackground>
   );
 }
@@ -1762,5 +1800,70 @@ const styles = StyleSheet.create({
     color: Colors.dark.squats,
     textAlign: "center",
     marginTop: Spacing.md,
+  },
+
+  // Quit Confirmation Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.xl,
+  },
+  modalContent: {
+    backgroundColor: "#1A1A1A",
+    borderRadius: BorderRadius.md,
+    padding: Spacing.xl,
+    width: "100%",
+    maxWidth: 320,
+    borderWidth: 1,
+    borderColor: "#333333",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "900",
+    letterSpacing: 3,
+    color: Colors.dark.chalk,
+    textAlign: "center",
+    marginBottom: Spacing.md,
+  },
+  modalMessage: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: Colors.dark.textSecondary,
+    textAlign: "center",
+    marginBottom: Spacing.xl,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: Colors.dark.backgroundRoot,
+    borderWidth: 1,
+    borderColor: "#333333",
+    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.md,
+    alignItems: "center",
+  },
+  modalCancelText: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+  },
+  modalQuitButton: {
+    flex: 1,
+    backgroundColor: "#CC3333",
+    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.md,
+    alignItems: "center",
+  },
+  modalQuitText: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
   },
 });
