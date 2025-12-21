@@ -23,6 +23,28 @@ const DECK_IMAGES: Record<string, any> = {
   dayofdead: require("../../attached_assets/generated_images/day_of_dead_skull_cards.png"),
   samurai: require("../../attached_assets/generated_images/japanese_samurai_deck_cards.png"),
   anime: require("../../attached_assets/generated_images/anime_schoolgirl_deck_cards.png"),
+  hunters: require("../../attached_assets/generated_images/anime_hunters_demon_fighting_deck.png"),
+};
+
+// Face card images for high-value cards (10, J, Q, K, A) per deck style
+const FACE_CARD_IMAGES: Record<string, Record<string, any>> = {
+  hunters: {
+    "10": require("../../attached_assets/generated_images/hunters_deck_ten_face_card.png"),
+    "J": require("../../attached_assets/generated_images/hunters_deck_jack_face_card.png"),
+    "Q": require("../../attached_assets/generated_images/hunters_deck_queen_face_card.png"),
+    "K": require("../../attached_assets/generated_images/hunters_deck_king_face_card.png"),
+    "A": require("../../attached_assets/generated_images/hunters_deck_ace_face_card.png"),
+  },
+};
+
+// Check if a card rank has custom face artwork
+const HIGH_VALUE_RANKS = ["10", "J", "Q", "K", "A"];
+const hasFaceCardImage = (deckStyleId: string, rank: string): boolean => {
+  return FACE_CARD_IMAGES[deckStyleId]?.[rank] !== undefined;
+};
+
+const getFaceCardImage = (deckStyleId: string, rank: string): any | null => {
+  return FACE_CARD_IMAGES[deckStyleId]?.[rank] || null;
 };
 
 type CardSize = "small" | "medium" | "large";
@@ -194,94 +216,153 @@ export function PlayingCard({
           styles.card,
           styles.cardFront,
           cardContainerStyle,
-          { padding: cornerPadding },
+          { padding: hasFaceCardImage(deckStyleId, card?.rank || "") ? 0 : cornerPadding },
           frontAnimatedStyle,
         ]}
       >
         {card ? (
-          <>
-            {/* Top left corner */}
-            <View
-              style={[
-                styles.cornerTop,
-                { top: cornerPadding, left: cornerPadding },
-              ]}
+          hasFaceCardImage(deckStyleId, card.rank) ? (
+            // Custom face card artwork for high-value cards
+            <ImageBackground
+              source={getFaceCardImage(deckStyleId, card.rank)}
+              style={styles.faceCardImage}
+              imageStyle={styles.faceCardImageStyle}
+              resizeMode="cover"
             >
-              <ThemedText
-                style={[
-                  styles.cornerRank,
-                  {
-                    fontSize: typography.cornerRank,
-                    color: getSuitColor(card.suit),
-                  },
-                ]}
-              >
-                {card.rank}
-              </ThemedText>
-              <ThemedText
-                style={[
-                  styles.cornerSuit,
-                  {
-                    fontSize: typography.cornerSuit,
-                    color: getSuitColor(card.suit),
-                  },
-                ]}
-              >
-                {SUIT_SYMBOLS[card.suit]}
-              </ThemedText>
-            </View>
+              {/* Overlay with rank, suit and rep value */}
+              <View style={styles.faceCardOverlay}>
+                {/* Top left corner */}
+                <View style={[styles.faceCornerTop, { top: cornerPadding, left: cornerPadding }]}>
+                  <ThemedText
+                    style={[
+                      styles.faceCornerRank,
+                      { fontSize: typography.cornerRank - 4, color: "#FFF" },
+                    ]}
+                  >
+                    {card.rank}
+                  </ThemedText>
+                  <ThemedText
+                    style={[
+                      styles.faceCornerSuit,
+                      { fontSize: typography.cornerSuit - 4, color: getSuitColor(card.suit) },
+                    ]}
+                  >
+                    {SUIT_SYMBOLS[card.suit]}
+                  </ThemedText>
+                </View>
 
-            {/* Center suit */}
-            <View style={styles.centerContainer}>
-              <ThemedText
-                style={[
-                  styles.centerSuit,
-                  {
-                    fontSize: typography.centerSuit,
-                    color: getSuitColor(card.suit),
-                  },
-                ]}
-              >
-                {SUIT_SYMBOLS[card.suit]}
-              </ThemedText>
-            </View>
+                {/* Bottom right corner (rotated) */}
+                <View style={[styles.faceCornerBottom, { bottom: cornerPadding, right: cornerPadding }]}>
+                  <ThemedText
+                    style={[
+                      styles.faceCornerSuit,
+                      { fontSize: typography.cornerSuit - 4, color: getSuitColor(card.suit) },
+                    ]}
+                  >
+                    {SUIT_SYMBOLS[card.suit]}
+                  </ThemedText>
+                  <ThemedText
+                    style={[
+                      styles.faceCornerRank,
+                      { fontSize: typography.cornerRank - 4, color: "#FFF" },
+                    ]}
+                  >
+                    {card.rank}
+                  </ThemedText>
+                </View>
 
-            {/* Bottom right corner (rotated) */}
-            <View
-              style={[
-                styles.cornerBottom,
-                { bottom: cornerPadding, right: cornerPadding },
-              ]}
-            >
-              <ThemedText
+                {/* Rep value badge */}
+                <View style={styles.faceRepBadge}>
+                  <ThemedText style={styles.faceRepValue}>{card.value}</ThemedText>
+                </View>
+              </View>
+            </ImageBackground>
+          ) : (
+            // Standard card layout for number cards
+            <>
+              {/* Top left corner */}
+              <View
                 style={[
-                  styles.cornerSuit,
-                  {
-                    fontSize: typography.cornerSuit,
-                    color: getSuitColor(card.suit),
-                  },
+                  styles.cornerTop,
+                  { top: cornerPadding, left: cornerPadding },
                 ]}
               >
-                {SUIT_SYMBOLS[card.suit]}
-              </ThemedText>
-              <ThemedText
-                style={[
-                  styles.cornerRank,
-                  {
-                    fontSize: typography.cornerRank,
-                    color: getSuitColor(card.suit),
-                  },
-                ]}
-              >
-                {card.rank}
-              </ThemedText>
-            </View>
+                <ThemedText
+                  style={[
+                    styles.cornerRank,
+                    {
+                      fontSize: typography.cornerRank,
+                      color: getSuitColor(card.suit),
+                    },
+                  ]}
+                >
+                  {card.rank}
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.cornerSuit,
+                    {
+                      fontSize: typography.cornerSuit,
+                      color: getSuitColor(card.suit),
+                    },
+                  ]}
+                >
+                  {SUIT_SYMBOLS[card.suit]}
+                </ThemedText>
+              </View>
 
-            {/* Rep value badge */}
-            <View style={styles.repBadge}>
-              <ThemedText style={styles.repValue}>{card.value}</ThemedText>
-            </View>
-          </>
+              {/* Center suit */}
+              <View style={styles.centerContainer}>
+                <ThemedText
+                  style={[
+                    styles.centerSuit,
+                    {
+                      fontSize: typography.centerSuit,
+                      color: getSuitColor(card.suit),
+                    },
+                  ]}
+                >
+                  {SUIT_SYMBOLS[card.suit]}
+                </ThemedText>
+              </View>
+
+              {/* Bottom right corner (rotated) */}
+              <View
+                style={[
+                  styles.cornerBottom,
+                  { bottom: cornerPadding, right: cornerPadding },
+                ]}
+              >
+                <ThemedText
+                  style={[
+                    styles.cornerSuit,
+                    {
+                      fontSize: typography.cornerSuit,
+                      color: getSuitColor(card.suit),
+                    },
+                  ]}
+                >
+                  {SUIT_SYMBOLS[card.suit]}
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.cornerRank,
+                    {
+                      fontSize: typography.cornerRank,
+                      color: getSuitColor(card.suit),
+                    },
+                  ]}
+                >
+                  {card.rank}
+                </ThemedText>
+              </View>
+
+              {/* Rep value badge */}
+              <View style={styles.repBadge}>
+                <ThemedText style={styles.repValue}>{card.value}</ThemedText>
+              </View>
+            </>
+          )
         ) : null}
       </Animated.View>
     </View>
@@ -425,6 +506,69 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "800",
     color: "#0b0b0b",
+    letterSpacing: 1,
+  },
+  faceCardImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: BorderRadius.md,
+    overflow: "hidden",
+  },
+  faceCardImageStyle: {
+    borderRadius: BorderRadius.md,
+  },
+  faceCardOverlay: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  faceCornerTop: {
+    position: "absolute",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.65)",
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  faceCornerBottom: {
+    position: "absolute",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.65)",
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 4,
+    transform: [{ rotate: "180deg" }],
+  },
+  faceCornerRank: {
+    fontWeight: "900",
+    textShadowColor: "rgba(0,0,0,1)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 4,
+  },
+  faceCornerSuit: {
+    fontWeight: "600",
+    textShadowColor: "rgba(0,0,0,1)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  faceRepBadge: {
+    position: "absolute",
+    bottom: 8,
+    left: "50%",
+    transform: [{ translateX: -24 }],
+    backgroundColor: "rgba(0,0,0,0.75)",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.xs,
+    minWidth: 48,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.dark.accent,
+  },
+  faceRepValue: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: Colors.dark.accent,
     letterSpacing: 1,
   },
 });

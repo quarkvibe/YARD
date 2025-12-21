@@ -1014,20 +1014,11 @@ export default function WorkoutScreen() {
       {activeCards.length > 0 ? (
         renderCardDisplay()
       ) : (
-        <>
-          <View style={styles.exerciseBadgePlaceholder}>
-            <ThemedText style={styles.tapToStartText}>
-              TAP FLIP TO START
-            </ThemedText>
-          </View>
-          <View style={styles.cardContainer}>
-            <DeckStack
-              cardsRemaining={cardsRemaining}
-              totalCards={52}
-              deckStyleId={deckStyle.id}
-            />
-          </View>
-        </>
+        <View style={styles.exerciseBadgePlaceholder}>
+          <ThemedText style={styles.tapToStartText}>
+            TAP FLIP TO START
+          </ThemedText>
+        </View>
       )}
 
       <View style={styles.progressContainer}>
@@ -1089,6 +1080,19 @@ export default function WorkoutScreen() {
           </ThemedText>
         </Animated.View>
       )}
+
+      {/* Deck Stack - shows remaining cards above flip button */}
+      {cardsRemaining > 0 ? (
+        <View style={styles.deckStackContainer}>
+          <DeckStack
+            cardsRemaining={cardsRemaining}
+            totalCards={52}
+            deckStyleId={deckStyle.id}
+            size="small"
+          />
+          <ThemedText style={styles.deckStackLabel}>{cardsRemaining} LEFT</ThemedText>
+        </View>
+      ) : null}
 
       {/* Button Area */}
       {competitiveMode &&
@@ -1415,6 +1419,17 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 2,
     color: Colors.dark.textSecondary,
+  },
+  deckStackContainer: {
+    alignItems: "center",
+    marginBottom: Spacing.md,
+  },
+  deckStackLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    marginTop: Spacing.xs,
   },
   flipButton: {
     position: "absolute",
