@@ -2,7 +2,6 @@ import React, { useState, useCallback } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { Feather } from "@expo/vector-icons";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -12,7 +11,6 @@ import Animated, {
 
 import { ThemedText } from "@/components/ThemedText";
 import { ConcreteBackground } from "@/components/ConcreteBackground";
-import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import {
   getSettings,
@@ -65,7 +63,6 @@ function TallyMarks({ count }: { count: number }) {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<{ navigate: (screen: string) => void }>();
-  const { theme } = useTheme();
 
   const [ruleSetName, setRuleSetName] = useState("MISDEMEANOR");
   const [exerciseTypeName, setExerciseTypeName] = useState("SUPERSET");
@@ -188,43 +185,10 @@ export default function HomeScreen() {
           </AnimatedPressable>
         </Animated.View>
 
-        <Animated.View entering={FadeIn.delay(400)} style={styles.linksSection}>
-          <Pressable
-            style={styles.linkButton}
-            onPress={() => navigation.navigate("SettingsTab")}
-          >
-            <Feather name="sliders" size={18} color={theme.textSecondary} />
-            <ThemedText style={styles.linkText}>RULESET</ThemedText>
-          </Pressable>
-
-          <Pressable
-            style={styles.linkButton}
-            onPress={() => navigation.navigate("HistoryTab")}
-          >
-            <Feather name="clock" size={18} color={theme.textSecondary} />
-            <ThemedText style={styles.linkText}>HISTORY</ThemedText>
-          </Pressable>
-
-          <Pressable
-            style={styles.linkButton}
-            onPress={() => navigation.navigate("RecYardTab")}
-          >
-            <Feather name="award" size={18} color={theme.textSecondary} />
-            <ThemedText style={styles.linkText}>REC YARD</ThemedText>
-          </Pressable>
-
-          <Pressable
-            style={styles.linkButton}
-            onPress={() => navigation.navigate("SettingsTab")}
-          >
-            <Feather name="settings" size={18} color={theme.textSecondary} />
-            <ThemedText style={styles.linkText}>SETTINGS</ThemedText>
-          </Pressable>
-        </Animated.View>
 
         {totalWorkouts > 0 ? (
           <Animated.View
-            entering={FadeIn.delay(500)}
+            entering={FadeIn.delay(400)}
             style={styles.tallySection}
           >
             <TallyMarks count={totalWorkouts} />
@@ -347,25 +311,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 3,
     color: Colors.dark.backgroundRoot,
-  },
-  linksSection: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: Spacing.xl,
-  },
-  linkButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-  },
-  linkText: {
-    fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 2,
-    color: Colors.dark.textSecondary,
   },
   tallySection: {
     position: "absolute",
