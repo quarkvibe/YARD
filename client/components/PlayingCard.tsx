@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ImageBackground } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -12,6 +12,18 @@ import { ThemedText } from "@/components/ThemedText";
 import { BorderRadius, Spacing, Colors } from "@/constants/theme";
 import type { CardValue, DeckStyleId, DeckStyle } from "@/lib/storage";
 import { getDeckStyleById } from "@/lib/storage";
+
+// Import deck back images
+const DECK_IMAGES: Record<string, any> = {
+  yard: require("../../attached_assets/generated_images/yard_app_icon_tally_marks.png"),
+  military: require("../../attached_assets/generated_images/military_tactical_deck_cards.png"),
+  prison: require("../../attached_assets/generated_images/prison_yard_deck_cards.png"),
+  vintage: require("../../attached_assets/generated_images/classic_vintage_casino_cards.png"),
+  geometric: require("../../attached_assets/generated_images/modern_geometric_deck_cards.png"),
+  dayofdead: require("../../attached_assets/generated_images/day_of_dead_skull_cards.png"),
+  samurai: require("../../attached_assets/generated_images/japanese_samurai_deck_cards.png"),
+  anime: require("../../attached_assets/generated_images/anime_schoolgirl_deck_cards.png"),
+};
 
 type CardSize = "small" | "medium" | "large";
 
@@ -144,8 +156,13 @@ export function PlayingCard({
           backAnimatedStyle,
         ]}
       >
-        <View style={styles.backPattern}>
-          <View style={[styles.backInner, { borderColor: deckStyle.accentColor }]}>
+        <ImageBackground
+          source={DECK_IMAGES[deckStyleId] || DECK_IMAGES.yard}
+          style={styles.deckImage}
+          imageStyle={styles.deckImageStyle}
+          resizeMode="cover"
+        >
+          <View style={styles.deckImageOverlay}>
             <ThemedText
               style={[
                 styles.backText,
@@ -153,13 +170,16 @@ export function PlayingCard({
                   fontSize: typography.backText,
                   letterSpacing: typography.backLetterSpacing,
                   color: deckStyle.textColor,
+                  textShadowColor: "rgba(0,0,0,0.8)",
+                  textShadowOffset: { width: 1, height: 1 },
+                  textShadowRadius: 3,
                 },
               ]}
             >
               {deckStyle.name}
             </ThemedText>
           </View>
-        </View>
+        </ImageBackground>
 
         {/* Decorative border lines */}
         <View style={[styles.backBorderTop, { backgroundColor: deckStyle.accentColor }]} />
@@ -306,6 +326,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255, 107, 53, 0.05)",
+  },
+  deckImage: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deckImageStyle: {
+    borderRadius: BorderRadius.md - 2,
+    opacity: 0.85,
+  },
+  deckImageOverlay: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    width: "100%",
+    paddingHorizontal: Spacing.md,
   },
   backText: {
     fontWeight: "900",
