@@ -11,6 +11,9 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yardfitness.app",
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": []
+      },
       "infoPlist": {
         "SKAdNetworkItems": [
           {

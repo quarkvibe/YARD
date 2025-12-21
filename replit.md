@@ -240,11 +240,17 @@ npm run format            # Prettier formatting
 
 ## Deployment Checklist
 
+### App Store Requirements
+- **Privacy Policy URL**: https://flipmovefinish.now/privacy
+- **Support URL**: https://flipmovefinish.now/support
+- **Marketing URL**: https://flipmovefinish.now
+
 ### Pre-Launch
 - [ ] Test all workout flows on physical devices
-- [ ] Configure App Store Connect subscription ($1.99/month)
+- [ ] Configure App Store Connect subscription ($2.99/month)
 - [ ] Configure Google Play subscription
 - [ ] Set app price to $4.99 in both stores
+- [ ] Add privacy policy URL in App Store Connect
 - [ ] Create app screenshots and preview videos
 - [ ] Write App Store description with brand tone
 
