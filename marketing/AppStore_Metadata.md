@@ -13,86 +13,90 @@
 ### Short Description (for search results)
 Transform any deck of cards into an intense full-body workout. Flip cards, do reps, beat the clock.
 
-### Full Description
+### Full Description (Copy this for App Store Connect)
 
-**THE WORKOUT THAT BUILT LEGENDS**
+```
+THE WORKOUT THAT BUILT LEGENDS
 
-YARD brings the legendary "Deck of Cards" workout to your phone. Used by inmates, soldiers, and athletes for decades—this simple, brutal routine turns a standard 52-card deck into 300-800 reps of pure work.
+YARD brings the legendary Deck of Cards workout to your phone. Used by inmates, soldiers, and athletes for decades, this simple, brutal routine turns a standard 52-card deck into 300-800 reps of pure work.
 
-**HOW IT WORKS**
+HOW IT WORKS
 
 Flip a card. Do the reps. Repeat until the deck is done.
 
-• Flip an 8 of Hearts? That's 8 squats.
-• Flip a King of Spades? That's 10-20 pushups (depending on your intensity).
-• Race the clock. Beat your time. Get stronger.
+Flip an 8 of Hearts? Thats 8 squats.
+Flip a King of Spades? Thats 10-20 pushups depending on your intensity.
+Race the clock. Beat your time. Get stronger.
 
-**CHOOSE YOUR SENTENCE**
+CHOOSE YOUR SENTENCE
 
-🔹 MISDEMEANOR — 396 reps (Ace=15, Face cards=10)
-🔹 HARD TIME — 594 reps (1.5x multiplier)
-🔹 LIFER — 792 reps (2x multiplier, for the truly committed)
+MISDEMEANOR - 396 reps (Ace=15, Face cards=10)
+HARD TIME - 594 reps (1.5x multiplier)
+LIFER - 792 reps (2x multiplier, for the truly committed)
 
-**FLIP MODES**
+FLIP MODES
 
 Not all yards run the same. Pick your style:
 
-• FRESH FISH — One card at a time. Classic.
-• TRUSTEE — Two cards per flip. Double trouble.
-• OG — Keep flipping if your total is under 20 reps.
-• POD FATHER — Keep flipping while under 30 reps. Stack those sets.
+FRESH FISH - One card at a time. Classic.
+TRUSTEE - Two cards per flip. Double trouble.
+OG - Keep flipping if your total is under 20 reps.
+POD FATHER - Keep flipping while under 30 reps. Stack those sets.
 
-**EXERCISE OPTIONS**
+EXERCISE OPTIONS
 
-• PUSHUPS ONLY — Every card is pushups
-• SQUATS ONLY — Every card is squats
-• SUPERSET — Red suits (♥️♦️) = squats, Black suits (♣️♠️) = pushups
+PUSHUPS ONLY - Every card is pushups
+SQUATS ONLY - Every card is squats
+SUPERSET - Red suits = squats, Black suits = pushups
 
-**SUPERSET MODES**
+SUPERSET MODES
 
 When running supersets, choose how to mix it up:
-• ALTERNATING — One card squats, next card pushups, repeat
-• SPLIT 2 — Draw 2 cards, do one exercise each
-• SPLIT 4 — Draw 4 cards, split between exercises
-• SPLIT UNDER 20 — Keep drawing until you hit 20+ reps
 
-**10 CUSTOM DECK STYLES**
+ALTERNATING - One card squats, next card pushups, repeat
+SPLIT 2 - Draw 2 cards, do one exercise each
+SPLIT 4 - Draw 4 cards, split between exercises
+SPLIT UNDER 20 - Keep drawing until you hit 20+ reps
+
+10 CUSTOM DECK STYLES
 
 Express yourself with premium card designs:
-YARD • TACTICAL • LOCKUP • CASINO • NEON • CALAVERA • RONIN • KAWAII • COSPLAY • HUNTERS
+YARD, TACTICAL, LOCKUP, CASINO, NEON, CALAVERA, RONIN, KAWAII, COSPLAY, HUNTERS
 
 Each deck features unique artwork for face cards and backs.
 
-**TRACK YOUR GRIND**
+TRACK YOUR GRIND
 
-• Built-in workout timer
-• Set/rest tracking with configurable rest periods
-• Haptic and sound alerts when rest is up
-• Personal best tracking
-• Complete workout history
-• Practice mode for verified personal records
+Built-in workout timer
+Set/rest tracking with configurable rest periods
+Haptic and sound alerts when rest is up
+Personal best tracking
+Complete workout history
+Practice mode for verified personal records
 
-**REC YARD (Optional Subscription)**
+REC YARD (Optional Subscription)
 
 Join the community. $4.99/month unlocks:
-• Weekly leaderboards by exercise type and intensity
-• Weekly challenges with the whole yard
-• Callouts and trash talk
-• Profile badges
-• Cloud sync across devices
 
-**SHARE YOUR TIME**
+Weekly leaderboards by exercise type and intensity
+Weekly challenges with the whole yard
+Callouts and trash talk
+Profile badges
+Cloud sync across devices
 
-Every user can share workout results to social media. Link your Instagram, TikTok, Twitter, YouTube, and more. Let them know you're putting in the work.
+SHARE YOUR TIME
 
-**NO EXCUSES**
+Every user can share workout results to social media. Link your Instagram, TikTok, Twitter, YouTube, and more. Let them know you are putting in the work.
 
-• No equipment needed
-• Works anywhere—hotel, park, living room, actual prison yard
-• Workouts scale from 15 minutes to 45+ minutes
-• Suitable for beginners to advanced athletes
+NO EXCUSES
+
+No equipment needed
+Works anywhere - hotel, park, living room, actual prison yard
+Workouts scale from 15 minutes to 45+ minutes
+Suitable for beginners to advanced athletes
 
 Download YARD. Start your sentence. Get after it.
+```
 
 ---
 
