@@ -164,7 +164,8 @@ export type DeckStyleId =
   | "geometric"
   | "dayofdead"
   | "samurai"
-  | "anime";
+  | "anime"
+  | "hunters";
 
 export interface DeckStyle {
   id: DeckStyleId;
@@ -248,6 +249,15 @@ export const DECK_STYLES: DeckStyle[] = [
     backColor: "#2A2A4A",
     accentColor: "#FF69B4",
     textColor: "#FFB6C1",
+  },
+  {
+    id: "hunters",
+    name: "HUNTERS",
+    description: "Anime demon slayers",
+    previewImage: "anime_hunters_demon_fighting_deck.png",
+    backColor: "#0A0A12",
+    accentColor: "#FF1493",
+    textColor: "#00D4FF",
   },
 ];
 
