@@ -405,19 +405,19 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        {/* Competitive Mode */}
-        <ThemedText style={styles.sectionHeader}>COMPETITIVE MODE</ThemedText>
+        {/* Practice Mode */}
+        <ThemedText style={styles.sectionHeader}>REC YARD PRACTICE</ThemedText>
 
         <View style={styles.preferencesCard}>
           <View style={styles.preferenceItem}>
             <View style={styles.preferenceInfo}>
-              <Feather name="award" size={18} color={Colors.dark.accent} />
+              <Feather name="target" size={18} color={Colors.dark.accent} />
               <View>
                 <ThemedText style={styles.preferenceLabel}>
-                  REC YARD MODE
+                  PRACTICE MODE DEFAULT
                 </ThemedText>
                 <ThemedText style={styles.preferenceHint}>
-                  Track each set for leaderboard
+                  Always start with set tracking enabled
                 </ThemedText>
               </View>
             </View>
@@ -435,12 +435,10 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {settings.competitiveMode && (
-          <ThemedText style={styles.competitiveModeHint}>
-            In Rec Yard Mode, you must tap &quot;SET DONE&quot; after each set.
-            Your work/rest times are tracked for anti-cheat verification.
-          </ThemedText>
-        )}
+        <ThemedText style={styles.competitiveModeHint}>
+          Practice times are saved locally with a 🎯 icon.{"\n"}
+          Join the Rec Yard to post official times to the leaderboard!
+        </ThemedText>
 
         <ThemedText style={styles.versionText}>VERSION 1.0.0</ThemedText>
 

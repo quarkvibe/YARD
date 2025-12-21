@@ -700,6 +700,66 @@ export default function RecYardScreen() {
 
   const renderLeaderboardTab = () => (
     <View style={styles.leaderboardContainer}>
+      {/* Quick Actions Dashboard */}
+      <Animated.View entering={FadeIn} style={styles.quickActionsCard}>
+        <View style={styles.quickActionsRow}>
+          {/* Your Rank */}
+          <View style={styles.quickActionItem}>
+            <ThemedText style={styles.quickActionLabel}>YOUR RANK</ThemedText>
+            <ThemedText style={styles.quickActionValue}>
+              {profile
+                ? leaderboard.findIndex((l) => l.profileId === profile.id) +
+                    1 || "--"
+                : "--"}
+            </ThemedText>
+          </View>
+
+          {/* Practice Times */}
+          <View style={styles.quickActionItem}>
+            <ThemedText style={styles.quickActionLabel}>PRACTICE</ThemedText>
+            <ThemedText style={styles.quickActionValue}>
+              {profile?.totalWorkouts || 0}
+            </ThemedText>
+          </View>
+
+          {/* Best Time */}
+          <View style={styles.quickActionItem}>
+            <ThemedText style={styles.quickActionLabel}>BEST</ThemedText>
+            <ThemedText style={styles.quickActionValue}>
+              {profile?.bestTime ? formatDuration(profile.bestTime) : "--:--"}
+            </ThemedText>
+          </View>
+        </View>
+
+        {/* Submit Official Time Button */}
+        <Pressable
+          style={styles.submitOfficialButton}
+          onPress={() => {
+            Alert.alert(
+              "SUBMIT OFFICIAL TIME",
+              "Complete a workout with Rec Yard Practice Mode enabled to submit an official time to the leaderboard.\n\n• Tap 'Practice Mode' before starting\n• Complete all 52 cards\n• Your time will be submitted automatically",
+              [
+                { text: "GOT IT", style: "default" },
+                {
+                  text: "START WORKOUT",
+                  onPress: () => navigation.navigate("WorkoutTab"),
+                },
+              ],
+            );
+          }}
+        >
+          <Feather
+            name="upload"
+            size={16}
+            color={Colors.dark.accent}
+            style={{ marginRight: 8 }}
+          />
+          <ThemedText style={styles.submitOfficialButtonText}>
+            POST OFFICIAL TIME
+          </ThemedText>
+        </Pressable>
+      </Animated.View>
+
       {/* Weekly Challenge Card */}
       {weeklyChallenge && (
         <Animated.View entering={FadeIn} style={styles.challengeCard}>
@@ -1764,6 +1824,52 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 2,
     color: Colors.dark.backgroundRoot,
+  },
+  // Quick Actions Dashboard
+  quickActionsCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.accent,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  quickActionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: Spacing.lg,
+  },
+  quickActionItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  quickActionLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  quickActionValue: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: Colors.dark.chalk,
+  },
+  submitOfficialButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: Colors.dark.accent,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.sm,
+  },
+  submitOfficialButtonText: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.accent,
   },
   leaderboardHeader: {
     flexDirection: "row",

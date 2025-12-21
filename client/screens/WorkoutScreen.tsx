@@ -336,8 +336,9 @@ export default function WorkoutScreen() {
       totalPushups,
       totalSquats,
       cardsCompleted: currentCardIndex + 1,
-      // Competitive mode data for anti-cheat verification
-      isCompetitive: competitiveMode,
+      // Practice mode data for personal tracking
+      isPracticeMode: competitiveMode,
+      isOfficialSubmission: false, // Only true when submitted to Rec Yard
       intervals: competitiveMode ? intervals : undefined,
       totalWorkTime: competitiveMode ? totalWorkTime : undefined,
       totalRestTime: competitiveMode ? totalRestTime : undefined,
@@ -808,7 +809,7 @@ export default function WorkoutScreen() {
         </View>
       ) : null}
 
-      {/* Competition Tracking Toggle */}
+      {/* Rec Yard Practice Mode Toggle */}
       <Pressable
         onPress={() => {
           setCompetitiveMode(!competitiveMode);
@@ -820,7 +821,7 @@ export default function WorkoutScreen() {
         ]}
       >
         <Feather
-          name={competitiveMode ? "award" : "clock"}
+          name={competitiveMode ? "target" : "clock"}
           size={18}
           color={
             competitiveMode ? Colors.dark.backgroundRoot : Colors.dark.accent
@@ -832,18 +833,12 @@ export default function WorkoutScreen() {
             competitiveMode && styles.competitionToggleTextActive,
           ]}
         >
-          {competitiveMode ? "COMPETITION MODE" : "TRACK SETS"}
+          {competitiveMode ? "🎯 REC YARD PRACTICE" : "PRACTICE MODE"}
         </ThemedText>
-        <View
-          style={[
-            styles.competitionIndicator,
-            competitiveMode && styles.competitionIndicatorActive,
-          ]}
-        />
       </Pressable>
       {competitiveMode && (
         <ThemedText style={styles.competitionHint}>
-          Track work/rest times for each set
+          Track sets • Tap SET DONE after each • Saved to personal records
         </ThemedText>
       )}
 

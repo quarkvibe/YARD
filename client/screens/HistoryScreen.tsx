@@ -64,9 +64,27 @@ export default function HistoryScreen() {
       style={styles.workoutItem}
     >
       <View style={styles.workoutHeader}>
-        <ThemedText style={styles.workoutDate}>
-          {formatDate(item.date)}
-        </ThemedText>
+        <View style={styles.workoutDateRow}>
+          <ThemedText style={styles.workoutDate}>
+            {formatDate(item.date)}
+          </ThemedText>
+          {/* Practice Mode Icon */}
+          {item.isPracticeMode && (
+            <View style={styles.practiceModeBadge}>
+              <ThemedText style={styles.practiceModeIcon}>🎯</ThemedText>
+            </View>
+          )}
+          {/* Official Submission Icon */}
+          {item.isOfficialSubmission && (
+            <View style={styles.officialBadge}>
+              <Feather
+                name="check-circle"
+                size={12}
+                color={Colors.dark.accent}
+              />
+            </View>
+          )}
+        </View>
         <ThemedText style={styles.workoutTime}>
           {formatDuration(item.duration)}
         </ThemedText>
@@ -84,6 +102,17 @@ export default function HistoryScreen() {
           </ThemedText>
         </View>
       </View>
+      {/* Practice Mode Details */}
+      {item.isPracticeMode && item.totalWorkTime && item.totalRestTime && (
+        <View style={styles.practiceDetails}>
+          <ThemedText style={styles.practiceDetailText}>
+            WORK: {formatDuration(Math.floor(item.totalWorkTime / 1000))}
+          </ThemedText>
+          <ThemedText style={styles.practiceDetailText}>
+            REST: {formatDuration(Math.floor(item.totalRestTime / 1000))}
+          </ThemedText>
+        </View>
+      )}
     </Animated.View>
   );
 
@@ -250,5 +279,34 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     color: Colors.dark.textSecondary,
     textAlign: "center",
+  },
+  // Practice mode styles
+  workoutDateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  practiceModeBadge: {
+    marginLeft: Spacing.xs,
+  },
+  practiceModeIcon: {
+    fontSize: 12,
+  },
+  officialBadge: {
+    marginLeft: Spacing.xs,
+  },
+  practiceDetails: {
+    flexDirection: "row",
+    gap: Spacing.lg,
+    marginTop: Spacing.sm,
+    paddingTop: Spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: Colors.dark.cardBorder,
+  },
+  practiceDetailText: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
   },
 });

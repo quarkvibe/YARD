@@ -24,8 +24,9 @@ export interface WorkoutRecord {
   totalPushups: number;
   totalSquats: number;
   cardsCompleted: number;
-  // Competitive mode data for anti-cheat
-  isCompetitive?: boolean;
+  // Practice mode data (for personal tracking with verified intervals)
+  isPracticeMode?: boolean; // 🎯 Rec Yard Practice - saved locally with special icon
+  isOfficialSubmission?: boolean; // Posted to Rec Yard community leaderboard
   intervals?: SetInterval[];
   totalWorkTime?: number; // Total time doing reps
   totalRestTime?: number; // Total rest time
