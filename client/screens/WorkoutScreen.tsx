@@ -1100,18 +1100,8 @@ export default function WorkoutScreen() {
         </Animated.View>
       )}
 
-      {/* Deck Stack - shows remaining cards above flip button */}
-      {cardsRemaining > 0 ? (
-        <View style={styles.deckStackContainer}>
-          <DeckStack
-            cardsRemaining={cardsRemaining}
-            totalCards={52}
-            deckStyleId={deckStyle.id}
-            size="small"
-          />
-          <ThemedText style={styles.deckStackLabel}>{cardsRemaining} LEFT</ThemedText>
-        </View>
-      ) : null}
+      {/* Spacer to account for absolute positioned button */}
+      <View style={styles.buttonSpacer} />
 
       {/* Button Area */}
       {competitiveMode &&
@@ -1463,16 +1453,8 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     color: Colors.dark.textSecondary,
   },
-  deckStackContainer: {
-    alignItems: "center",
-    marginBottom: Spacing.md,
-  },
-  deckStackLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 2,
-    color: Colors.dark.textSecondary,
-    marginTop: Spacing.xs,
+  buttonSpacer: {
+    height: 70, // Space for absolute positioned button (60px height + 10px margin)
   },
   flipButton: {
     position: "absolute",
