@@ -14,7 +14,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
   FadeIn,
@@ -31,62 +32,66 @@ import { ThemedText } from "@/components/ThemedText";
 import { ConcreteBackground } from "@/components/ConcreteBackground";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import { formatDuration } from "@/lib/storage";
+import { useRecYard, formatTimeAgo } from "@/hooks/useRecYard";
+import type { LeaderboardEntry } from "@/hooks/useRecYard";
 import {
-  RecYardProfile,
-  LeaderboardEntry,
-  WeeklyChallenge,
-  getRecYardProfile,
-  saveRecYardProfile,
-  createRecYardProfile,
-  pickProfilePhoto,
-  takeProfilePhoto,
-  updateProfilePhoto,
-  getMockLeaderboard,
-  getCurrentWeeklyChallenge,
-  getDaysUntilChallengeEnd,
-  getMyCallouts,
-  formatTimeAgo,
   TrashTalkMessage,
   TauntCategory,
-  Callout,
-  sendCallout,
-  getTrashTalkByCategory,
+  TRASH_TALK_PRESETS,
 } from "@/lib/recyard";
 import {
-  checkRecYardAccess,
-  restorePurchases,
   getRecYardPackages,
+  restorePurchases,
   purchaseRecYard,
 } from "@/lib/purchases";
+import * as ImagePicker from "expo-image-picker";
+import { supabase } from "@/lib/supabase";
 
 type TabType = "leaderboard" | "beef" | "profile";
+
+// Navigation types
+type MainTabParamList = {
+  HomeTab: undefined;
+  WorkoutTab: undefined;
+  HistoryTab: undefined;
+  RecYardTab: undefined;
+  SettingsTab: undefined;
+};
 
 export default function RecYardScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
+  const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
 
-  // Subscription state
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  // Use the Supabase-connected Rec Yard hook
+  const {
+    isLoading,
+    isSubscribed,
+    setIsSubscribed,
+    profile,
+    leaderboard,
+    weeklyChallenge,
+    sentCallouts,
+    receivedCallouts,
+    initialize,
+    refresh,
+    createProfile: hookCreateProfile,
+    updateProfile: hookUpdateProfile,
+    sendCallout: hookSendCallout,
+    getDaysUntilChallengeEnd,
+  } = useRecYard();
+
+  // Local UI state
   const [isPurchasing, setIsPurchasing] = useState(false);
-
-  // Profile state
-  const [profile, setProfile] = useState<RecYardProfile | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editHandle, setEditHandle] = useState("");
   const [editDisplayName, setEditDisplayName] = useState("");
   const [editBio, setEditBio] = useState("");
   const [editInstagram, setEditInstagram] = useState("");
-
-  // Content state
   const [activeTab, setActiveTab] = useState<TabType>("leaderboard");
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [weeklyChallenge, setWeeklyChallenge] =
-    useState<WeeklyChallenge | null>(null);
-  const [daysRemaining, setDaysRemaining] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Trash talk state
+  // Trash talk modal state
   const [showCalloutModal, setShowCalloutModal] = useState(false);
   const [calloutTarget, setCalloutTarget] = useState<LeaderboardEntry | null>(
     null,
@@ -94,49 +99,23 @@ export default function RecYardScreen() {
   const [selectedCategory, setSelectedCategory] =
     useState<TauntCategory>("challenge");
   const [customMessage, setCustomMessage] = useState("");
-  const [sentCallouts, setSentCallouts] = useState<Callout[]>([]);
-  const [receivedCallouts, setReceivedCallouts] = useState<Callout[]>([]);
 
   // Animation values
   const fireScale = useSharedValue(1);
 
-  // Load data on focus
+  // Calculate days remaining
+  const daysRemaining = getDaysUntilChallengeEnd();
+
+  // Refresh on focus
   useFocusEffect(
     useCallback(() => {
-      loadData();
-    }, []),
+      initialize();
+    }, [initialize]),
   );
-
-  const loadData = async () => {
-    setIsLoading(true);
-
-    // Check subscription status
-    // For MVP, we'll allow local testing without real IAP
-    const status = await checkRecYardAccess();
-    setIsSubscribed(status.isSubscribed);
-
-    // Load profile
-    const loadedProfile = await getRecYardProfile();
-    setProfile(loadedProfile);
-
-    // Load leaderboard
-    setLeaderboard(getMockLeaderboard());
-
-    // Load challenge
-    setWeeklyChallenge(getCurrentWeeklyChallenge());
-    setDaysRemaining(getDaysUntilChallengeEnd());
-
-    // Load callouts (trash talk)
-    const callouts = await getMyCallouts();
-    setSentCallouts(callouts.sent);
-    setReceivedCallouts(callouts.received);
-
-    setIsLoading(false);
-  };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadData();
+    await refresh();
     setRefreshing(false);
   };
 
@@ -148,9 +127,17 @@ export default function RecYardScreen() {
       const packages = await getRecYardPackages();
 
       if (packages.length === 0) {
-        // If no packages available (dev mode or config issue), allow access
-        console.log("[RecYard] No packages available - granting dev access");
-        setIsSubscribed(true);
+        // No packages available - show error with option to retry or restore
+        console.log("[RecYard] No packages available from RevenueCat");
+        Alert.alert(
+          "SUBSCRIPTION UNAVAILABLE",
+          "The subscription is being set up. Please try again in a few minutes, or restore if you've already purchased.",
+          [
+            { text: "TRY AGAIN", onPress: () => handleUnlock() },
+            { text: "RESTORE PURCHASE", onPress: handleRestore },
+            { text: "CANCEL", style: "cancel" },
+          ],
+        );
         setIsPurchasing(false);
         return;
       }
@@ -199,28 +186,91 @@ export default function RecYardScreen() {
       return;
     }
 
-    const newProfile = await createRecYardProfile(
+    const success = await hookCreateProfile(
       editHandle.trim(),
       editDisplayName.trim() || editHandle.trim(),
     );
-    setProfile(newProfile);
-    setIsEditingProfile(false);
+    if (success) {
+      setIsEditingProfile(false);
+    } else {
+      Alert.alert(
+        "ERROR",
+        "Failed to create profile. Handle may already be taken.",
+      );
+    }
   };
 
   const handleSaveProfile = async () => {
     if (!profile) return;
 
-    const updatedProfile: RecYardProfile = {
-      ...profile,
+    const success = await hookUpdateProfile({
       handle: editHandle.toUpperCase().replace(/[^A-Z0-9_]/g, ""),
       displayName: editDisplayName,
       bio: editBio,
       instagram: editInstagram,
-    };
+    });
 
-    await saveRecYardProfile(updatedProfile);
-    setProfile(updatedProfile);
-    setIsEditingProfile(false);
+    if (success) {
+      setIsEditingProfile(false);
+    } else {
+      Alert.alert("ERROR", "Failed to save profile.");
+    }
+  };
+
+  // Navigate to workout to participate in weekly challenge
+  const handleClockIn = () => {
+    if (!weeklyChallenge) {
+      Alert.alert("NO CHALLENGE", "No active weekly challenge right now.");
+      return;
+    }
+
+    Alert.alert(
+      "CLOCK IN",
+      `Join the "${weeklyChallenge.exerciseType.toUpperCase()} ${weeklyChallenge.intensity.toUpperCase()}" challenge?\n\nComplete a workout to submit your time to the leaderboard!`,
+      [
+        { text: "CANCEL", style: "cancel" },
+        {
+          text: "LET'S GO",
+          onPress: () => {
+            // Navigate to workout screen
+            navigation.navigate("WorkoutTab");
+          },
+        },
+      ],
+    );
+  };
+
+  const uploadPhoto = async (uri: string) => {
+    if (!profile) return;
+
+    try {
+      // Create file from URI
+      const filename = `${profile.id}-${Date.now()}.jpg`;
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      // Upload to Supabase Storage
+      const { error } = await supabase.storage
+        .from("profile-photos")
+        .upload(filename, blob, { contentType: "image/jpeg", upsert: true });
+
+      if (error) {
+        console.error("[RecYard] Photo upload error:", error);
+        Alert.alert("UPLOAD FAILED", "Could not upload photo.");
+        return;
+      }
+
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("profile-photos").getPublicUrl(filename);
+
+      // Update profile with new photo URL
+      await hookUpdateProfile({ photoUrl: publicUrl });
+    } catch (err) {
+      console.error("[RecYard] Photo upload error:", err);
+      Alert.alert("UPLOAD FAILED", "Could not upload photo.");
+    }
   };
 
   const handlePickPhoto = async () => {
@@ -231,20 +281,43 @@ export default function RecYardScreen() {
         {
           text: "CAMERA",
           onPress: async () => {
-            const uri = await takeProfilePhoto();
-            if (uri) {
-              await updateProfilePhoto(uri);
-              setProfile((prev) => (prev ? { ...prev, photoUri: uri } : null));
+            const { status } =
+              await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== "granted") {
+              Alert.alert("PERMISSION DENIED", "Camera access is required.");
+              return;
+            }
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.7,
+            });
+            if (!result.canceled && result.assets[0]) {
+              await uploadPhoto(result.assets[0].uri);
             }
           },
         },
         {
           text: "LIBRARY",
           onPress: async () => {
-            const uri = await pickProfilePhoto();
-            if (uri) {
-              await updateProfilePhoto(uri);
-              setProfile((prev) => (prev ? { ...prev, photoUri: uri } : null));
+            const { status } =
+              await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== "granted") {
+              Alert.alert(
+                "PERMISSION DENIED",
+                "Photo library access is required.",
+              );
+              return;
+            }
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.7,
+            });
+            if (!result.canceled && result.assets[0]) {
+              await uploadPhoto(result.assets[0].uri);
             }
           },
         },
@@ -278,16 +351,14 @@ export default function RecYardScreen() {
   const handleSendCallout = async (message: string, messageId?: string) => {
     if (!calloutTarget || !profile) return;
 
-    const callout = await sendCallout(
+    const success = await hookSendCallout(
       calloutTarget.profileId,
       calloutTarget.handle,
-      calloutTarget.photoUri,
       message,
-      messageId || null,
+      messageId,
     );
 
-    if (callout) {
-      setSentCallouts((prev) => [callout, ...prev]);
+    if (success) {
       setShowCalloutModal(false);
       setCalloutTarget(null);
 
@@ -301,11 +372,13 @@ export default function RecYardScreen() {
         "🔥 CALLOUT SENT",
         `You just called out @${calloutTarget.handle}. Let's see if they respond.`,
       );
+    } else {
+      Alert.alert("ERROR", "Failed to send callout.");
     }
   };
 
   const getCategoryMessages = (category: TauntCategory): TrashTalkMessage[] => {
-    return getTrashTalkByCategory(category);
+    return TRASH_TALK_PRESETS.filter((m) => m.category === category);
   };
 
   const fireAnimatedStyle = useAnimatedStyle(() => ({
@@ -594,8 +667,8 @@ export default function RecYardScreen() {
       </View>
 
       <View style={styles.avatarSmall}>
-        {item.photoUri ? (
-          <Image source={{ uri: item.photoUri }} style={styles.avatarImage} />
+        {item.photoUrl ? (
+          <Image source={{ uri: item.photoUrl }} style={styles.avatarImage} />
         ) : (
           <Feather name="user" size={16} color={Colors.dark.textSecondary} />
         )}
@@ -668,14 +741,16 @@ export default function RecYardScreen() {
             </View>
           </View>
 
-          <Pressable style={styles.clockInButton}>
+          <Pressable style={styles.clockInButton} onPress={handleClockIn}>
             <Feather
-              name="video"
+              name="play"
               size={16}
               color={Colors.dark.backgroundRoot}
               style={{ marginRight: 8 }}
             />
-            <ThemedText style={styles.clockInButtonText}>CLOCK IN</ThemedText>
+            <ThemedText style={styles.clockInButtonText}>
+              JOIN CHALLENGE
+            </ThemedText>
           </Pressable>
         </Animated.View>
       )}
@@ -749,9 +824,9 @@ export default function RecYardScreen() {
                 <View style={styles.calloutHeader}>
                   <View style={styles.calloutUser}>
                     <View style={styles.avatarSmall}>
-                      {callout.fromPhotoUri ? (
+                      {callout.fromPhotoUrl ? (
                         <Image
-                          source={{ uri: callout.fromPhotoUri }}
+                          source={{ uri: callout.fromPhotoUrl }}
                           style={styles.avatarImage}
                         />
                       ) : (
@@ -780,9 +855,10 @@ export default function RecYardScreen() {
                     style={styles.respondButton}
                     onPress={() => {
                       setCalloutTarget({
+                        id: callout.fromProfileId,
                         profileId: callout.fromProfileId,
                         handle: callout.fromHandle,
-                        photoUri: callout.fromPhotoUri,
+                        photoUrl: callout.fromPhotoUrl,
                         rank: 0,
                         displayName: callout.fromHandle,
                         time: 0,
@@ -987,9 +1063,9 @@ export default function RecYardScreen() {
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           <Pressable style={styles.avatarLarge} onPress={handlePickPhoto}>
-            {profile.photoUri ? (
+            {profile.photoUrl ? (
               <Image
-                source={{ uri: profile.photoUri }}
+                source={{ uri: profile.photoUrl }}
                 style={styles.avatarImageLarge}
               />
             ) : (

@@ -30,6 +30,16 @@ export interface LeaderboardEntry {
   intensity: string;
 }
 
+export interface Badge {
+  id: string;
+  badgeId: string;
+  name: string;
+  description: string;
+  icon: string;
+  rarity: "common" | "rare" | "epic" | "legendary";
+  earnedAt: string;
+}
+
 export interface RecYardProfile {
   id: string;
   handle: string;
@@ -42,6 +52,7 @@ export interface RecYardProfile {
   currentStreak: number;
   longestStreak: number;
   isVerified: boolean;
+  badges: Badge[];
 }
 
 export interface WeeklyChallenge {
@@ -117,7 +128,24 @@ export function useRecYard() {
         .single();
 
       if (profileData) {
-        setProfile(mapDbProfileToProfile(profileData));
+        // Load badges for this profile
+        const { data: badgesData } = await supabase
+          .from("badges")
+          .select("*")
+          .eq("profile_id", profileData.id)
+          .order("created_at", { ascending: false });
+
+        const badges: Badge[] = (badgesData || []).map((b) => ({
+          id: b.id,
+          badgeId: b.badge_id,
+          name: b.name,
+          description: b.description || "",
+          icon: b.icon || "award",
+          rarity: b.rarity as Badge["rarity"],
+          earnedAt: b.created_at,
+        }));
+
+        setProfile(mapDbProfileToProfile(profileData, badges));
       }
 
       // Load leaderboard
@@ -347,7 +375,7 @@ export function useRecYard() {
           `,
             )
             .eq("from_profile_id", profileId)
-            .eq("is_hidden", false)
+            .eq("is_deleted", false)
             .order("created_at", { ascending: false }),
 
           supabase
@@ -359,7 +387,7 @@ export function useRecYard() {
           `,
             )
             .eq("to_profile_id", profileId)
-            .eq("is_hidden", false)
+            .eq("is_deleted", false)
             .order("created_at", { ascending: false }),
         ]);
 
@@ -511,7 +539,10 @@ export function useRecYard() {
   // HELPERS
   // ============================================
 
-  function mapDbProfileToProfile(dbProfile: DbProfile): RecYardProfile {
+  function mapDbProfileToProfile(
+    dbProfile: DbProfile,
+    badges: Badge[] = [],
+  ): RecYardProfile {
     return {
       id: dbProfile.id,
       handle: dbProfile.handle,
@@ -524,6 +555,7 @@ export function useRecYard() {
       currentStreak: dbProfile.current_streak,
       longestStreak: dbProfile.longest_streak,
       isVerified: dbProfile.is_verified,
+      badges,
     };
   }
 
