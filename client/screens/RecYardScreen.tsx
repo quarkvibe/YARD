@@ -60,14 +60,7 @@ type TabType =
   | "barbershop"
   | "profile";
 
-// Navigation types
-type MainTabParamList = {
-  HomeTab: undefined;
-  WorkoutTab: undefined;
-  HistoryTab: undefined;
-  RecYardTab: undefined;
-  SettingsTab: undefined;
-};
+import { MainTabParamList } from "@/navigation/MainTabNavigator";
 
 export default function RecYardScreen() {
   const insets = useSafeAreaInsets();
@@ -275,7 +268,7 @@ export default function RecYardScreen() {
     }
 
     Alert.alert(
-      "CLOCK IN 🏋️",
+      "CLOCK IN",
       `Join the "${weeklyChallenge.exerciseType.toUpperCase()} ${weeklyChallenge.intensity.toUpperCase()}" challenge?\n\n• Your time will be submitted to the leaderboard\n• Practice Mode will be auto-enabled\n• SET DONE tracking is required`,
       [
         { text: "CANCEL", style: "cancel" },
@@ -508,7 +501,7 @@ export default function RecYardScreen() {
         </View>
 
         <View style={styles.featureItem}>
-          <ThemedText style={{ fontSize: 20 }}>🔥</ThemedText>
+          <Feather name="message-circle" size={20} color={Colors.dark.accent} />
           <View style={styles.featureContent}>
             <ThemedText style={styles.featureTitle}>TRASH TALK</ThemedText>
             <ThemedText style={styles.featureDesc}>
@@ -556,6 +549,15 @@ export default function RecYardScreen() {
             RESTORE PURCHASE
           </ThemedText>
         </Pressable>
+      </Animated.View>
+
+      <Animated.View entering={FadeIn.delay(500)} style={styles.freeFeatureSection}>
+        <ThemedText style={styles.freeFeatureTitle}>FREE FEATURES</ThemedText>
+        <ThemedText style={styles.freeFeatureText}>
+          Share workouts from History tab{"\n"}
+          Set up your profile in Settings{"\n"}
+          Practice mode with set tracking
+        </ThemedText>
       </Animated.View>
     </ScrollView>
   );
@@ -2189,6 +2191,26 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 1,
     color: Colors.dark.textSecondary,
+  },
+  freeFeatureSection: {
+    marginTop: Spacing["2xl"],
+    alignItems: "center",
+    paddingTop: Spacing.xl,
+    borderTopWidth: 1,
+    borderTopColor: Colors.dark.cardBorder,
+  },
+  freeFeatureTitle: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    marginBottom: Spacing.md,
+  },
+  freeFeatureText: {
+    fontSize: 12,
+    color: Colors.dark.textSecondary,
+    textAlign: "center",
+    lineHeight: 20,
   },
 
   // Profile Setup

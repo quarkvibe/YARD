@@ -47,22 +47,22 @@ export default function HistoryScreen() {
       const profile = await getProfile();
       const handle = profile.handle ? `@${profile.handle}` : "";
       const socials = [
-        profile.instagram && `📸 @${profile.instagram}`,
-        profile.tiktok && `🎵 @${profile.tiktok}`,
-        profile.twitter && `🐦 @${profile.twitter}`,
+        profile.instagram && `IG: @${profile.instagram}`,
+        profile.tiktok && `TT: @${profile.tiktok}`,
+        profile.twitter && `X: @${profile.twitter}`,
       ]
         .filter(Boolean)
         .join(" | ");
 
-      let message = `🏋️ YARD WORKOUT\n\n`;
-      message += `📅 ${formatDate(workout.date)}\n`;
-      message += `⏱️ Time: ${formatDuration(workout.duration)}\n`;
-      message += `💪 Pushups: ${workout.totalPushups}\n`;
-      message += `🦵 Squats: ${workout.totalSquats}\n`;
-      message += `📋 Mode: ${workout.ruleSetName}\n`;
+      let message = `YARD WORKOUT COMPLETE\n\n`;
+      message += `${formatDate(workout.date)}\n`;
+      message += `Time: ${formatDuration(workout.duration)}\n`;
+      message += `Pushups: ${workout.totalPushups}\n`;
+      message += `Squats: ${workout.totalSquats}\n`;
+      message += `Mode: ${workout.ruleSetName}\n`;
 
       if (workout.isPracticeMode) {
-        message += `🎯 Practice Mode Verified\n`;
+        message += `[VERIFIED]\n`;
       }
 
       if (handle) {
@@ -72,7 +72,7 @@ export default function HistoryScreen() {
         message += `\n${socials}`;
       }
 
-      message += `\n\n🏋️ Download YARD Fitness and start your sentence!`;
+      message += `\n\nDownload YARD and start your sentence.`;
 
       await Share.share({ message });
     } catch (error) {
@@ -108,11 +108,15 @@ export default function HistoryScreen() {
             {formatDate(item.date)}
           </ThemedText>
           {/* Practice Mode Icon */}
-          {item.isPracticeMode && (
+          {item.isPracticeMode ? (
             <View style={styles.practiceModeBadge}>
-              <ThemedText style={styles.practiceModeIcon}>🎯</ThemedText>
+              <Feather
+                name="target"
+                size={12}
+                color={Colors.dark.accent}
+              />
             </View>
-          )}
+          ) : null}
           {/* Official Submission Icon */}
           {item.isOfficialSubmission && (
             <View style={styles.officialBadge}>
@@ -336,9 +340,6 @@ const styles = StyleSheet.create({
   },
   practiceModeBadge: {
     marginLeft: Spacing.xs,
-  },
-  practiceModeIcon: {
-    fontSize: 12,
   },
   officialBadge: {
     marginLeft: Spacing.xs,

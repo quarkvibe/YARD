@@ -686,8 +686,8 @@ export default function SettingsScreen() {
         </View>
 
         <ThemedText style={styles.competitiveModeHint}>
-          Practice times are saved locally with a 🎯 icon.{"\n"}
-          Join the Rec Yard to post official times to the leaderboard!
+          Practice times are saved locally and marked as verified.{"\n"}
+          Join the Rec Yard to post official times to the leaderboard.
         </ThemedText>
 
         <ThemedText style={styles.versionText}>VERSION 1.0.0</ThemedText>

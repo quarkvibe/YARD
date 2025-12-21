@@ -979,7 +979,7 @@ export default function WorkoutScreen() {
               competitiveMode && styles.competitionToggleTextActive,
             ]}
           >
-            {competitiveMode ? "🎯 REC YARD PRACTICE" : "PRACTICE MODE"}
+            {competitiveMode ? "REC YARD PRACTICE" : "PRACTICE MODE"}
           </ThemedText>
         </Pressable>
       )}
@@ -1216,17 +1216,17 @@ export default function WorkoutScreen() {
         </ThemedText>
       </Pressable>
 
-      {!isOfficialRecYardSubmission && competitiveMode && (
+      {!isOfficialRecYardSubmission && competitiveMode ? (
         <ThemedText style={styles.practiceModeSavedText}>
-          🎯 Practice time saved to personal records
+          Practice time saved to personal records
         </ThemedText>
-      )}
+      ) : null}
 
-      {isOfficialRecYardSubmission && (
+      {isOfficialRecYardSubmission ? (
         <ThemedText style={styles.officialSubmittedText}>
-          🏆 Official time submitted to Rec Yard leaderboard!
+          Official time submitted to Rec Yard leaderboard
         </ThemedText>
-      )}
+      ) : null}
     </Animated.View>
   );
 
