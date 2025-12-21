@@ -15,16 +15,16 @@ import { getDeckStyleById } from "@/lib/storage";
 
 // Import deck back images
 const DECK_IMAGES: Record<string, any> = {
-  yard: require("../../attached_assets/generated_images/yard_app_icon_tally_marks.png"),
-  military: require("../../attached_assets/generated_images/military_tactical_deck_cards.png"),
-  prison: require("../../attached_assets/generated_images/prison_yard_deck_cards.png"),
-  vintage: require("../../attached_assets/generated_images/classic_vintage_casino_cards.png"),
-  geometric: require("../../attached_assets/generated_images/modern_geometric_deck_cards.png"),
-  dayofdead: require("../../attached_assets/generated_images/day_of_dead_skull_cards.png"),
-  samurai: require("../../attached_assets/generated_images/japanese_samurai_deck_cards.png"),
-  anime: require("../../attached_assets/generated_images/anime_schoolgirl_deck_cards.png"),
+  yard: require("../../attached_assets/generated_images/yard_deck_back_design.png"),
+  military: require("../../attached_assets/generated_images/tactical_deck_back_design.png"),
+  prison: require("../../attached_assets/generated_images/lockup_deck_back_design.png"),
+  vintage: require("../../attached_assets/generated_images/casino_deck_back_design.png"),
+  geometric: require("../../attached_assets/generated_images/neon_deck_back_design.png"),
+  dayofdead: require("../../attached_assets/generated_images/calavera_deck_back_design.png"),
+  samurai: require("../../attached_assets/generated_images/ronin_deck_back_design.png"),
+  anime: require("../../attached_assets/generated_images/kawaii_deck_back_design.png"),
   cosplay: require("../../attached_assets/generated_images/cosplay_deck_back_design.png"),
-  hunters: require("../../attached_assets/generated_images/anime_hunters_demon_fighting_deck.png"),
+  hunters: require("../../attached_assets/generated_images/hunters_deck_back_design.png"),
 };
 
 // Face card images for high-value cards (10, J, Q, K, A) per deck style
