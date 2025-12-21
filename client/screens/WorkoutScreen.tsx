@@ -66,11 +66,13 @@ export default function WorkoutScreen() {
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [hapticsEnabled, setHapticsEnabled] = useState(false);
   const [activeCards, setActiveCards] = useState<CardValue[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeReps, setActiveReps] = useState(0);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const buttonScale = useSharedValue(1);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const currentCard =
     activeCards.length > 0 ? activeCards[activeCards.length - 1] : null;
   const cardsRemaining = deck.length - currentCardIndex - 1;
@@ -455,6 +457,175 @@ export default function WorkoutScreen() {
     transform: [{ scale: buttonScale.value }],
   }));
 
+  // Helper to get rep value from a card
+  const getCardReps = (card: CardValue): number => {
+    const ruleSet = getRuleSetById(ruleSetId);
+    return ruleSet.cardValues[card.rank as keyof typeof ruleSet.cardValues];
+  };
+
+  // Determine if we're in a split superset mode (where cards are divided by exercise)
+  const isSplitMode =
+    exerciseType === "superset" &&
+    (supersetModeId === "split2" ||
+      supersetModeId === "split4" ||
+      supersetModeId === "splitunder20");
+
+  // Render card display based on mode
+  const renderCardDisplay = () => {
+    // Single card mode (Fresh Fish or single exercise)
+    if (activeCards.length === 1) {
+      const card = activeCards[0];
+      const reps = getCardReps(card);
+      const currentExercise =
+        exerciseType === "pushups"
+          ? "PUSHUPS"
+          : exerciseType === "squats"
+            ? "SQUATS"
+            : alternatingExercise === "pushups"
+              ? "PUSHUPS"
+              : "SQUATS";
+
+      return (
+        <>
+          <View style={styles.singleCardHeader}>
+            <ThemedText
+              style={[
+                styles.bigRepNumber,
+                {
+                  color:
+                    currentExercise === "PUSHUPS"
+                      ? Colors.dark.pushups
+                      : Colors.dark.squats,
+                },
+              ]}
+            >
+              {reps}
+            </ThemedText>
+            <ThemedText style={styles.exerciseLabel}>
+              {currentExercise}
+            </ThemedText>
+          </View>
+          <View style={styles.cardContainer}>
+            <PlayingCard card={card} isFlipped={true} />
+          </View>
+        </>
+      );
+    }
+
+    // Split mode - show cards separated by exercise
+    if (isSplitMode && activeCards.length >= 2) {
+      const halfIndex = Math.floor(activeCards.length / 2);
+      const pushupCards = activeCards.slice(0, halfIndex);
+      const squatCards = activeCards.slice(halfIndex);
+
+      const pushupReps = pushupCards.reduce(
+        (sum, c) => sum + getCardReps(c),
+        0,
+      );
+      const squatReps = squatCards.reduce((sum, c) => sum + getCardReps(c), 0);
+
+      return (
+        <>
+          <View style={styles.splitCardContainer}>
+            {/* Pushups Side */}
+            <View style={styles.splitSide}>
+              <ThemedText
+                style={[styles.splitRepNumber, { color: Colors.dark.pushups }]}
+              >
+                {pushupReps}
+              </ThemedText>
+              <ThemedText style={styles.splitExerciseLabel}>PUSHUPS</ThemedText>
+              <View style={styles.splitCardStack}>
+                {pushupCards.map((card, index) => (
+                  <Animated.View
+                    key={`pushup-${card.suit}-${card.rank}-${index}`}
+                    entering={FadeIn.delay(index * 50)}
+                    style={[
+                      styles.splitCard,
+                      { marginLeft: index > 0 ? -30 : 0 },
+                    ]}
+                  >
+                    <PlayingCard card={card} isFlipped={true} size="small" />
+                  </Animated.View>
+                ))}
+              </View>
+            </View>
+
+            {/* Divider */}
+            <View style={styles.splitDivider} />
+
+            {/* Squats Side */}
+            <View style={styles.splitSide}>
+              <ThemedText
+                style={[styles.splitRepNumber, { color: Colors.dark.squats }]}
+              >
+                {squatReps}
+              </ThemedText>
+              <ThemedText style={styles.splitExerciseLabel}>SQUATS</ThemedText>
+              <View style={styles.splitCardStack}>
+                {squatCards.map((card, index) => (
+                  <Animated.View
+                    key={`squat-${card.suit}-${card.rank}-${index}`}
+                    entering={FadeIn.delay(index * 50 + 100)}
+                    style={[
+                      styles.splitCard,
+                      { marginLeft: index > 0 ? -30 : 0 },
+                    ]}
+                  >
+                    <PlayingCard card={card} isFlipped={true} size="small" />
+                  </Animated.View>
+                ))}
+              </View>
+            </View>
+          </View>
+        </>
+      );
+    }
+
+    // Multi-card alternating mode - show all cards with total
+    const totalReps = activeCards.reduce((sum, c) => sum + getCardReps(c), 0);
+    return (
+      <>
+        <View style={styles.exerciseBadge}>
+          <ThemedText style={styles.exerciseText}>{totalReps} REPS</ThemedText>
+          <ThemedText style={styles.cardCountText}>
+            ({activeCards.length} CARDS)
+          </ThemedText>
+        </View>
+        <View style={styles.cardContainer}>
+          <View style={styles.multiCardStack}>
+            {activeCards.map((card, index) => (
+              <Animated.View
+                key={`${card.suit}-${card.rank}-${index}`}
+                entering={FadeIn.delay(index * 80)}
+                style={[
+                  styles.stackedCard,
+                  {
+                    transform: [
+                      {
+                        translateX: (index - (activeCards.length - 1) / 2) * 45,
+                      },
+                      {
+                        rotate: `${(index - (activeCards.length - 1) / 2) * 5}deg`,
+                      },
+                      {
+                        translateY:
+                          Math.abs(index - (activeCards.length - 1) / 2) * 8,
+                      },
+                    ],
+                    zIndex: index,
+                  },
+                ]}
+              >
+                <PlayingCard card={card} isFlipped={true} size="small" />
+              </Animated.View>
+            ))}
+          </View>
+        </View>
+      </>
+    );
+  };
+
   const renderIdleState = () => (
     <Animated.View
       entering={FadeIn}
@@ -514,56 +685,19 @@ export default function WorkoutScreen() {
       </View>
 
       {activeCards.length > 0 ? (
-        <View style={styles.exerciseBadge}>
-          <ThemedText style={styles.exerciseText}>{activeReps} REPS</ThemedText>
-          {activeCards.length > 1 ? (
-            <ThemedText style={styles.cardCountText}>
-              ({activeCards.length} CARDS)
-            </ThemedText>
-          ) : null}
-        </View>
+        renderCardDisplay()
       ) : (
-        <View style={styles.exerciseBadgePlaceholder}>
-          <ThemedText style={styles.tapToStartText}>
-            TAP FLIP TO START
-          </ThemedText>
-        </View>
-      )}
-
-      <View style={styles.cardContainer}>
-        {activeCards.length > 1 ? (
-          <View style={styles.multiCardStack}>
-            {activeCards.map((card, index) => (
-              <Animated.View
-                key={`${card.suit}-${card.rank}-${index}`}
-                entering={FadeIn.delay(index * 80)}
-                style={[
-                  styles.stackedCard,
-                  {
-                    transform: [
-                      {
-                        translateX: (index - (activeCards.length - 1) / 2) * 45,
-                      },
-                      {
-                        rotate: `${(index - (activeCards.length - 1) / 2) * 5}deg`,
-                      },
-                      {
-                        translateY:
-                          Math.abs(index - (activeCards.length - 1) / 2) * 8,
-                      },
-                    ],
-                    zIndex: index,
-                  },
-                ]}
-              >
-                <PlayingCard card={card} isFlipped={true} size="small" />
-              </Animated.View>
-            ))}
+        <>
+          <View style={styles.exerciseBadgePlaceholder}>
+            <ThemedText style={styles.tapToStartText}>
+              TAP FLIP TO START
+            </ThemedText>
           </View>
-        ) : (
-          <PlayingCard card={currentCard} isFlipped={currentCardIndex >= 0} />
-        )}
-      </View>
+          <View style={styles.cardContainer}>
+            <PlayingCard card={null} isFlipped={false} />
+          </View>
+        </>
+      )}
 
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>
@@ -972,5 +1106,63 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 2,
     color: Colors.dark.textSecondary,
+  },
+  // Single card display with large rep number
+  singleCardHeader: {
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+  },
+  bigRepNumber: {
+    fontSize: 72,
+    fontWeight: "900",
+    letterSpacing: 2,
+  },
+  exerciseLabel: {
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 3,
+    color: Colors.dark.textSecondary,
+    marginTop: Spacing.xs,
+  },
+  // Split card display for superset split modes
+  splitCardContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.lg,
+    gap: Spacing.lg,
+  },
+  splitSide: {
+    flex: 1,
+    alignItems: "center",
+  },
+  splitRepNumber: {
+    fontSize: 48,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+  splitExerciseLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
+  },
+  splitCardStack: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  splitCard: {
+    // Individual card in split view
+  },
+  splitDivider: {
+    width: 2,
+    height: 180,
+    backgroundColor: Colors.dark.cardBorder,
+    alignSelf: "center",
+    opacity: 0.5,
   },
 });
