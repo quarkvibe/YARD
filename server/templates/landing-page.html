@@ -1,465 +1,895 @@
-<!doctype html>
-<html>
-  <head>
-    <title>APP_NAME_PLACEHOLDER</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        margin: 0;
-        padding: 32px 20px;
-        text-align: center;
-        background: #fff;
-        color: #222;
-        line-height: 1.5;
-        min-height: 100vh;
-      }
-      .wrapper {
-        max-width: 480px;
-        margin: 0 auto;
-      }
-      h1 {
-        font-size: 26px;
-        font-weight: 600;
-        margin: 0;
-        color: #111;
-      }
-      .subtitle {
-        font-size: 15px;
-        color: #666;
-        margin-top: 8px;
-        margin-bottom: 32px;
-      }
-      .loading {
-        display: none;
-        margin: 60px 0;
-      }
-      .spinner {
-        border: 2px solid #ddd;
-        border-top-color: #333;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        animation: spin 0.8s linear infinite;
-        margin: 20px auto;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-      .loading-text {
-        font-size: 16px;
-        color: #444;
-      }
-      .content {
-        display: block;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YARD - Deck of Cards Workout</title>
+  <meta name="description" content="YARD is a brutally simple fitness app. Flip cards. Do reps. Beat your time. No excuses.">
+  <meta name="theme-color" content="#0B0B0B">
+  <link rel="icon" type="image/png" href="/static/images/app-icon.png">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="YARD - Deck of Cards Workout">
+  <meta property="og:description" content="Flip cards. Do reps. Beat your time. No excuses.">
+  <meta property="og:image" content="/static/images/scattered_cards_on_concrete.png">
+  <meta property="og:type" content="website">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0B0B0B;
+      --bg-elevated: #141414;
+      --text: #E8E4D9;
+      --text-muted: #6B6B6B;
+      --accent: #D4A574;
+      --accent-dim: rgba(212, 165, 116, 0.15);
+      --red: #C75B5B;
+      --blue: #5B8BC7;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4 {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      line-height: 1.1;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      padding: 80px 24px;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: url('/static/images/dark_prison_yard_concrete.png') center/cover no-repeat;
+      opacity: 0.3;
+      z-index: -2;
+    }
+
+    .hero-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, 
+        rgba(11, 11, 11, 0.4) 0%,
+        rgba(11, 11, 11, 0.6) 50%,
+        rgba(11, 11, 11, 1) 100%
+      );
+      z-index: -1;
+    }
+
+    .hero-content {
+      max-width: 700px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 32px;
+    }
+
+    .hero h1 {
+      font-size: clamp(64px, 15vw, 140px);
+      letter-spacing: 0.15em;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .hero-tagline {
+      font-size: clamp(18px, 4vw, 28px);
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+    }
+
+    .hero-description {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 500px;
+      margin: 0 auto 48px;
+      line-height: 1.7;
+    }
+
+    .cta-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .cta-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 40px;
+      background: var(--text);
+      color: var(--bg);
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .cta-primary:hover {
+      background: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .cta-secondary {
+      color: var(--text-muted);
+      font-size: 14px;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+
+    .cta-secondary:hover {
+      color: var(--text);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* How It Works Section */
+    .section {
+      padding: 120px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 16px;
+    }
+
+    .section h2 {
+      font-size: clamp(32px, 6vw, 48px);
+      color: var(--text);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+
+    .step {
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border: 2px solid var(--text-muted);
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .step h3 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .step p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* Features Section */
+    .features {
+      background: var(--bg-elevated);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      background: var(--bg);
+    }
+
+    .feature {
+      background: var(--bg-elevated);
+      padding: 48px 40px;
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      color: var(--accent);
+    }
+
+    .feature h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .feature p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* Intensity Section */
+    .intensity-section {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .intensity-bg {
+      position: absolute;
+      inset: 0;
+      background: url('/static/images/scattered_cards_on_concrete.png') center/cover no-repeat;
+      opacity: 0.15;
+      z-index: -1;
+    }
+
+    .intensity-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .intensity-card {
+      background: rgba(20, 20, 20, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 40px 32px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .intensity-card h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .intensity-reps {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 16px 0;
+    }
+
+    .intensity-reps span {
+      font-size: 16px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .intensity-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Card Preview */
+    .preview-section {
+      background: var(--bg);
+    }
+
+    .preview-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .preview-text h2 {
+      font-size: clamp(28px, 5vw, 40px);
+      margin-bottom: 24px;
+    }
+
+    .preview-text p {
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 32px;
+    }
+
+    .exercise-tags {
+      display: flex;
+      gap: 16px;
+    }
+
+    .exercise-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--bg-elevated);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .exercise-tag.pushups {
+      color: var(--red);
+      border-color: var(--red);
+    }
+
+    .exercise-tag.squats {
+      color: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .preview-image {
+      position: relative;
+    }
+
+    .preview-image img {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      display: block;
+      border-radius: 8px;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Pricing */
+    .pricing-section {
+      background: var(--bg-elevated);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: var(--bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 48px 40px;
+      text-align: center;
+    }
+
+    .pricing-card.featured {
+      border-color: var(--accent);
+      position: relative;
+    }
+
+    .pricing-card.featured::before {
+      content: 'COMPETITIVE MODE';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: var(--bg);
+      padding: 4px 16px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+
+    .pricing-card h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .pricing-price {
+      font-size: 48px;
+      font-weight: 700;
+      margin: 24px 0;
+    }
+
+    .pricing-price span {
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+
+    .pricing-features li {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pricing-features li::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+    }
+
+    /* Final CTA */
+    .final-cta {
+      text-align: center;
+      padding: 160px 24px;
+      position: relative;
+    }
+
+    .final-cta h2 {
+      font-size: clamp(36px, 8vw, 64px);
+      margin-bottom: 24px;
+    }
+
+    .final-cta p {
+      color: var(--text-muted);
+      font-size: 18px;
+      margin-bottom: 48px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 48px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 24px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    .footer-copy {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 900px) {
+      .steps {
+        grid-template-columns: 1fr;
+        gap: 24px;
       }
 
-      .steps-container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .intensity-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .preview-content {
+        grid-template-columns: 1fr;
+        gap: 48px;
+        text-align: center;
+      }
+
+      .preview-image {
+        order: -1;
+      }
+
+      .exercise-tags {
+        justify-content: center;
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: 100svh;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .section {
+        padding: 80px 0;
       }
 
       .step {
-        padding: 24px;
-        border: 1px solid #ddd;
-        border-radius: 12px;
-        text-align: center;
-        background: #fafafa;
-      }
-      .step-header {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 12px;
-      }
-      .step-number {
-        width: 28px;
-        height: 28px;
-        border: 1px solid #999;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 14px;
-        flex-shrink: 0;
-        color: #555;
-      }
-      .step-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin: 0;
-        color: #222;
-      }
-      .step-description {
-        font-size: 14px;
-        margin-bottom: 16px;
-        color: #666;
+        padding: 32px 16px;
       }
 
-      .store-buttons {
-        display: flex;
+      .feature {
+        padding: 32px 24px;
+      }
+
+      .pricing-card {
+        padding: 40px 24px;
+      }
+
+      .footer-links {
         flex-direction: column;
-        gap: 6px;
-        justify-content: center;
-        flex-wrap: wrap;
+        gap: 16px;
       }
-      .store-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 20px;
-        font-size: 14px;
-        font-weight: 500;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        text-decoration: none;
-        color: #333;
-        background: #fff;
-        transition: all 0.15s;
-      }
-      .store-button:hover {
-        background: #f5f5f5;
-        border-color: #999;
-      }
-      .store-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 8px 0;
-        font-size: 13px;
-        font-weight: 400;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-        color: #666;
-        background: none;
-        border: none;
-        transition: color 0.15s;
-      }
-      .store-link:hover {
-        color: #333;
-      }
-      .store-link .store-icon {
-        width: 14px;
-        height: 14px;
-      }
-      .store-icon {
-        width: 18px;
-        height: 18px;
-      }
+    }
 
-      .qr-section {
-        background: #333;
-        color: #fff;
-        border-color: #333;
-      }
-      .qr-section .step-number {
-        border-color: rgba(255, 255, 255, 0.5);
-        color: #fff;
-      }
-      .qr-section .step-title {
-        color: #fff;
-      }
-      .qr-section .step-description {
-        color: rgba(255, 255, 255, 0.7);
-      }
-      .qr-code {
-        width: 180px;
-        height: 180px;
-        margin: 0 auto 16px;
-        background: #fff;
-        border-radius: 8px;
-        padding: 12px;
-      }
-      .qr-code canvas {
-        width: 100%;
-        height: 100%;
-      }
-      .open-button {
-        display: inline-block;
-        padding: 12px 24px;
-        font-size: 14px;
-        font-weight: 500;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 8px;
-        text-decoration: none;
-        color: #333;
-        background: #fff;
-        transition: opacity 0.15s;
-      }
-      .open-button:hover {
-        opacity: 0.9;
-      }
+    /* App Store Badges */
+    .store-badges {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
 
-      /* Desktop styles */
-      @media (min-width: 768px) {
-        body {
-          padding: 48px 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .wrapper {
-          max-width: 720px;
-        }
-        h1 {
-          font-size: 32px;
-          margin-bottom: 10px;
-        }
-        .subtitle {
-          font-size: 16px;
-          margin-bottom: 40px;
-        }
-        .steps-container {
-          flex-direction: row;
-          gap: 20px;
-          align-items: stretch;
-        }
-        .step {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          padding: 28px;
-        }
-        .step-description {
-          flex-grow: 1;
-        }
-        .store-buttons {
-          flex-direction: column;
-          gap: 10px;
-        }
-        .qr-code {
-          width: 200px;
-          height: 200px;
-        }
-      }
+    .store-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      background: transparent;
+      border: 1px solid var(--text-muted);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
 
-      /* Large desktop */
-      @media (min-width: 1024px) {
-        .wrapper {
-          max-width: 800px;
-        }
-        h1 {
-          font-size: 36px;
-        }
-        .steps-container {
-          gap: 28px;
-        }
-        .step {
-          padding: 32px;
-        }
-      }
+    .store-badge:hover {
+      border-color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
 
-      /* Dark mode */
-      @media (prefers-color-scheme: dark) {
-        body {
-          background: #0d0d0d;
-          color: #e0e0e0;
-        }
-        h1 {
-          color: #f5f5f5;
-        }
-        .subtitle {
-          color: #999;
-        }
-        .spinner {
-          border-color: #444;
-          border-top-color: #ccc;
-        }
-        .loading-text {
-          color: #aaa;
-        }
-        .step {
-          border-color: #333;
-          background: #1a1a1a;
-        }
-        .step-number {
-          border-color: #666;
-          color: #bbb;
-        }
-        .step-title {
-          color: #f0f0f0;
-        }
-        .step-description {
-          color: #888;
-        }
-        .store-button {
-          border-color: #444;
-          color: #e0e0e0;
-          background: #222;
-        }
-        .store-button:hover {
-          background: #2a2a2a;
-          border-color: #666;
-        }
-        .store-link {
-          color: #888;
-        }
-        .store-link:hover {
-          color: #ccc;
-        }
-        .qr-section {
-          background: #111;
-          border-color: #333;
-        }
-        .qr-section .step-number {
-          border-color: rgba(255, 255, 255, 0.4);
-        }
-        .qr-section .step-description {
-          color: rgba(255, 255, 255, 0.6);
-        }
-        .open-button {
-          background: #f0f0f0;
-          color: #111;
-        }
-        .open-button:hover {
-          background: #e0e0e0;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrapper">
-      <div class="loading" id="loading">
-        <div class="spinner"></div>
-        <div class="loading-text">Opening in Expo Go...</div>
+    .store-badge svg {
+      width: 20px;
+      height: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-gradient"></div>
+    <div class="hero-content">
+      <div class="hero-badge">Deck of Cards Workout</div>
+      <h1>YARD</h1>
+      <p class="hero-tagline">Flip. Move. Finish.</p>
+      <p class="hero-description">
+        52 cards. Pushups and squats. Beat the clock. 
+        No equipment. No excuses. Just you and the deck.
+      </p>
+      <div class="cta-group">
+        <a href="#download" class="cta-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7,10 12,15 17,10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download Free
+        </a>
+        <a href="#how-it-works" class="cta-secondary">See How It Works</a>
       </div>
+    </div>
+    <div class="scroll-indicator">
+      <span>Scroll</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6,9 12,15 18,9"/>
+      </svg>
+    </div>
+  </section>
 
-      <div class="content" id="content">
-        <h1>APP_NAME_PLACEHOLDER</h1>
-        <p class="subtitle">Preview this app on your phone</p>
+  <!-- How It Works -->
+  <section class="section" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">The Workout</p>
+        <h2>Simple. Brutal. Effective.</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Flip</h3>
+          <p>Draw a card from the deck. The suit determines your exercise. The value determines your reps.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Move</h3>
+          <p>Complete the reps. Pushups or squats. No rest until done. Hit the button to flip again.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Finish</h3>
+          <p>Clear all 52 cards. Track your time. Beat your record. Come back tomorrow and do it again.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="steps-container">
-          <div class="step">
-            <div class="step-header">
-              <div class="step-number">1</div>
-              <h2 class="step-title">Download Expo Go</h2>
-            </div>
-            <p class="step-description">
-              Expo Go is a free app to test mobile apps
-            </p>
-            <div class="store-buttons" id="store-buttons">
-              <a
-                id="app-store-btn"
-                href="https://apps.apple.com/app/id982107779"
-                class="store-button"
-                target="_blank"
-              >
-                <svg class="store-icon" viewBox="0 0 24 24" fill="currentColor">
-                  <path
-                    d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
-                  />
-                </svg>
-                App Store
-              </a>
-              <a
-                id="play-store-btn"
-                href="https://play.google.com/store/apps/details?id=host.exp.exponent"
-                class="store-button"
-                target="_blank"
-              >
-                <svg class="store-icon" viewBox="0 0 24 24" fill="currentColor">
-                  <path
-                    d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"
-                  />
-                </svg>
-                Google Play
-              </a>
-            </div>
+  <!-- Features -->
+  <section class="section features">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Features</p>
+        <h2>Everything You Need. Nothing You Don't.</h2>
+      </div>
+      <div class="feature-grid">
+        <div class="feature">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
           </div>
+          <h3>Time Tracking</h3>
+          <p>Precise timer tracks every workout. See your progress. Beat your personal best.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <h3>Workout History</h3>
+          <p>Every session logged. Review past workouts. Track your consistency.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 20V10"/>
+              <path d="M18 20V4"/>
+              <path d="M6 20v-4"/>
+            </svg>
+          </div>
+          <h3>Multiple Intensities</h3>
+          <p>Choose your level. Misdemeanor, Hard Time, or Lifer. Scale to your fitness.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h3>Rec Yard Mode</h3>
+          <p>Competitive leaderboards. Weekly challenges. Prove yourself against others.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-          <div class="step qr-section">
-            <div class="step-header">
-              <div class="step-number">2</div>
-              <h2 class="step-title">Scan QR Code</h2>
-            </div>
-            <p class="step-description">Use your phone's camera or Expo Go</p>
-            <div class="qr-code" id="qr-code"></div>
-            <a href="exps://EXPS_URL_PLACEHOLDER" class="open-button"
-              >Open in Expo Go</a
-            >
+  <!-- Intensity Levels -->
+  <section class="section intensity-section">
+    <div class="intensity-bg"></div>
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Intensity Levels</p>
+        <h2>Pick Your Sentence</h2>
+      </div>
+      <div class="intensity-grid">
+        <div class="intensity-card">
+          <h3>Misdemeanor</h3>
+          <div class="intensity-reps">396 <span>reps</span></div>
+          <p>Standard values. Aces are 15. Face cards are 10. Your entry point.</p>
+        </div>
+        <div class="intensity-card">
+          <h3>Hard Time</h3>
+          <div class="intensity-reps">594 <span>reps</span></div>
+          <p>1.5x multiplier. Same deck. More pain. For those who want it harder.</p>
+        </div>
+        <div class="intensity-card">
+          <h3>Lifer</h3>
+          <div class="intensity-reps">792 <span>reps</span></div>
+          <p>Double everything. 792 reps minimum. Reserved for the committed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Exercise Preview -->
+  <section class="section preview-section">
+    <div class="container">
+      <div class="preview-content">
+        <div class="preview-text">
+          <h2>Two Exercises. One Deck. Zero Equipment.</h2>
+          <p>
+            Spades and clubs mean pushups. Hearts and diamonds mean squats. 
+            Or go all pushups. All squats. Superset mode for variety. 
+            Your workout, your rules.
+          </p>
+          <div class="exercise-tags">
+            <span class="exercise-tag pushups">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+              </svg>
+              Pushups
+            </span>
+            <span class="exercise-tag squats">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+              Squats
+            </span>
+          </div>
+        </div>
+        <div class="preview-image">
+          <img src="/static/images/floating_ace_of_spades.png" alt="Playing card">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="section pricing-section" id="download">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Get Started</p>
+        <h2>Download YARD</h2>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>YARD</h3>
+          <div class="pricing-price">$4.99</div>
+          <ul class="pricing-features">
+            <li>Full deck of cards workout</li>
+            <li>Three intensity levels</li>
+            <li>Multiple flip modes</li>
+            <li>Workout history tracking</li>
+            <li>Personal best records</li>
+            <li>No ads, no subscriptions</li>
+          </ul>
+          <div class="store-badges">
+            <a href="https://apps.apple.com" class="store-badge" target="_blank">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              App Store
+            </a>
+          </div>
+        </div>
+        <div class="pricing-card featured">
+          <h3>Rec Yard</h3>
+          <div class="pricing-price">$1.99<span>/mo</span></div>
+          <ul class="pricing-features">
+            <li>Everything in YARD</li>
+            <li>Global leaderboards</li>
+            <li>Weekly challenges</li>
+            <li>Profile customization</li>
+            <li>Badge achievements</li>
+            <li>Social features</li>
+          </ul>
+          <div class="store-badges">
+            <a href="https://apps.apple.com" class="store-badge" target="_blank">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              App Store
+            </a>
           </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <script src="https://unpkg.com/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
-    <script>
-      (function () {
-        const ua = navigator.userAgent;
-        const loadingEl = document.getElementById("loading");
-        const contentEl = document.getElementById("content");
+  <!-- Final CTA -->
+  <section class="final-cta">
+    <div class="container">
+      <h2>No Excuses. Just Reps.</h2>
+      <p>Download YARD and start your first workout today.</p>
+      <a href="https://apps.apple.com" class="cta-primary" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        </svg>
+        Download on the App Store
+      </a>
+    </div>
+  </section>
 
-        const isAndroid = /Android/i.test(ua);
-        const isIOS =
-          /iPhone|iPad|iPod/i.test(ua) ||
-          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="mailto:support@yardworkout.com">Support</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+      </div>
+      <p class="footer-copy">YARD. All rights reserved.</p>
+    </div>
+  </footer>
 
-        const deepLink = "exps://EXPS_URL_PLACEHOLDER";
-
-        // Adjust store buttons based on platform
-        const appStoreBtn = document.getElementById("app-store-btn");
-        const playStoreBtn = document.getElementById("play-store-btn");
-        const storeButtonsContainer = document.getElementById("store-buttons");
-
-        if (isIOS) {
-          playStoreBtn.className = "store-link";
-          storeButtonsContainer.appendChild(playStoreBtn);
-        } else if (isAndroid) {
-          appStoreBtn.className = "store-link";
-          storeButtonsContainer.insertBefore(playStoreBtn, appStoreBtn);
-        }
-
-        const qrCode = new QRCodeStyling({
-          width: 400,
-          height: 400,
-          data: deepLink,
-          image: "assets/images/icon.png",
-          dotsOptions: {
-            color: "#333333",
-            type: "rounded",
-          },
-          backgroundOptions: {
-            color: "#ffffff",
-          },
-          imageOptions: {
-            crossOrigin: "anonymous",
-            margin: 6,
-            imageSize: 0.35,
-          },
-          cornersSquareOptions: {
-            type: "extra-rounded",
-          },
-          cornersDotOptions: {
-            type: "dot",
-          },
-          qrOptions: {
-            errorCorrectionLevel: "H",
-          },
-        });
-
-        qrCode.append(document.getElementById("qr-code"));
-
-        if (isAndroid || isIOS) {
-          loadingEl.style.display = "block";
-          contentEl.style.display = "none";
-          window.location.href = deepLink;
-          setTimeout(function () {
-            loadingEl.style.display = "none";
-            contentEl.style.display = "block";
-          }, 500);
-        }
-      })();
-    </script>
-  </body>
+</body>
 </html>
