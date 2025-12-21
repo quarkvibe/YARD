@@ -165,6 +165,7 @@ export type DeckStyleId =
   | "dayofdead"
   | "samurai"
   | "anime"
+  | "cosplay"
   | "hunters";
 
 export interface DeckStyle {
@@ -249,6 +250,15 @@ export const DECK_STYLES: DeckStyle[] = [
     backColor: "#2A2A4A",
     accentColor: "#FF69B4",
     textColor: "#FFB6C1",
+  },
+  {
+    id: "cosplay",
+    name: "COSPLAY",
+    description: "Anime cosplay girls",
+    previewImage: "cosplay_deck_back_design.png",
+    backColor: "#1A0A1A",
+    accentColor: "#FF1493",
+    textColor: "#FF69B4",
   },
   {
     id: "hunters",
