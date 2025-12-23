@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Modal,
+  Linking,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -527,11 +528,20 @@ export default function RecYardScreen() {
         <ThemedText style={styles.priceAmount}>$1.99</ThemedText>
         <ThemedText style={styles.pricePeriod}>PER MONTH</ThemedText>
         <ThemedText style={styles.priceCancel}>CANCEL ANYTIME</ThemedText>
+        <ThemedText style={styles.subscriptionDisclosure}>
+          Rec Yard Monthly Subscription • Auto-renews monthly at $1.99/month until cancelled.
+          Payment will be charged to your Apple ID account at confirmation of purchase.
+          Subscription automatically renews unless cancelled at least 24-hours before the end of the current period.
+          Manage subscriptions in Account Settings after purchase.
+        </ThemedText>
       </Animated.View>
 
       <Animated.View entering={FadeIn.delay(400)} style={styles.actionSection}>
         <Pressable
-          style={styles.unlockButton}
+          style={({ pressed }) => [
+            styles.unlockButton,
+            pressed && styles.unlockButtonPressed,
+          ]}
           onPress={handleUnlock}
           disabled={isPurchasing}
         >
@@ -549,6 +559,16 @@ export default function RecYardScreen() {
             RESTORE PURCHASE
           </ThemedText>
         </Pressable>
+
+        <View style={styles.legalLinks}>
+          <Pressable onPress={() => Linking.openURL("https://yardfitness.app/terms")}>
+            <ThemedText style={styles.legalLinkText}>Terms of Use</ThemedText>
+          </Pressable>
+          <ThemedText style={styles.legalSeparator}>•</ThemedText>
+          <Pressable onPress={() => Linking.openURL("https://yardfitness.app/privacy")}>
+            <ThemedText style={styles.legalLinkText}>Privacy Policy</ThemedText>
+          </Pressable>
+        </View>
       </Animated.View>
 
       <Animated.View
@@ -2168,6 +2188,30 @@ const styles = StyleSheet.create({
     color: Colors.dark.textSecondary,
     marginTop: Spacing.sm,
   },
+  subscriptionDisclosure: {
+    fontSize: 10,
+    lineHeight: 14,
+    color: Colors.dark.textSecondary,
+    textAlign: "center",
+    marginTop: Spacing.md,
+    paddingHorizontal: Spacing.md,
+  },
+  legalLinks: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  legalLinkText: {
+    fontSize: 12,
+    color: Colors.dark.accent,
+    textDecorationLine: "underline",
+  },
+  legalSeparator: {
+    fontSize: 12,
+    color: Colors.dark.textSecondary,
+  },
   actionSection: {
     width: "100%",
     alignItems: "center",
@@ -2179,6 +2223,10 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.lg,
     borderRadius: BorderRadius.sm,
     alignItems: "center",
+  },
+  unlockButtonPressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.98 }],
   },
   unlockButtonText: {
     fontSize: 16,

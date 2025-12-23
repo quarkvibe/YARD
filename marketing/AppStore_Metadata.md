@@ -74,15 +74,20 @@ Personal best tracking
 Complete workout history
 Practice mode for verified personal records
 
-REC YARD (Optional Subscription)
+REC YARD (Optional Subscription - $1.99/month)
 
-Join the community. $4.99/month unlocks:
+Join the community and unlock:
 
 Weekly leaderboards by exercise type and intensity
 Weekly challenges with the whole yard
 Callouts and trash talk
 Profile badges
 Cloud sync across devices
+
+Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. Manage subscriptions in Account Settings.
+
+Terms of Use: https://yardfitness.app/terms
+Privacy Policy: https://yardfitness.app/privacy
 
 SHARE YOUR TIME
 
@@ -147,18 +152,21 @@ Version 1.0.0 — Initial Release
 
 | Product | Price | Description |
 |---------|-------|-------------|
-| Rec Yard Monthly | $4.99/month | Access leaderboards, weekly challenges, community features, callouts, badges, and cloud sync. |
+| Rec Yard Monthly | $1.99/month | Access leaderboards, weekly challenges, community features, callouts, badges, and cloud sync. Auto-renews until cancelled. |
 
 ---
 
 ## Privacy Policy URL
-[Your Privacy Policy URL]
+https://yardfitness.app/privacy
+
+## Terms of Use (EULA) URL
+https://yardfitness.app/terms
 
 ## Support URL
-[Your Support URL or Email]
+support@yardfitness.app
 
 ## Marketing URL (Optional)
-[Your Website URL]
+https://yardfitness.app
 
 ---
 
@@ -173,16 +181,24 @@ YARD is a fitness timer app based on the classic "Deck of Cards" workout. Users 
 - Workout history and personal bests
 - Profile with social sharing
 
-**Rec Yard subscription ($4.99/month):**
+**Rec Yard subscription ($1.99/month auto-renewable):**
 - Leaderboards ranked by exercise type and intensity
 - Weekly community challenges
 - Callouts between users
 - Profile badges
 - Cloud sync
 
+**To Test the Subscription:**
+1. Tap the "Rec Yard" tab at the bottom of the app
+2. Scroll down to see subscription features and pricing
+3. Tap "ENTER THE YARD" to initiate the purchase flow
+4. Use a sandbox Apple ID to test the purchase
+5. After purchase, you can create a profile and access community features
+
 **Test Notes:**
 - No login required for free features
-- Subscription can be tested via sandbox account
+- Subscription uses RevenueCat for payment processing
+- In-app purchase product ID: rec_yard_monthly
 - Workout completes when all 52 cards are flipped
 
 ---
