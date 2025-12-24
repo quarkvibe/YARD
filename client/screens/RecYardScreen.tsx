@@ -561,11 +561,11 @@ export default function RecYardScreen() {
         </Pressable>
 
         <View style={styles.legalLinks}>
-          <Pressable onPress={() => Linking.openURL("https://yardfitness.app/terms")}>
+          <Pressable onPress={() => Linking.openURL("https://flipmovefinish.now/terms")}>
             <ThemedText style={styles.legalLinkText}>Terms of Use</ThemedText>
           </Pressable>
           <ThemedText style={styles.legalSeparator}>•</ThemedText>
-          <Pressable onPress={() => Linking.openURL("https://yardfitness.app/privacy")}>
+          <Pressable onPress={() => Linking.openURL("https://flipmovefinish.now/privacy")}>
             <ThemedText style={styles.legalLinkText}>Privacy Policy</ThemedText>
           </Pressable>
         </View>
