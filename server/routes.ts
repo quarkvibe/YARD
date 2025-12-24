@@ -13,6 +13,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve(process.cwd(), "server", "templates", "support.html"));
   });
 
+  // Serve terms of use page
+  app.get("/terms", (_req, res) => {
+    res.sendFile(path.resolve(process.cwd(), "server", "templates", "terms.html"));
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
