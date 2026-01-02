@@ -86,8 +86,8 @@ Cloud sync across devices
 
 Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. Manage subscriptions in Account Settings.
 
-Terms of Use: https://yardfitness.app/terms
-Privacy Policy: https://yardfitness.app/privacy
+Terms of Use: https://flipmovefinish.now/terms
+Privacy Policy: https://flipmovefinish.now/privacy
 
 SHARE YOUR TIME
 
@@ -157,16 +157,16 @@ Version 1.0.0 — Initial Release
 ---
 
 ## Privacy Policy URL
-https://yardfitness.app/privacy
+https://flipmovefinish.now/privacy
 
 ## Terms of Use (EULA) URL
-https://yardfitness.app/terms
+https://flipmovefinish.now/terms
 
 ## Support URL
-support@yardfitness.app
+https://flipmovefinish.now/support
 
 ## Marketing URL (Optional)
-https://yardfitness.app
+https://flipmovefinish.now
 
 ---
 

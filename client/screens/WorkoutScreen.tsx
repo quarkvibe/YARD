@@ -38,6 +38,7 @@ import {
   generateDeck,
   getRuleSetById,
   getSettings,
+  saveSettings,
   saveWorkout,
   formatDuration,
   getWorkouts,
@@ -49,7 +50,6 @@ import {
   SupersetModeId,
   getSupersetModeById,
   getProfile,
-  UserProfile,
   getDeckStyleById,
   DeckStyle,
   DECK_STYLES,
@@ -70,19 +70,19 @@ export default function WorkoutScreen() {
     route.params?.officialRecYardSubmission ?? false;
 
   const [workoutState, setWorkoutState] = useState<WorkoutState>("idle");
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [deck, setDeck] = useState<CardValue[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(-1);
   const [timer, setTimer] = useState(0);
   const [totalPushups, setTotalPushups] = useState(0);
   const [totalSquats, setTotalSquats] = useState(0);
-  const [ruleSetName, setRuleSetName] = useState("STANDARD");
-  const [ruleSetId, setRuleSetId] = useState("standard");
+  const [ruleSetName, setRuleSetName] = useState("");
+  const [ruleSetId, setRuleSetId] = useState("");
   const [flipModeId, setFlipModeId] = useState<FlipModeId>("freshfish");
-  const [flipModeName, setFlipModeName] = useState("FRESH FISH");
+  const [flipModeName, setFlipModeName] = useState("");
   const [exerciseType, setExerciseType] = useState<ExerciseType>("superset");
   const [supersetModeId, setSupersetModeId] =
     useState<SupersetModeId>("alternating");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [supersetModeName, setSupersetModeName] = useState("ALTERNATING");
   const [alternatingExercise, setAlternatingExercise] = useState<
     "pushups" | "squats"
@@ -137,7 +137,12 @@ export default function WorkoutScreen() {
   const cardsCompleted = currentCardIndex + 1;
 
   const loadSettings = useCallback(async () => {
+    console.log("[WorkoutScreen] Loading settings...");
     const settings = await getSettings();
+    console.log("[WorkoutScreen] Loaded settings:", {
+      flipModeId: settings.selectedFlipModeId,
+      ruleSetId: settings.selectedRuleSetId,
+    });
     const ruleSet = getRuleSetById(settings.selectedRuleSetId);
     const flipMode = getFlipModeById(settings.selectedFlipModeId);
     const supersetMode = getSupersetModeById(settings.selectedSupersetModeId);
@@ -145,6 +150,7 @@ export default function WorkoutScreen() {
     setRuleSetName(ruleSet.name);
     setFlipModeId(flipMode.id);
     setFlipModeName(flipMode.name);
+    console.log("[WorkoutScreen] Set flipModeName to:", flipMode.name);
     setSupersetModeId(supersetMode.id);
     setSupersetModeName(supersetMode.name);
     setExerciseType(settings.selectedExerciseType);
@@ -164,13 +170,24 @@ export default function WorkoutScreen() {
     const workouts = await getWorkouts();
     const best = getBestTime(workouts, ruleSet.id);
     setBestTime(best);
+    setSettingsLoaded(true);
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      loadSettings();
-    }, [loadSettings]),
+      // Only reload settings when in idle state (not during active workout)
+      if (workoutState === "idle") {
+        loadSettings();
+      }
+    }, [loadSettings, workoutState]),
   );
+
+  // Reload settings when returning to idle state (after workout completes or is quit)
+  useEffect(() => {
+    if (workoutState === "idle") {
+      loadSettings();
+    }
+  }, [workoutState, loadSettings]);
 
   const triggerHaptic = useCallback(
     (style: Haptics.ImpactFeedbackStyle) => {
@@ -975,6 +992,11 @@ export default function WorkoutScreen() {
       </View>
 
       <ThemedText style={styles.ruleSetLabel}>{ruleSetName}</ThemedText>
+      <ThemedText style={styles.flipModeLabel}>
+        {exerciseType === "superset"
+          ? `${supersetModeName} SUPERSET`
+          : exerciseType.toUpperCase()}
+      </ThemedText>
       <ThemedText style={styles.flipModeLabel}>{flipModeName}</ThemedText>
 
       {bestTime !== null ? (
@@ -989,8 +1011,12 @@ export default function WorkoutScreen() {
       {/* Rec Yard Practice Mode Toggle - hidden for official submissions */}
       {!isOfficialRecYardSubmission && (
         <Pressable
-          onPress={() => {
-            setCompetitiveMode(!competitiveMode);
+          onPress={async () => {
+            const newValue = !competitiveMode;
+            setCompetitiveMode(newValue);
+            // Save to settings so it persists
+            const settings = await getSettings();
+            await saveSettings({ ...settings, competitiveMode: newValue });
             triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
           }}
           style={[
@@ -1263,7 +1289,12 @@ export default function WorkoutScreen() {
           },
         ]}
       >
-        {workoutState === "idle" ? renderIdleState() : null}
+        {workoutState === "idle" && settingsLoaded ? renderIdleState() : null}
+        {workoutState === "idle" && !settingsLoaded ? (
+          <View style={styles.loadingContainer}>
+            <ThemedText style={styles.loadingText}>LOADING...</ThemedText>
+          </View>
+        ) : null}
         {workoutState === "active" || workoutState === "paused"
           ? renderActiveState()
           : null}
@@ -1302,6 +1333,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Spacing.xl,
     backgroundColor: Colors.dark.backgroundRoot,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
   },
   centerContent: {
     flex: 1,

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   ScrollView,
   View,
@@ -26,7 +26,7 @@ import {
   getBestTime,
   formatDuration,
 } from "@/lib/storage";
-import { checkSubscriptionStatus } from "@/lib/purchases";
+import { checkRecYardAccess } from "@/lib/purchases";
 
 export default function ProfileScreen() {
   const tabBarHeight = useBottomTabBarHeight();
@@ -36,7 +36,7 @@ export default function ProfileScreen() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showSocialLinks, setShowSocialLinks] = useState(false);
-  const [hapticsEnabled, setHapticsEnabled] = useState(true);
+  const [hapticsEnabled] = useState(true);
 
   // Stats
   const [totalWorkouts, setTotalWorkouts] = useState(0);
@@ -50,8 +50,8 @@ export default function ProfileScreen() {
     setProfile(loadedProfile);
 
     // Check subscription status
-    const subStatus = await checkSubscriptionStatus();
-    setIsSubscribed(subStatus);
+    const subStatus = await checkRecYardAccess();
+    setIsSubscribed(subStatus.isSubscribed);
 
     // Load stats from workout history
     const workouts = await getWorkouts();

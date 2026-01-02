@@ -53,6 +53,8 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { supabase } from "@/lib/supabase";
 
+import { MainTabParamList } from "@/navigation/MainTabNavigator";
+
 type TabType =
   | "home"
   | "leaderboards"
@@ -60,8 +62,6 @@ type TabType =
   | "beef"
   | "barbershop"
   | "profile";
-
-import { MainTabParamList } from "@/navigation/MainTabNavigator";
 
 export default function RecYardScreen() {
   const insets = useSafeAreaInsets();
@@ -529,9 +529,10 @@ export default function RecYardScreen() {
         <ThemedText style={styles.pricePeriod}>PER MONTH</ThemedText>
         <ThemedText style={styles.priceCancel}>CANCEL ANYTIME</ThemedText>
         <ThemedText style={styles.subscriptionDisclosure}>
-          Rec Yard Monthly Subscription • Auto-renews monthly at $1.99/month until cancelled.
-          Payment will be charged to your Apple ID account at confirmation of purchase.
-          Subscription automatically renews unless cancelled at least 24-hours before the end of the current period.
+          Rec Yard Monthly Subscription • Auto-renews monthly at $1.99/month
+          until cancelled. Payment will be charged to your Apple ID account at
+          confirmation of purchase. Subscription automatically renews unless
+          cancelled at least 24-hours before the end of the current period.
           Manage subscriptions in Account Settings after purchase.
         </ThemedText>
       </Animated.View>
@@ -561,11 +562,19 @@ export default function RecYardScreen() {
         </Pressable>
 
         <View style={styles.legalLinks}>
-          <Pressable onPress={() => Linking.openURL("https://flipmovefinish.now/terms")}>
+          <Pressable
+            onPress={() =>
+              Linking.openURL("https://flipmovefinish.now/terms")
+            }
+          >
             <ThemedText style={styles.legalLinkText}>Terms of Use</ThemedText>
           </Pressable>
           <ThemedText style={styles.legalSeparator}>•</ThemedText>
-          <Pressable onPress={() => Linking.openURL("https://flipmovefinish.now/privacy")}>
+          <Pressable
+            onPress={() =>
+              Linking.openURL("https://flipmovefinish.now/privacy")
+            }
+          >
             <ThemedText style={styles.legalLinkText}>Privacy Policy</ThemedText>
           </Pressable>
         </View>
