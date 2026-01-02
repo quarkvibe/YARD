@@ -86,8 +86,8 @@ Cloud sync across devices
 
 Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. Manage subscriptions in Account Settings.
 
-Terms of Use: https://quarkvibe.github.io/YARD/terms.html
-Privacy Policy: https://quarkvibe.github.io/YARD/privacy.html
+Terms of Use: https://flipmovefinish.now/terms
+Privacy Policy: https://flipmovefinish.now/privacy
 
 SHARE YOUR TIME
 
@@ -157,16 +157,16 @@ Version 1.0.0 — Initial Release
 ---
 
 ## Privacy Policy URL
-https://quarkvibe.github.io/YARD/privacy.html
+https://flipmovefinish.now/privacy
 
 ## Terms of Use (EULA) URL
-https://quarkvibe.github.io/YARD/terms.html
+https://flipmovefinish.now/terms
 
 ## Support URL
-support@yardfitness.app
+https://flipmovefinish.now/support
 
 ## Marketing URL (Optional)
-https://quarkvibe.github.io/YARD/
+https://flipmovefinish.now
 
 ---
 

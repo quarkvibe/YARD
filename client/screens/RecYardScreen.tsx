@@ -564,7 +564,7 @@ export default function RecYardScreen() {
         <View style={styles.legalLinks}>
           <Pressable
             onPress={() =>
-              Linking.openURL("https://quarkvibe.github.io/YARD/terms.html")
+              Linking.openURL("https://flipmovefinish.now/terms")
             }
           >
             <ThemedText style={styles.legalLinkText}>Terms of Use</ThemedText>
@@ -572,7 +572,7 @@ export default function RecYardScreen() {
           <ThemedText style={styles.legalSeparator}>•</ThemedText>
           <Pressable
             onPress={() =>
-              Linking.openURL("https://quarkvibe.github.io/YARD/privacy.html")
+              Linking.openURL("https://flipmovefinish.now/privacy")
             }
           >
             <ThemedText style={styles.legalLinkText}>Privacy Policy</ThemedText>
