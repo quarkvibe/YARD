@@ -242,6 +242,7 @@ npm run format            # Prettier formatting
 
 ### App Store Requirements
 - **Privacy Policy URL**: https://flipmovefinish.now/privacy
+- **Terms of Use (EULA) URL**: https://flipmovefinish.now/terms
 - **Support URL**: https://flipmovefinish.now/support
 - **Marketing URL**: https://flipmovefinish.now
 
