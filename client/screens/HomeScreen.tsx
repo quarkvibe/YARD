@@ -136,7 +136,7 @@ export default function HomeScreen() {
         >
           <Pressable
             style={styles.configCard}
-            onPress={() => navigation.navigate("SettingsTab")}
+            onPress={() => navigation.navigate("WorkoutTab")}
           >
             <ThemedText style={styles.configLabel}>EXERCISE</ThemedText>
             <ThemedText style={styles.configValue}>
@@ -145,7 +145,7 @@ export default function HomeScreen() {
           </Pressable>
           <Pressable
             style={styles.configCard}
-            onPress={() => navigation.navigate("SettingsTab")}
+            onPress={() => navigation.navigate("WorkoutTab")}
           >
             <ThemedText style={styles.configLabel}>INTENSITY</ThemedText>
             <ThemedText style={styles.configValue}>{ruleSetName}</ThemedText>
@@ -159,7 +159,7 @@ export default function HomeScreen() {
           >
             <Pressable
               style={styles.supersetModeCard}
-              onPress={() => navigation.navigate("SettingsTab")}
+              onPress={() => navigation.navigate("WorkoutTab")}
             >
               <ThemedText style={styles.configLabel}>SUPERSET MODE</ThemedText>
               <ThemedText style={styles.configValue}>
@@ -168,6 +168,15 @@ export default function HomeScreen() {
             </Pressable>
           </Animated.View>
         ) : null}
+
+        <Animated.View
+          entering={FadeIn.delay(320)}
+          style={styles.tapHintContainer}
+        >
+          <ThemedText style={styles.tapHintText}>
+            TAP OPTIONS TO CUSTOMIZE
+          </ThemedText>
+        </Animated.View>
 
         <Animated.View
           entering={FadeIn.delay(350)}
@@ -346,5 +355,16 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: Colors.dark.textSecondary,
     alignSelf: "center",
+  },
+  tapHintContainer: {
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+  },
+  tapHintText: {
+    fontSize: 10,
+    fontWeight: "500",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    opacity: 0.6,
   },
 });

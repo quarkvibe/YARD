@@ -563,9 +563,7 @@ export default function RecYardScreen() {
 
         <View style={styles.legalLinks}>
           <Pressable
-            onPress={() =>
-              Linking.openURL("https://flipmovefinish.now/terms")
-            }
+            onPress={() => Linking.openURL("https://flipmovefinish.now/terms")}
           >
             <ThemedText style={styles.legalLinkText}>Terms of Use</ThemedText>
           </Pressable>
