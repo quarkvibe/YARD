@@ -151,24 +151,29 @@ export default function RecYardScreen() {
   };
 
   const handleUnlock = async () => {
+    console.log("[RecYard] handleUnlock called, hasAcceptedRules:", hasAcceptedRules);
+    
     // Check if user has accepted the YARD rules first
     if (!hasAcceptedRules) {
+      console.log("[RecYard] Showing rules modal");
       setShowRulesModal(true);
       return;
     }
 
     setIsPurchasing(true);
+    console.log("[RecYard] Fetching packages from RevenueCat...");
 
     try {
       // Get available packages from RevenueCat
       const packages = await getRecYardPackages();
+      console.log("[RecYard] Got packages:", packages.length, packages);
 
       if (packages.length === 0) {
         // No packages available - show error with option to retry or restore
         console.log("[RecYard] No packages available from RevenueCat");
         Alert.alert(
           "SUBSCRIPTION UNAVAILABLE",
-          "The subscription is being set up. Please try again in a few minutes, or restore if you've already purchased.",
+          "The subscription is not yet available. This may happen if:\n\n• The app is still being reviewed\n• RevenueCat is still syncing with App Store\n\nPlease try again in a few minutes.",
           [
             { text: "TRY AGAIN", onPress: () => handleUnlock() },
             { text: "RESTORE PURCHASE", onPress: handleRestore },
