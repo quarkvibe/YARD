@@ -31,6 +31,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve(process.cwd(), "server", "templates", "terms.html"));
   });
 
+  // Serve sitemap.xml
+  app.get("/sitemap.xml", (_req, res) => {
+    res.type("application/xml");
+    res.sendFile(path.resolve(process.cwd(), "server", "templates", "sitemap.xml"));
+  });
+
+  // Serve robots.txt
+  app.get("/robots.txt", (_req, res) => {
+    res.type("text/plain");
+    res.sendFile(path.resolve(process.cwd(), "server", "templates", "robots.txt"));
+  });
+
   // Contact form endpoint
   app.post("/api/contact", async (req, res) => {
     try {
