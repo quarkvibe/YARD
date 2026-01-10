@@ -273,15 +273,14 @@ export default function SettingsScreen() {
               {SUPERSET_MODES.map(renderSupersetModeCard)}
             </View>
           </>
-        ) : null}
-
-        <ThemedText style={styles.sectionTitle}>INTENSITY</ThemedText>
-        {DEFAULT_RULE_SETS.map(renderRuleSetCard)}
-
-        <ThemedText style={styles.sectionTitle}>FLIP MODE</ThemedText>
-        <View style={styles.flipModesContainer}>
-          {FLIP_MODES.map(renderFlipModeCard)}
-        </View>
+        ) : (
+          <>
+            <ThemedText style={styles.sectionTitle}>FLIP MODE</ThemedText>
+            <View style={styles.flipModesContainer}>
+              {FLIP_MODES.map(renderFlipModeCard)}
+            </View>
+          </>
+        )}
 
         <ThemedText style={styles.sectionTitle}>DECK STYLE</ThemedText>
         <View style={styles.deckStylesContainer}>

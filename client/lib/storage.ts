@@ -134,23 +134,23 @@ export interface SupersetMode {
 export const SUPERSET_MODES: SupersetMode[] = [
   {
     id: "alternating",
-    name: "ALTERNATING",
-    description: "Squats then pushups, back and forth",
+    name: "TAG TEAM",
+    description: "Alternate between exercises every card",
   },
   {
     id: "split2",
-    name: "SPLIT 2",
-    description: "Draw 2 cards, split exercises",
+    name: "DOUBLE DOWN",
+    description: "Draw 2 cards, one for each exercise",
   },
   {
     id: "split4",
-    name: "SPLIT 4",
-    description: "Draw 4 cards, split exercises",
+    name: "SQUAD LEAD",
+    description: "Draw 4 cards, split across exercises",
   },
   {
     id: "splitunder20",
-    name: "SPLIT UNDER 20",
-    description: "Keep drawing if under 20 reps",
+    name: "OVERKILL",
+    description: "Keep drawing while under 20 total reps",
   },
 ];
 
