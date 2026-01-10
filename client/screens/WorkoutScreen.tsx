@@ -143,14 +143,12 @@ export default function WorkoutScreen() {
       flipModeId: settings.selectedFlipModeId,
       ruleSetId: settings.selectedRuleSetId,
     });
-    const ruleSet = getRuleSetById(settings.selectedRuleSetId);
     const flipMode = getFlipModeById(settings.selectedFlipModeId);
     const supersetMode = getSupersetModeById(settings.selectedSupersetModeId);
     setRuleSetId(ruleSet.id);
     setRuleSetName(ruleSet.name);
     setFlipModeId(flipMode.id);
-    setFlipModeName(flipMode.name);
-    console.log("[WorkoutScreen] Set flipModeName to:", flipMode.name);
+    setFlipModeName(settings.selectedExerciseType === "superset" ? supersetMode.name : flipMode.name);
     setSupersetModeId(supersetMode.id);
     setSupersetModeName(supersetMode.name);
     setExerciseType(settings.selectedExerciseType);
@@ -324,7 +322,7 @@ export default function WorkoutScreen() {
     setRuleSetId(ruleSet.id);
     setRuleSetName(ruleSet.name);
     setFlipModeId(flipMode.id);
-    setFlipModeName(flipMode.name);
+    setFlipModeName(settings.selectedExerciseType === "superset" ? supersetMode.name : flipMode.name);
     setSupersetModeId(supersetMode.id);
     setSupersetModeName(supersetMode.name);
     setHapticsEnabled(settings.hapticsEnabled);

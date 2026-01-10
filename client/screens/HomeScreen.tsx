@@ -20,6 +20,7 @@ import {
   formatDuration,
   getExerciseTypeById,
   getSupersetModeById,
+  getFlipModeById,
 } from "@/lib/storage";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -66,7 +67,8 @@ export default function HomeScreen() {
 
   const [ruleSetName, setRuleSetName] = useState("MISDEMEANOR");
   const [exerciseTypeName, setExerciseTypeName] = useState("SUPERSET");
-  const [supersetModeName, setSupersetModeName] = useState("ALTERNATING");
+  const [supersetModeName, setSupersetModeName] = useState("TAG TEAM");
+  const [flipModeName, setFlipModeName] = useState("FRESH FISH");
   const [isSuperset, setIsSuperset] = useState(true);
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [totalWorkouts, setTotalWorkouts] = useState(0);
@@ -84,9 +86,11 @@ export default function HomeScreen() {
     const ruleSet = getRuleSetById(settings.selectedRuleSetId);
     const exerciseType = getExerciseTypeById(settings.selectedExerciseType);
     const supersetMode = getSupersetModeById(settings.selectedSupersetModeId);
+    const flipMode = getFlipModeById(settings.selectedFlipModeId);
     setRuleSetName(ruleSet.name);
     setExerciseTypeName(exerciseType.name);
     setSupersetModeName(supersetMode.name);
+    setFlipModeName(flipMode.name);
     setIsSuperset(settings.selectedExerciseType === "superset");
 
     const workouts = await getWorkouts();
@@ -152,22 +156,22 @@ export default function HomeScreen() {
           </Pressable>
         </Animated.View>
 
-        {isSuperset ? (
-          <Animated.View
-            entering={FadeIn.delay(300)}
-            style={styles.supersetModeSection}
+        <Animated.View
+          entering={FadeIn.delay(300)}
+          style={styles.supersetModeSection}
+        >
+          <Pressable
+            style={styles.supersetModeCard}
+            onPress={() => navigation.navigate("SettingsTab")}
           >
-            <Pressable
-              style={styles.supersetModeCard}
-              onPress={() => navigation.navigate("SettingsTab")}
-            >
-              <ThemedText style={styles.configLabel}>SUPERSET MODE</ThemedText>
-              <ThemedText style={styles.configValue}>
-                {supersetModeName}
-              </ThemedText>
-            </Pressable>
-          </Animated.View>
-        ) : null}
+            <ThemedText style={styles.configLabel}>
+              {isSuperset ? "SUPERSET MODE" : "FLIP MODE"}
+            </ThemedText>
+            <ThemedText style={styles.configValue}>
+              {isSuperset ? supersetModeName : flipModeName}
+            </ThemedText>
+          </Pressable>
+        </Animated.View>
 
         <Animated.View
           entering={FadeIn.delay(350)}
