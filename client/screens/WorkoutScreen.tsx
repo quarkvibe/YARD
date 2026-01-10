@@ -143,6 +143,7 @@ export default function WorkoutScreen() {
       flipModeId: settings.selectedFlipModeId,
       ruleSetId: settings.selectedRuleSetId,
     });
+    const ruleSet = getRuleSetById(settings.selectedRuleSetId);
     const flipMode = getFlipModeById(settings.selectedFlipModeId);
     const supersetMode = getSupersetModeById(settings.selectedSupersetModeId);
     setRuleSetId(ruleSet.id);
