@@ -466,8 +466,19 @@ export default function WorkoutScreen() {
 
     await saveWorkout(workoutRecord);
 
+    // Verify minimum possible time (approx 4 minutes for 396 reps)
+    const MINIMUM_POSSIBLE_TIME = 240; // 4 minutes
+
     // Submit to Rec Yard leaderboard if this is an official submission
     if (isOfficialRecYardSubmission && currentCardIndex + 1 === 52) {
+      if (timer < MINIMUM_POSSIBLE_TIME) {
+        Alert.alert(
+          "TIME INVALID",
+          "Your workout time is below the physiological minimum for this rep count. This run cannot be submitted to the leaderboard.",
+        );
+        return;
+      }
+
       try {
         const { supabase } = await import("@/lib/supabase");
         const {
