@@ -129,12 +129,16 @@ export function useRecYard() {
         return;
       }
 
-      // Load profile
-      const { data: profileData } = await supabase
+      // Load profile (use maybeSingle to avoid error when no profile exists)
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", authUserId)
-        .single();
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("[useRecYard] Error loading profile:", profileError);
+      }
 
       if (profileData) {
         // Load badges for this profile
@@ -185,10 +189,10 @@ export function useRecYard() {
   // ============================================
 
   const createProfile = useCallback(
-    async (handle: string, displayName: string): Promise<boolean> => {
+    async (handle: string, displayName: string): Promise<{ success: boolean; error?: string }> => {
       if (!userId) {
         console.error("[useRecYard] No userId available for profile creation");
-        return false;
+        return { success: false, error: "Not authenticated. Please restart the app." };
       }
 
       const cleanHandle = handle.toUpperCase().replace(/[^A-Z0-9_]/g, "");
@@ -204,13 +208,14 @@ export function useRecYard() {
 
         if (existingError) {
           console.error("[useRecYard] Error checking existing profile:", existingError);
+          return { success: false, error: `Database error: ${existingError.message}` };
         }
 
         if (existingProfile) {
           // Profile already exists for this user - just load it
           console.log("[useRecYard] Profile already exists for user, loading it:", existingProfile);
           setProfile(mapDbProfileToProfile(existingProfile));
-          return true;
+          return { success: true };
         }
 
         // Check if the handle is already taken by someone else (use maybeSingle)
@@ -222,14 +227,15 @@ export function useRecYard() {
 
         if (handleError) {
           console.error("[useRecYard] Error checking handle:", handleError);
+          return { success: false, error: `Database error: ${handleError.message}` };
         }
 
         if (handleCheck) {
           console.error("[useRecYard] Handle already taken by another user:", cleanHandle);
-          return false;
+          return { success: false, error: `Handle @${cleanHandle} is already taken. Choose another.` };
         }
 
-        // Create new profile
+        // Create new profile with all required fields
         console.log("[useRecYard] Inserting new profile...");
         const { data, error: insertError } = await supabase
           .from("profiles")
@@ -237,21 +243,34 @@ export function useRecYard() {
             user_id: userId,
             handle: cleanHandle,
             display_name: displayName || handle,
+            bio: "",
+            instagram: "",
+            tiktok: "",
+            twitter: "",
+            youtube: "",
+            discord: "",
+            threads: "",
+            total_workouts: 0,
+            best_time: null,
+            current_streak: 0,
+            longest_streak: 0,
+            is_verified: false,
           })
           .select()
           .single();
 
         if (insertError) {
           console.error("[useRecYard] Create profile error:", insertError);
-          return false;
+          console.error("[useRecYard] Error details:", JSON.stringify(insertError, null, 2));
+          return { success: false, error: `Failed to create profile: ${insertError.message}` };
         }
 
         console.log("[useRecYard] Profile created successfully:", data);
         setProfile(mapDbProfileToProfile(data));
-        return true;
+        return { success: true };
       } catch (err) {
         console.error("[useRecYard] Create profile exception:", err);
-        return false;
+        return { success: false, error: "An unexpected error occurred. Please try again." };
       }
     },
     [userId],

@@ -272,16 +272,16 @@ export default function RecYardScreen() {
       return;
     }
 
-    const success = await hookCreateProfile(
+    const result = await hookCreateProfile(
       editHandle.trim(),
       editDisplayName.trim() || editHandle.trim(),
     );
-    if (success) {
+    if (result.success) {
       setIsEditingProfile(false);
     } else {
       Alert.alert(
         "ERROR",
-        "Failed to create profile. Handle may already be taken.",
+        result.error || "Failed to create profile. Please try again.",
       );
     }
   };
