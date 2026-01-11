@@ -1,0 +1,65 @@
+I have implemented the 4-minute (240-second) hard validation floor.
+
+How it works:
+
+The app still saves the workout locally to the user's history (so they don't lose their data completely).
+Before submitting to the Supabase Leaderboard, it checks: if (timer < 240).
+If the time is too fast:
+It shows an Alert: "Your workout time is below the physiological minimum for this rep count. This run cannot be submitted to the leaderboard."
+It abops the submission process immediately (returns early).
+This effectively blocks any "superhuman" or glitched times from polluting the global leaderboard while respecting the user's local data.
+
+You are now robustly protected against impossible times. The app is ready for submission again.
+
+bash
+eas submit -p ios --latest
+do we have any redundancies in our images or cards?
+Analyzed
+stessa
+Analyzed
+segami/stessa
+Error while searching filesystem
+Encountered an internal error in running find command.
+Analyzed
+stnenopmoc/tneilc
+Analyzed
+PlayingCard.tsx#L1-800
+I have audited the 
+PlayingCard.tsx
+ file and the assets folder.
+
+Summary of Findings:
+
+Redundant Image References:
+In 
+PlayingCard.tsx
+, the FACE_CARD_IMAGES object (lines 31-252) explicitly requires a specific PNG for every single face card (10, J, Q, K, A) for each of the 10 deck styles.
+This is a massive list of hardcoded require paths (approx 200 distinct image references).
+Looking at the paths, e.g., ../../attached_assets/generated_images/yard_deck_10_hearts.png, it suggests these images were generated and placed in attached_assets.
+However, strict checking of the assets/images directory (Step 296) ONLY shows:
+yard-IOS.png
+splash.png
+icon.png
+android-icon-*.png
+And a few others.
+The specific card face images (e.g., yard_deck_10_hearts.png) are NOT present in the assets/images folder listed in Step 296.
+CRITICAL ISSUE: The code in PlayingCard.tsx is requiring images from a path ../../attached_assets/generated_images/.... This path likely does not exist or is not bundled correctly in the PROD build if it's outside the standard assets folder structure usually expected by Expo/React Native, or if those files were temporary generation artifacts that weren't committed.
+
+If these files are missing, the app will crash immediately upon trying to load a face card.
+
+Question for User: Do you actually have these 200+ specific face card images (e.g., yard_deck_jack_hearts.png, neon_deck_king_diamonds.png, etc.) committed in your repo?
+
+Based on my list_dir of assets, they are missing.
+If they don't exist, we must remove these requires and fallback to the standard "Number Card" layout (lines 542+) for face cards, or simpler generic assets.
+Redundancy: If the files did exist:
+
+Requiring 10_hearts, 10_diamonds, 10_clubs, 10_spades separately for a deck usually means 4 distinct images. If the design is identical except for the suit icon, we could reduce this to just one 10_generic.png and overlay the suit icon programmatically (which the code already supports for number cards).
+However, "Face Cards" (Jack, Queen, King) usually do have unique art per suit.
+Immediate Action: I strongly suspect these ../../attached_assets files are missing. I need to verify if that directory even exists.
+
+Refined Plan:
+
+Check if client/attached_assets exists.
+If not, I MUST comment out or remove the FACE_CARD_IMAGES logic to prevent a crash, and force the app to use the "text-based" card rendering (lines 542-624) which looks perfectly fine (it just uses the font/suit icons).
+Let me check that directory.
+
