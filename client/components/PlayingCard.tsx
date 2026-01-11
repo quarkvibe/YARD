@@ -471,65 +471,8 @@ export function PlayingCard({
               imageStyle={styles.faceCardImageStyle}
               resizeMode="cover"
             >
-              {/* Overlay with rank, suit and rep value */}
+              {/* Rep value badge only - face card images have their own frame */}
               <View style={styles.faceCardOverlay}>
-                {/* Top left corner */}
-                <View
-                  style={[
-                    styles.faceCornerTop,
-                    { top: cornerPadding, left: cornerPadding },
-                  ]}
-                >
-                  <ThemedText
-                    style={[
-                      styles.faceCornerRank,
-                      { fontSize: typography.cornerRank - 4, color: "#FFF" },
-                    ]}
-                  >
-                    {card.rank}
-                  </ThemedText>
-                  <ThemedText
-                    style={[
-                      styles.faceCornerSuit,
-                      {
-                        fontSize: typography.cornerSuit - 4,
-                        color: getSuitColor(card.suit),
-                      },
-                    ]}
-                  >
-                    {SUIT_SYMBOLS[card.suit]}
-                  </ThemedText>
-                </View>
-
-                {/* Bottom right corner (rotated) */}
-                <View
-                  style={[
-                    styles.faceCornerBottom,
-                    { bottom: cornerPadding, right: cornerPadding },
-                  ]}
-                >
-                  <ThemedText
-                    style={[
-                      styles.faceCornerSuit,
-                      {
-                        fontSize: typography.cornerSuit - 4,
-                        color: getSuitColor(card.suit),
-                      },
-                    ]}
-                  >
-                    {SUIT_SYMBOLS[card.suit]}
-                  </ThemedText>
-                  <ThemedText
-                    style={[
-                      styles.faceCornerRank,
-                      { fontSize: typography.cornerRank - 4, color: "#FFF" },
-                    ]}
-                  >
-                    {card.rank}
-                  </ThemedText>
-                </View>
-
-                {/* Rep value badge */}
                 <View style={styles.faceRepBadge}>
                   <ThemedText style={styles.faceRepValue}>
                     {card.value}
