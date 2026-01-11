@@ -152,23 +152,6 @@ export default function HomeScreen() {
           </Pressable>
         </Animated.View>
 
-        {isSuperset ? (
-          <Animated.View
-            entering={FadeIn.delay(300)}
-            style={styles.supersetModeSection}
-          >
-            <Pressable
-              style={styles.supersetModeCard}
-              onPress={() => navigation.navigate("WorkoutTab")}
-            >
-              <ThemedText style={styles.configLabel}>SUPERSET MODE</ThemedText>
-              <ThemedText style={styles.configValue}>
-                {supersetModeName}
-              </ThemedText>
-            </Pressable>
-          </Animated.View>
-        ) : null}
-
         <Animated.View
           entering={FadeIn.delay(320)}
           style={styles.tapHintContainer}
