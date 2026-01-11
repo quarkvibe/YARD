@@ -67,7 +67,10 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export default function WorkoutScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const navigation = useNavigation<{ navigate: (screen: string) => void }>();
+  const navigation = useNavigation<{
+    navigate: (screen: string, params?: any) => void;
+    setParams: (params: any) => void;
+  }>();
   const route = useRoute<RouteProp<MainTabParamList, "WorkoutTab">>();
 
   // Check if this is an official Rec Yard submission
@@ -184,14 +187,7 @@ export default function WorkoutScreen() {
     setSettingsLoaded(true);
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      // Only reload settings when in idle state (not during active workout)
-      if (workoutState === "idle") {
-        loadSettings();
-      }
-    }, [loadSettings, workoutState]),
-  );
+
 
   // Reload settings when returning to idle state (after workout completes or is quit)
   useEffect(() => {
@@ -377,6 +373,63 @@ export default function WorkoutScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   }, [isOfficialRecYardSubmission]);
+
+  const startNew = route.params?.startNew;
+
+  useFocusEffect(
+    useCallback(() => {
+      if (startNew) {
+        if (workoutState === "active" || workoutState === "paused") {
+          if (Platform.OS === "web") {
+            // On web, simple confirm
+            if (
+              confirm(
+                "Start a new workout? Your current progress will be lost.",
+              )
+            ) {
+              startWorkout();
+            }
+            navigation.setParams({ startNew: undefined });
+          } else {
+            Alert.alert(
+              "START NEW WORKOUT",
+              "Your current progress will be lost. Are you sure?",
+              [
+                {
+                  text: "CANCEL",
+                  style: "cancel",
+                  onPress: () => {
+                    navigation.setParams({ startNew: undefined });
+                  },
+                },
+                {
+                  text: "START NEW",
+                  style: "destructive",
+                  onPress: () => {
+                    startWorkout();
+                    navigation.setParams({ startNew: undefined });
+                  },
+                },
+              ],
+            );
+          }
+        } else {
+          // Idle or complete - just start
+          startWorkout();
+          navigation.setParams({ startNew: undefined });
+        }
+      } else if (workoutState === "idle") {
+        // Only reload settings when in idle state (not during active workout)
+        loadSettings();
+      }
+    }, [
+      loadSettings,
+      workoutState,
+      startNew,
+      startWorkout,
+      navigation,
+    ]),
+  );
 
   const completeWorkout = useCallback(async () => {
     stopTimer();
@@ -1299,8 +1352,8 @@ export default function WorkoutScreen() {
 
       {/* Button Area */}
       {competitiveMode &&
-      workoutPhase === "working" &&
-      activeCards.length > 0 ? (
+        workoutPhase === "working" &&
+        activeCards.length > 0 ? (
         <View style={styles.buttonRow}>
           <AnimatedPressable
             onPress={completeSet}

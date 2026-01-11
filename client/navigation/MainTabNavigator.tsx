@@ -13,7 +13,7 @@ import { Colors, Spacing } from "@/constants/theme";
 
 export type MainTabParamList = {
   HomeTab: undefined;
-  WorkoutTab: { officialRecYardSubmission?: boolean } | undefined;
+  WorkoutTab: { officialRecYardSubmission?: boolean; startNew?: boolean } | undefined;
   HistoryTab: undefined;
   RecYardTab: undefined;
   ProfileTab: undefined;

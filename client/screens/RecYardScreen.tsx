@@ -1771,7 +1771,14 @@ export default function RecYardScreen() {
               <ThemedText style={styles.sectionTitle}>SOCIAL</ThemedText>
               <View style={styles.socialCard}>
                 {profile.socialLinks.instagram && (
-                  <Pressable style={styles.socialItem}>
+                  <Pressable
+                    style={styles.socialItem}
+                    onPress={() =>
+                      Linking.openURL(
+                        `https://instagram.com/${profile.socialLinks.instagram}`,
+                      )
+                    }
+                  >
                     <ThemedText style={styles.socialIcon}>📸</ThemedText>
                     <ThemedText style={styles.socialLabel}>INSTAGRAM</ThemedText>
                     <ThemedText style={styles.socialHandle}>
@@ -1780,7 +1787,14 @@ export default function RecYardScreen() {
                   </Pressable>
                 )}
                 {profile.socialLinks.tiktok && (
-                  <Pressable style={styles.socialItem}>
+                  <Pressable
+                    style={styles.socialItem}
+                    onPress={() =>
+                      Linking.openURL(
+                        `https://tiktok.com/@${profile.socialLinks.tiktok}`,
+                      )
+                    }
+                  >
                     <ThemedText style={styles.socialIcon}>🎵</ThemedText>
                     <ThemedText style={styles.socialLabel}>TIKTOK</ThemedText>
                     <ThemedText style={styles.socialHandle}>
@@ -1789,7 +1803,14 @@ export default function RecYardScreen() {
                   </Pressable>
                 )}
                 {profile.socialLinks.twitter && (
-                  <Pressable style={styles.socialItem}>
+                  <Pressable
+                    style={styles.socialItem}
+                    onPress={() =>
+                      Linking.openURL(
+                        `https://twitter.com/${profile.socialLinks.twitter}`,
+                      )
+                    }
+                  >
                     <ThemedText style={styles.socialIcon}>🐦</ThemedText>
                     <ThemedText style={styles.socialLabel}>
                       X / TWITTER
@@ -1800,7 +1821,14 @@ export default function RecYardScreen() {
                   </Pressable>
                 )}
                 {profile.socialLinks.youtube && (
-                  <Pressable style={styles.socialItem}>
+                  <Pressable
+                    style={styles.socialItem}
+                    onPress={() =>
+                      Linking.openURL(
+                        `https://youtube.com/@${profile.socialLinks.youtube}`,
+                      )
+                    }
+                  >
                     <ThemedText style={styles.socialIcon}>📺</ThemedText>
                     <ThemedText style={styles.socialLabel}>YOUTUBE</ThemedText>
                     <ThemedText style={styles.socialHandle}>
@@ -1818,7 +1846,14 @@ export default function RecYardScreen() {
                   </Pressable>
                 )}
                 {profile.socialLinks.threads && (
-                  <Pressable style={styles.socialItem}>
+                  <Pressable
+                    style={styles.socialItem}
+                    onPress={() =>
+                      Linking.openURL(
+                        `https://www.threads.net/@${profile.socialLinks.threads}`,
+                      )
+                    }
+                  >
                     <ThemedText style={styles.socialIcon}>🧵</ThemedText>
                     <ThemedText style={styles.socialLabel}>THREADS</ThemedText>
                     <ThemedText style={styles.socialHandle}>

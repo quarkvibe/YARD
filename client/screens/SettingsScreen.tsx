@@ -33,7 +33,7 @@ export default function SettingsScreen() {
   const [showRuleDetails, setShowRuleDetails] = useState<string | null>(null);
 
   const handleStartWorkout = () => {
-    navigation.navigate("WorkoutTab");
+    navigation.navigate("WorkoutTab", { startNew: true });
   };
 
   const loadData = useCallback(async () => {
