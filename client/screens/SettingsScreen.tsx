@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { ScrollView, View, StyleSheet, Switch, Pressable } from "react-native";
+import { ScrollView, View, StyleSheet, Switch, Pressable, Linking } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
@@ -403,14 +403,14 @@ export default function SettingsScreen() {
                       style={[
                         styles.durationOption,
                         settings.restTimerDuration === seconds &&
-                          styles.durationOptionSelected,
+                        styles.durationOptionSelected,
                       ]}
                     >
                       <ThemedText
                         style={[
                           styles.durationOptionText,
                           settings.restTimerDuration === seconds &&
-                            styles.durationOptionTextSelected,
+                          styles.durationOptionTextSelected,
                         ]}
                       >
                         {seconds}s
@@ -442,7 +442,7 @@ export default function SettingsScreen() {
                       style={[
                         styles.alertOption,
                         settings.restAlertType === option.id &&
-                          styles.alertOptionSelected,
+                        styles.alertOptionSelected,
                       ]}
                     >
                       <Feather
@@ -463,6 +463,22 @@ export default function SettingsScreen() {
         </View>
 
         <ThemedText style={styles.versionText}>VERSION 1.0.0</ThemedText>
+
+        <View style={styles.legalLinks}>
+          <Pressable
+            onPress={() => Linking.openURL("https://flipmovefinish.now/terms")}
+          >
+            <ThemedText style={styles.legalLinkText}>Terms</ThemedText>
+          </Pressable>
+          <ThemedText style={styles.legalSeparator}>•</ThemedText>
+          <Pressable
+            onPress={() =>
+              Linking.openURL("https://flipmovefinish.now/privacy")
+            }
+          >
+            <ThemedText style={styles.legalLinkText}>Privacy</ThemedText>
+          </Pressable>
+        </View>
 
         <View style={styles.startWorkoutContainer}>
           <Button onPress={handleStartWorkout}>START WORKOUT</Button>
@@ -823,5 +839,23 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+  },
+  legalLinks: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: Spacing.md,
+    gap: Spacing.md,
+  },
+  legalLinkText: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+    textDecorationLine: "underline",
+  },
+  legalSeparator: {
+    fontSize: 10,
+    color: Colors.dark.textSecondary,
   },
 });

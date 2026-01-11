@@ -52,7 +52,12 @@ import {
   getProfile,
   getDeckStyleById,
   DeckStyle,
+  DeckStyleId,
   DECK_STYLES,
+  DEFAULT_RULE_SETS,
+  FLIP_MODES,
+  EXERCISE_TYPES,
+  SUPERSET_MODES,
 } from "@/lib/storage";
 
 type WorkoutState = "idle" | "active" | "paused" | "complete";
@@ -100,6 +105,13 @@ export default function WorkoutScreen() {
   // Set/Rest tracking state
   const [competitiveMode, setCompetitiveMode] = useState(false);
   const [showQuitConfirm, setShowQuitConfirm] = useState(false);
+
+  // Quick-change selector modals
+  const [showDeckPicker, setShowDeckPicker] = useState(false);
+  const [showIntensityPicker, setShowIntensityPicker] = useState(false);
+  const [showFlipModePicker, setShowFlipModePicker] = useState(false);
+  const [showExercisePicker, setShowExercisePicker] = useState(false);
+  const [showSupersetPicker, setShowSupersetPicker] = useState(false);
   const [restTimerEnabled, setRestTimerEnabled] = useState(false);
   const [restTimerDuration, setRestTimerDuration] = useState(60);
   const [restAlertType, setRestAlertType] = useState<
@@ -720,6 +732,73 @@ export default function WorkoutScreen() {
     setShowQuitConfirm(false);
   }, []);
 
+  // Quick-change handlers
+  const handleQuickChangeDeck = useCallback(
+    async (styleId: DeckStyleId) => {
+      const newStyle = getDeckStyleById(styleId);
+      setDeckStyle(newStyle);
+      const settings = await getSettings();
+      await saveSettings({ ...settings, selectedDeckStyleId: styleId });
+      setShowDeckPicker(false);
+      triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
+    },
+    [triggerHaptic],
+  );
+
+  const handleQuickChangeIntensity = useCallback(
+    async (intensityId: string) => {
+      const ruleSet = getRuleSetById(intensityId);
+      setRuleSetId(ruleSet.id);
+      setRuleSetName(ruleSet.name);
+      const settings = await getSettings();
+      await saveSettings({ ...settings, selectedRuleSetId: intensityId });
+      // Update best time for new intensity
+      const workouts = await getWorkouts();
+      const best = getBestTime(workouts, intensityId);
+      setBestTime(best);
+      setShowIntensityPicker(false);
+      triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
+    },
+    [triggerHaptic],
+  );
+
+  const handleQuickChangeFlipMode = useCallback(
+    async (modeId: FlipModeId) => {
+      const flipMode = getFlipModeById(modeId);
+      setFlipModeId(flipMode.id);
+      setFlipModeName(flipMode.name);
+      const settings = await getSettings();
+      await saveSettings({ ...settings, selectedFlipModeId: modeId });
+      setShowFlipModePicker(false);
+      triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
+    },
+    [triggerHaptic],
+  );
+
+  const handleQuickChangeExercise = useCallback(
+    async (type: ExerciseType) => {
+      setExerciseType(type);
+      const settings = await getSettings();
+      await saveSettings({ ...settings, selectedExerciseType: type });
+      setShowExercisePicker(false);
+      triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
+    },
+    [triggerHaptic],
+  );
+
+  const handleQuickChangeSupersetMode = useCallback(
+    async (modeId: SupersetModeId) => {
+      const supersetMode = getSupersetModeById(modeId);
+      setSupersetModeId(supersetMode.id);
+      setSupersetModeName(supersetMode.name);
+      const settings = await getSettings();
+      await saveSettings({ ...settings, selectedSupersetModeId: modeId });
+      setShowSupersetPicker(false);
+      triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
+    },
+    [triggerHaptic],
+  );
+
   const handleButtonPressIn = () => {
     buttonScale.value = withSpring(0.95, { damping: 15, stiffness: 150 });
   };
@@ -982,21 +1061,84 @@ export default function WorkoutScreen() {
         </View>
       )}
 
-      <View style={styles.deckPreview}>
+      {/* Tappable Deck - Quick Change Deck Style */}
+      <Pressable
+        style={styles.deckPreview}
+        onPress={() => setShowDeckPicker(true)}
+      >
         <DeckStack
           cardsRemaining={52}
           totalCards={52}
           deckStyleId={deckStyle.id}
         />
+        <View style={styles.quickChangeHint}>
+          <Feather name="edit-2" size={12} color={Colors.dark.textSecondary} />
+          <ThemedText style={styles.quickChangeHintText}>
+            {deckStyle.name}
+          </ThemedText>
+        </View>
+      </Pressable>
+
+      {/* Quick-change config row */}
+      <View style={styles.quickConfigRow}>
+        <Pressable
+          style={styles.quickConfigItem}
+          onPress={() => setShowIntensityPicker(true)}
+        >
+          <ThemedText style={styles.quickConfigLabel}>INTENSITY</ThemedText>
+          <View style={styles.quickConfigValueRow}>
+            <ThemedText style={styles.quickConfigValue}>
+              {ruleSetName}
+            </ThemedText>
+            <Feather name="chevron-down" size={14} color={Colors.dark.accent} />
+          </View>
+        </Pressable>
+        <Pressable
+          style={styles.quickConfigItem}
+          onPress={() => setShowFlipModePicker(true)}
+        >
+          <ThemedText style={styles.quickConfigLabel}>FLIP MODE</ThemedText>
+          <View style={styles.quickConfigValueRow}>
+            <ThemedText style={styles.quickConfigValue}>
+              {flipModeName}
+            </ThemedText>
+            <Feather name="chevron-down" size={14} color={Colors.dark.accent} />
+          </View>
+        </Pressable>
       </View>
 
-      <ThemedText style={styles.ruleSetLabel}>{ruleSetName}</ThemedText>
-      <ThemedText style={styles.flipModeLabel}>
-        {exerciseType === "superset"
-          ? `${supersetModeName} SUPERSET`
-          : exerciseType.toUpperCase()}
-      </ThemedText>
-      <ThemedText style={styles.flipModeLabel}>{flipModeName}</ThemedText>
+      <View style={styles.quickConfigRow}>
+        <Pressable
+          style={styles.quickConfigItem}
+          onPress={() => setShowExercisePicker(true)}
+        >
+          <ThemedText style={styles.quickConfigLabel}>EXERCISE</ThemedText>
+          <View style={styles.quickConfigValueRow}>
+            <ThemedText style={styles.quickConfigValue}>
+              {exerciseType.toUpperCase()}
+            </ThemedText>
+            <Feather name="chevron-down" size={14} color={Colors.dark.accent} />
+          </View>
+        </Pressable>
+        {exerciseType === "superset" && (
+          <Pressable
+            style={styles.quickConfigItem}
+            onPress={() => setShowSupersetPicker(true)}
+          >
+            <ThemedText style={styles.quickConfigLabel}>SUPERSET</ThemedText>
+            <View style={styles.quickConfigValueRow}>
+              <ThemedText style={styles.quickConfigValue}>
+                {supersetModeName}
+              </ThemedText>
+              <Feather
+                name="chevron-down"
+                size={14}
+                color={Colors.dark.accent}
+              />
+            </View>
+          </Pressable>
+        )}
+      </View>
 
       {bestTime !== null ? (
         <View style={styles.bestTimeContainer}>
@@ -1320,6 +1462,218 @@ export default function WorkoutScreen() {
                 <ThemedText style={styles.modalQuitText}>QUIT</ThemedText>
               </Pressable>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Deck Style Picker Modal */}
+      <Modal
+        visible={showDeckPicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowDeckPicker(false)}
+      >
+        <View style={styles.pickerModalOverlay}>
+          <View style={styles.pickerModalContent}>
+            <View style={styles.pickerModalHeader}>
+              <ThemedText style={styles.pickerModalTitle}>
+                DECK STYLE
+              </ThemedText>
+              <Pressable onPress={() => setShowDeckPicker(false)}>
+                <Feather name="x" size={24} color={Colors.dark.chalk} />
+              </Pressable>
+            </View>
+            <View style={styles.pickerGrid}>
+              {DECK_STYLES.map((style) => (
+                <Pressable
+                  key={style.id}
+                  style={[
+                    styles.pickerGridItem,
+                    {
+                      backgroundColor: style.backColor,
+                      borderColor: style.accentColor,
+                    },
+                    deckStyle.id === style.id && styles.pickerGridItemSelected,
+                  ]}
+                  onPress={() => handleQuickChangeDeck(style.id)}
+                >
+                  <ThemedText
+                    style={[styles.pickerGridText, { color: style.textColor }]}
+                  >
+                    {style.name}
+                  </ThemedText>
+                  {deckStyle.id === style.id && (
+                    <Feather name="check" size={16} color={style.accentColor} />
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Intensity Picker Modal */}
+      <Modal
+        visible={showIntensityPicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowIntensityPicker(false)}
+      >
+        <View style={styles.pickerModalOverlay}>
+          <View style={styles.pickerModalContent}>
+            <View style={styles.pickerModalHeader}>
+              <ThemedText style={styles.pickerModalTitle}>INTENSITY</ThemedText>
+              <Pressable onPress={() => setShowIntensityPicker(false)}>
+                <Feather name="x" size={24} color={Colors.dark.chalk} />
+              </Pressable>
+            </View>
+            {DEFAULT_RULE_SETS.map((rule) => (
+              <Pressable
+                key={rule.id}
+                style={[
+                  styles.pickerListItem,
+                  ruleSetId === rule.id && styles.pickerListItemSelected,
+                ]}
+                onPress={() => handleQuickChangeIntensity(rule.id)}
+              >
+                <View>
+                  <ThemedText style={styles.pickerListTitle}>
+                    {rule.name}
+                  </ThemedText>
+                  <ThemedText style={styles.pickerListDescription}>
+                    {rule.description}
+                  </ThemedText>
+                </View>
+                {ruleSetId === rule.id && (
+                  <Feather name="check" size={20} color={Colors.dark.accent} />
+                )}
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Flip Mode Picker Modal */}
+      <Modal
+        visible={showFlipModePicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowFlipModePicker(false)}
+      >
+        <View style={styles.pickerModalOverlay}>
+          <View style={styles.pickerModalContent}>
+            <View style={styles.pickerModalHeader}>
+              <ThemedText style={styles.pickerModalTitle}>FLIP MODE</ThemedText>
+              <Pressable onPress={() => setShowFlipModePicker(false)}>
+                <Feather name="x" size={24} color={Colors.dark.chalk} />
+              </Pressable>
+            </View>
+            {FLIP_MODES.map((mode) => (
+              <Pressable
+                key={mode.id}
+                style={[
+                  styles.pickerListItem,
+                  flipModeId === mode.id && styles.pickerListItemSelected,
+                ]}
+                onPress={() => handleQuickChangeFlipMode(mode.id)}
+              >
+                <View>
+                  <ThemedText style={styles.pickerListTitle}>
+                    {mode.name}
+                  </ThemedText>
+                  <ThemedText style={styles.pickerListDescription}>
+                    {mode.description}
+                  </ThemedText>
+                </View>
+                {flipModeId === mode.id && (
+                  <Feather name="check" size={20} color={Colors.dark.accent} />
+                )}
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Exercise Type Picker Modal */}
+      <Modal
+        visible={showExercisePicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowExercisePicker(false)}
+      >
+        <View style={styles.pickerModalOverlay}>
+          <View style={styles.pickerModalContent}>
+            <View style={styles.pickerModalHeader}>
+              <ThemedText style={styles.pickerModalTitle}>EXERCISE</ThemedText>
+              <Pressable onPress={() => setShowExercisePicker(false)}>
+                <Feather name="x" size={24} color={Colors.dark.chalk} />
+              </Pressable>
+            </View>
+            {EXERCISE_TYPES.map((type) => (
+              <Pressable
+                key={type.id}
+                style={[
+                  styles.pickerListItem,
+                  exerciseType === type.id && styles.pickerListItemSelected,
+                ]}
+                onPress={() => handleQuickChangeExercise(type.id)}
+              >
+                <View>
+                  <ThemedText style={styles.pickerListTitle}>
+                    {type.name}
+                  </ThemedText>
+                  <ThemedText style={styles.pickerListDescription}>
+                    {type.description}
+                  </ThemedText>
+                </View>
+                {exerciseType === type.id && (
+                  <Feather name="check" size={20} color={Colors.dark.accent} />
+                )}
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Superset Mode Picker Modal */}
+      <Modal
+        visible={showSupersetPicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowSupersetPicker(false)}
+      >
+        <View style={styles.pickerModalOverlay}>
+          <View style={styles.pickerModalContent}>
+            <View style={styles.pickerModalHeader}>
+              <ThemedText style={styles.pickerModalTitle}>
+                SUPERSET MODE
+              </ThemedText>
+              <Pressable onPress={() => setShowSupersetPicker(false)}>
+                <Feather name="x" size={24} color={Colors.dark.chalk} />
+              </Pressable>
+            </View>
+            {SUPERSET_MODES.map((mode) => (
+              <Pressable
+                key={mode.id}
+                style={[
+                  styles.pickerListItem,
+                  supersetModeId === mode.id && styles.pickerListItemSelected,
+                ]}
+                onPress={() => handleQuickChangeSupersetMode(mode.id)}
+              >
+                <View>
+                  <ThemedText style={styles.pickerListTitle}>
+                    {mode.name}
+                  </ThemedText>
+                  <ThemedText style={styles.pickerListDescription}>
+                    {mode.description}
+                  </ThemedText>
+                </View>
+                {supersetModeId === mode.id && (
+                  <Feather name="check" size={20} color={Colors.dark.accent} />
+                )}
+              </Pressable>
+            ))}
           </View>
         </View>
       </Modal>
@@ -1920,5 +2274,130 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 2,
     color: Colors.dark.chalk,
+  },
+
+  // Quick-change UI Styles
+  quickChangeHint: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    marginTop: Spacing.sm,
+  },
+  quickChangeHintText: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+  },
+  quickConfigRow: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
+    width: "100%",
+    paddingHorizontal: Spacing.md,
+  },
+  quickConfigItem: {
+    flex: 1,
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+  },
+  quickConfigLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+    marginBottom: 4,
+  },
+  quickConfigValueRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  quickConfigValue: {
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 1,
+    color: Colors.dark.accent,
+  },
+
+  // Picker Modal Styles
+  pickerModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "flex-end",
+  },
+  pickerModalContent: {
+    backgroundColor: "#1A1A1A",
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+    paddingBottom: Spacing["3xl"],
+    maxHeight: "70%",
+  },
+  pickerModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.xl,
+  },
+  pickerModalTitle: {
+    fontSize: 18,
+    fontWeight: "900",
+    letterSpacing: 3,
+    color: Colors.dark.chalk,
+  },
+  pickerGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+  },
+  pickerGridItem: {
+    width: "48%",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  pickerGridItemSelected: {
+    borderWidth: 2,
+  },
+  pickerGridText: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 1,
+  },
+  pickerListItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.dark.cardBackground,
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+  },
+  pickerListItemSelected: {
+    borderColor: Colors.dark.accent,
+    borderWidth: 2,
+  },
+  pickerListTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
+    marginBottom: 4,
+  },
+  pickerListDescription: {
+    fontSize: 12,
+    fontWeight: "500",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
   },
 });

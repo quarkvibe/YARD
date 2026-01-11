@@ -151,24 +151,29 @@ export default function RecYardScreen() {
   };
 
   const handleUnlock = async () => {
+    console.log("[RecYard] handleUnlock called, hasAcceptedRules:", hasAcceptedRules);
+
     // Check if user has accepted the YARD rules first
     if (!hasAcceptedRules) {
+      console.log("[RecYard] Showing rules modal");
       setShowRulesModal(true);
       return;
     }
 
     setIsPurchasing(true);
+    console.log("[RecYard] Fetching packages from RevenueCat...");
 
     try {
       // Get available packages from RevenueCat
       const packages = await getRecYardPackages();
+      console.log("[RecYard] Got packages:", packages.length, packages);
 
       if (packages.length === 0) {
         // No packages available - show error with option to retry or restore
         console.log("[RecYard] No packages available from RevenueCat");
         Alert.alert(
           "SUBSCRIPTION UNAVAILABLE",
-          "The subscription is being set up. Please try again in a few minutes, or restore if you've already purchased.",
+          "The subscription is not yet available. This may happen if:\n\n• The app is still being reviewed\n• RevenueCat is still syncing with App Store\n\nPlease try again in a few minutes.",
           [
             { text: "TRY AGAIN", onPress: () => handleUnlock() },
             { text: "RESTORE PURCHASE", onPress: handleRestore },
@@ -563,9 +568,7 @@ export default function RecYardScreen() {
 
         <View style={styles.legalLinks}>
           <Pressable
-            onPress={() =>
-              Linking.openURL("https://flipmovefinish.now/terms")
-            }
+            onPress={() => Linking.openURL("https://flipmovefinish.now/terms")}
           >
             <ThemedText style={styles.legalLinkText}>Terms of Use</ThemedText>
           </Pressable>
@@ -1764,68 +1767,68 @@ export default function RecYardScreen() {
           profile.socialLinks.youtube ||
           profile.socialLinks.discord ||
           profile.socialLinks.threads) && (
-          <View style={styles.socialSection}>
-            <ThemedText style={styles.sectionTitle}>SOCIAL</ThemedText>
-            <View style={styles.socialCard}>
-              {profile.socialLinks.instagram && (
-                <Pressable style={styles.socialItem}>
-                  <ThemedText style={styles.socialIcon}>📸</ThemedText>
-                  <ThemedText style={styles.socialLabel}>INSTAGRAM</ThemedText>
-                  <ThemedText style={styles.socialHandle}>
-                    @{profile.socialLinks.instagram}
-                  </ThemedText>
-                </Pressable>
-              )}
-              {profile.socialLinks.tiktok && (
-                <Pressable style={styles.socialItem}>
-                  <ThemedText style={styles.socialIcon}>🎵</ThemedText>
-                  <ThemedText style={styles.socialLabel}>TIKTOK</ThemedText>
-                  <ThemedText style={styles.socialHandle}>
-                    @{profile.socialLinks.tiktok}
-                  </ThemedText>
-                </Pressable>
-              )}
-              {profile.socialLinks.twitter && (
-                <Pressable style={styles.socialItem}>
-                  <ThemedText style={styles.socialIcon}>🐦</ThemedText>
-                  <ThemedText style={styles.socialLabel}>
-                    X / TWITTER
-                  </ThemedText>
-                  <ThemedText style={styles.socialHandle}>
-                    @{profile.socialLinks.twitter}
-                  </ThemedText>
-                </Pressable>
-              )}
-              {profile.socialLinks.youtube && (
-                <Pressable style={styles.socialItem}>
-                  <ThemedText style={styles.socialIcon}>📺</ThemedText>
-                  <ThemedText style={styles.socialLabel}>YOUTUBE</ThemedText>
-                  <ThemedText style={styles.socialHandle}>
-                    @{profile.socialLinks.youtube}
-                  </ThemedText>
-                </Pressable>
-              )}
-              {profile.socialLinks.discord && (
-                <Pressable style={styles.socialItem}>
-                  <ThemedText style={styles.socialIcon}>💬</ThemedText>
-                  <ThemedText style={styles.socialLabel}>DISCORD</ThemedText>
-                  <ThemedText style={styles.socialHandle}>
-                    {profile.socialLinks.discord}
-                  </ThemedText>
-                </Pressable>
-              )}
-              {profile.socialLinks.threads && (
-                <Pressable style={styles.socialItem}>
-                  <ThemedText style={styles.socialIcon}>🧵</ThemedText>
-                  <ThemedText style={styles.socialLabel}>THREADS</ThemedText>
-                  <ThemedText style={styles.socialHandle}>
-                    @{profile.socialLinks.threads}
-                  </ThemedText>
-                </Pressable>
-              )}
+            <View style={styles.socialSection}>
+              <ThemedText style={styles.sectionTitle}>SOCIAL</ThemedText>
+              <View style={styles.socialCard}>
+                {profile.socialLinks.instagram && (
+                  <Pressable style={styles.socialItem}>
+                    <ThemedText style={styles.socialIcon}>📸</ThemedText>
+                    <ThemedText style={styles.socialLabel}>INSTAGRAM</ThemedText>
+                    <ThemedText style={styles.socialHandle}>
+                      @{profile.socialLinks.instagram}
+                    </ThemedText>
+                  </Pressable>
+                )}
+                {profile.socialLinks.tiktok && (
+                  <Pressable style={styles.socialItem}>
+                    <ThemedText style={styles.socialIcon}>🎵</ThemedText>
+                    <ThemedText style={styles.socialLabel}>TIKTOK</ThemedText>
+                    <ThemedText style={styles.socialHandle}>
+                      @{profile.socialLinks.tiktok}
+                    </ThemedText>
+                  </Pressable>
+                )}
+                {profile.socialLinks.twitter && (
+                  <Pressable style={styles.socialItem}>
+                    <ThemedText style={styles.socialIcon}>🐦</ThemedText>
+                    <ThemedText style={styles.socialLabel}>
+                      X / TWITTER
+                    </ThemedText>
+                    <ThemedText style={styles.socialHandle}>
+                      @{profile.socialLinks.twitter}
+                    </ThemedText>
+                  </Pressable>
+                )}
+                {profile.socialLinks.youtube && (
+                  <Pressable style={styles.socialItem}>
+                    <ThemedText style={styles.socialIcon}>📺</ThemedText>
+                    <ThemedText style={styles.socialLabel}>YOUTUBE</ThemedText>
+                    <ThemedText style={styles.socialHandle}>
+                      @{profile.socialLinks.youtube}
+                    </ThemedText>
+                  </Pressable>
+                )}
+                {profile.socialLinks.discord && (
+                  <Pressable style={styles.socialItem}>
+                    <ThemedText style={styles.socialIcon}>💬</ThemedText>
+                    <ThemedText style={styles.socialLabel}>DISCORD</ThemedText>
+                    <ThemedText style={styles.socialHandle}>
+                      {profile.socialLinks.discord}
+                    </ThemedText>
+                  </Pressable>
+                )}
+                {profile.socialLinks.threads && (
+                  <Pressable style={styles.socialItem}>
+                    <ThemedText style={styles.socialIcon}>🧵</ThemedText>
+                    <ThemedText style={styles.socialLabel}>THREADS</ThemedText>
+                    <ThemedText style={styles.socialHandle}>
+                      @{profile.socialLinks.threads}
+                    </ThemedText>
+                  </Pressable>
+                )}
+              </View>
             </View>
-          </View>
-        )}
+          )}
 
         {/* Verification Section */}
         <View style={styles.verificationSection}>
@@ -1857,7 +1860,23 @@ export default function RecYardScreen() {
             </View>
           </View>
         </View>
-      </ScrollView>
+
+        <View style={[styles.legalLinks, { marginTop: Spacing.xl, marginBottom: Spacing.xl }]}>
+          <Pressable
+            onPress={() => Linking.openURL("https://flipmovefinish.now/terms")}
+          >
+            <ThemedText style={styles.legalLinkText}>Terms of Use</ThemedText>
+          </Pressable>
+          <ThemedText style={styles.legalSeparator}>•</ThemedText>
+          <Pressable
+            onPress={() =>
+              Linking.openURL("https://flipmovefinish.now/privacy")
+            }
+          >
+            <ThemedText style={styles.legalLinkText}>Privacy Policy</ThemedText>
+          </Pressable>
+        </View>
+      </ScrollView >
     );
   };
 
@@ -2035,6 +2054,11 @@ export default function RecYardScreen() {
         >
           {renderLockedState()}
         </View>
+        <YardRulesModal
+          visible={showRulesModal}
+          onAccept={handleAcceptRules}
+          onDecline={handleDeclineRules}
+        />
       </ConcreteBackground>
     );
   }

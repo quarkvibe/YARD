@@ -21,8 +21,8 @@
           }
         ],
         "ITSAppUsesNonExemptEncryption": false,
-        "NSCameraUsageDescription": "YARD needs camera access to take a profile photo for your Rec Yard community profile. For example, you can snap a selfie to show other members who you are.",
-        "NSPhotoLibraryUsageDescription": "YARD needs access to your photo library to select a profile photo for your Rec Yard community profile. For example, you can choose an existing photo to represent yourself in the community."
+        "NSCameraUsageDescription": "YARD requires camera access to allow you to take a profile photo. This photo is displayed on the global leaderboard to verify your identity to other members. For example, you can take a selfie to use as your avatar.",
+        "NSPhotoLibraryUsageDescription": "YARD requires photo library access to allow you to upload a profile photo. This photo is displayed on the global leaderboard. For example, you can select an existing photo from your library to use as your avatar."
       }
     },
     "android": {
