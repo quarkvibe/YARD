@@ -1,0 +1,257 @@
+# KAWAII Deck Face Card Prompts
+
+## Master Style Prompt (copy this base for all)
+```
+Anime magical girl illustration, shoujo manga art style, beautiful detailed eyes, 
+sparkles and magical effects, playing card design composition, 3:4 aspect ratio,
+elegant and glamorous, [CHARACTER_TYPE], [SUIT_THEME], [SUIT_SYMBOL] motifs,
+[COLOR_SCHEME] color palette, confident graceful pose, stylish form-fitting costume
+```
+
+---
+
+## QUEENS (Magical Princess Characters)
+
+### Queen of Hearts
+```
+Anime magical girl princess illustration, shoujo manga art style, beautiful detailed eyes,
+sparkles and magical effects, playing card queen design, 3:4 aspect ratio,
+elegant and glamorous, romantic princess with flowing hair and tiara,
+heart theme with love and romance motifs, heart symbols decorating outfit,
+pink and red color palette, confident graceful pose, stylish ball gown costume,
+holding a magical heart scepter, warm loving expression
+```
+
+### Queen of Diamonds
+```
+Anime magical girl princess illustration, shoujo manga art style, beautiful detailed eyes,
+sparkles and magical effects, playing card queen design, 3:4 aspect ratio,
+elegant and glamorous, wealthy empress with jeweled crown and diamonds,
+diamond theme with luxury and wealth motifs, diamond symbols decorating outfit,
+gold and white color palette, confident regal pose, stylish elegant gown with gems,
+holding a crystal diamond staff, sophisticated knowing smile
+```
+
+### Queen of Clubs
+```
+Anime magical girl princess illustration, shoujo manga art style, beautiful detailed eyes,
+sparkles and magical effects, playing card queen design, 3:4 aspect ratio,
+elegant and glamorous, nature fairy queen with flower crown,
+club/clover theme with nature and growth motifs, clover symbols decorating outfit,
+green and gold color palette, confident mystical pose, stylish forest maiden dress,
+holding a magical wooden staff with leaves, serene peaceful expression
+```
+
+### Queen of Spades
+```
+Anime magical girl princess illustration, shoujo manga art style, beautiful detailed eyes,
+sparkles and magical effects, playing card queen design, 3:4 aspect ratio,
+elegant and glamorous, dark sorceress queen with gothic crown,
+spade theme with mystery and magic motifs, spade symbols decorating outfit,
+purple and black color palette, confident powerful pose, stylish dark elegant gown,
+holding a magical dark crystal staff, mysterious alluring smirk
+```
+
+---
+
+## KINGS (Handsome Anime Prince/Knight Characters)
+
+### King of Hearts
+```
+Handsome anime prince illustration, bishonen manga art style, beautiful detailed eyes,
+sparkles and royal effects, playing card king design, 3:4 aspect ratio,
+elegant and charming, romantic king with flowing cape and golden crown,
+heart theme with passion and courage motifs, heart symbols on royal armor,
+red and gold color palette, confident heroic pose, stylish royal armor and cape,
+holding a heart-emblazoned sword, warm charismatic smile
+```
+
+### King of Diamonds
+```
+Handsome anime emperor illustration, bishonen manga art style, beautiful detailed eyes,
+sparkles and royal effects, playing card king design, 3:4 aspect ratio,
+elegant and wealthy, merchant king with jeweled crown and fine robes,
+diamond theme with wealth and power motifs, diamond symbols on royal attire,
+gold and white color palette, confident commanding pose, stylish ornate royal robes,
+holding a golden scepter with diamond, shrewd confident expression
+```
+
+### King of Clubs
+```
+Handsome anime druid king illustration, bishonen manga art style, beautiful detailed eyes,
+sparkles and nature effects, playing card king design, 3:4 aspect ratio,
+elegant and wise, forest king with antler crown and natural armor,
+club/clover theme with nature and strength motifs, clover symbols on armor,
+green and brown color palette, confident grounded pose, stylish nature-infused armor,
+holding a mighty oak staff, calm wise expression
+```
+
+### King of Spades
+```
+Handsome anime dark king illustration, bishonen manga art style, beautiful detailed eyes,
+sparkles and shadow effects, playing card king design, 3:4 aspect ratio,
+elegant and mysterious, shadow king with dark crown and flowing cloak,
+spade theme with strategy and mystery motifs, spade symbols on dark armor,
+black and silver color palette, confident imposing pose, stylish dark royal armor,
+holding a shadow blade, intense piercing gaze
+```
+
+---
+
+## JACKS (Young Knight/Warrior Characters)
+
+### Jack of Hearts
+```
+Anime young knight illustration, shounen manga art style, beautiful detailed eyes,
+sparkles and action effects, playing card jack design, 3:4 aspect ratio,
+cute and energetic, young squire with heart emblem and light armor,
+heart theme with loyalty and bravery motifs, heart symbols on tunic,
+red and white color palette, dynamic action pose, stylish light armor with cape,
+wielding dual short swords, enthusiastic determined grin
+```
+
+### Jack of Diamonds
+```
+Anime young rogue illustration, shounen manga art style, beautiful detailed eyes,
+sparkles and treasure effects, playing card jack design, 3:4 aspect ratio,
+cute and clever, young treasure hunter with goggles and adventure gear,
+diamond theme with cunning and ambition motifs, diamond symbols on outfit,
+gold and blue color palette, dynamic sneaky pose, stylish adventurer outfit,
+holding lockpicks and a gem, mischievous winking expression
+```
+
+### Jack of Clubs
+```
+Anime young ranger illustration, shounen manga art style, beautiful detailed eyes,
+sparkles and nature effects, playing card jack design, 3:4 aspect ratio,
+cute and agile, young forest scout with leaf cloak and bow,
+club/clover theme with nature and speed motifs, clover symbols on gear,
+green and tan color palette, dynamic leaping pose, stylish ranger outfit,
+wielding a wooden bow, friendly adventurous smile
+```
+
+### Jack of Spades
+```
+Anime young assassin illustration, shounen manga art style, beautiful detailed eyes,
+sparkles and shadow effects, playing card jack design, 3:4 aspect ratio,
+cute and stealthy, young shadow apprentice with hood and daggers,
+spade theme with stealth and skill motifs, spade symbols on dark outfit,
+black and purple color palette, dynamic ninja pose, stylish dark assassin outfit,
+wielding throwing knives, cool confident smirk
+```
+
+---
+
+## ACES (Symbolic/Abstract with Character Element)
+
+### Ace of Hearts
+```
+Anime magical illustration, shoujo manga art style, mystical glowing effects,
+playing card ace design, 3:4 aspect ratio, giant ornate heart symbol as centerpiece,
+cute chibi angel girl emerging from or holding the heart,
+romantic ethereal theme with love and magic motifs,
+pink red and gold color palette, dreamy floating pose, heavenly background,
+sparkling light rays, warm loving atmosphere
+```
+
+### Ace of Diamonds
+```
+Anime magical illustration, shoujo manga art style, mystical glowing effects,
+playing card ace design, 3:4 aspect ratio, giant ornate diamond crystal as centerpiece,
+cute chibi treasure fairy presenting the diamond,
+wealthy luxurious theme with riches and light motifs,
+gold white and crystal color palette, elegant presenting pose, treasure vault background,
+sparkling gems everywhere, opulent wealthy atmosphere
+```
+
+### Ace of Clubs
+```
+Anime magical illustration, shoujo manga art style, mystical glowing effects,
+playing card ace design, 3:4 aspect ratio, giant ornate clover symbol as centerpiece,
+cute chibi forest sprite emerging from or holding the clover,
+nature growth theme with life and earth motifs,
+green gold and brown color palette, playful floating pose, enchanted forest background,
+glowing leaves and fireflies, peaceful natural atmosphere
+```
+
+### Ace of Spades
+```
+Anime magical illustration, shoujo manga art style, mystical glowing effects,
+playing card ace design, 3:4 aspect ratio, giant ornate spade symbol as centerpiece,
+cute chibi shadow spirit emerging from or holding the spade,
+mysterious dark magic theme with power and secrets motifs,
+purple black and silver color palette, mysterious floating pose, starry void background,
+swirling shadows and stars, powerful mystical atmosphere
+```
+
+---
+
+## 10s (Group/Action Scene or Powerful Single Character)
+
+### 10 of Hearts
+```
+Anime magical girl warrior illustration, shoujo manga art style, beautiful detailed eyes,
+sparkles and magical attack effects, playing card 10 design, 3:4 aspect ratio,
+powerful and beautiful, love warrior unleashing heart-shaped magic attack,
+heart theme with ten small hearts floating around her,
+pink and red color palette, dynamic attack pose, stylish magical girl battle outfit,
+casting powerful love spell, fierce determined expression
+```
+
+### 10 of Diamonds
+```
+Anime magical girl warrior illustration, shoujo manga art style, beautiful detailed eyes,
+sparkles and crystal attack effects, playing card 10 design, 3:4 aspect ratio,
+powerful and beautiful, gem mage summoning diamond crystal shards,
+diamond theme with ten small diamonds floating around her,
+gold and crystal color palette, dynamic casting pose, stylish gem-encrusted battle outfit,
+summoning crystal storm, focused powerful expression
+```
+
+### 10 of Clubs
+```
+Anime magical girl warrior illustration, shoujo manga art style, beautiful detailed eyes,
+sparkles and nature attack effects, playing card 10 design, 3:4 aspect ratio,
+powerful and beautiful, nature guardian summoning vine and leaf storm,
+club/clover theme with ten small clovers floating around her,
+green and gold color palette, dynamic nature pose, stylish forest warrior outfit,
+commanding plants and leaves, serene powerful expression
+```
+
+### 10 of Spades
+```
+Anime magical girl warrior illustration, shoujo manga art style, beautiful detailed eyes,
+sparkles and shadow attack effects, playing card 10 design, 3:4 aspect ratio,
+powerful and beautiful, shadow mage unleashing dark magic attack,
+spade theme with ten small spades floating around her,
+purple and black color palette, dynamic dark magic pose, stylish shadow sorceress outfit,
+commanding darkness and shadows, intense mysterious expression
+```
+
+---
+
+## File Naming Reference
+
+After generating, rename files to:
+- `kawaii_deck_queen_hearts.png`
+- `kawaii_deck_queen_diamonds.png`
+- `kawaii_deck_queen_clubs.png`
+- `kawaii_deck_queen_spades.png`
+- `kawaii_deck_king_hearts.png`
+- `kawaii_deck_king_diamonds.png`
+- `kawaii_deck_king_clubs.png`
+- `kawaii_deck_king_spades.png`
+- `kawaii_deck_jack_hearts.png`
+- `kawaii_deck_jack_diamonds.png`
+- `kawaii_deck_jack_clubs.png`
+- `kawaii_deck_jack_spades.png`
+- `kawaii_deck_10_hearts.png`
+- `kawaii_deck_10_diamonds.png`
+- `kawaii_deck_10_clubs.png`
+- `kawaii_deck_10_spades.png`
+- `kawaii_deck_ace_hearts.png`
+- `kawaii_deck_ace_diamonds.png`
+- `kawaii_deck_ace_clubs.png`
+- `kawaii_deck_ace_spades.png`
+
+Place in: `attached_assets/generated_images/`
