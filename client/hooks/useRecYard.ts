@@ -186,38 +186,51 @@ export function useRecYard() {
 
   const createProfile = useCallback(
     async (handle: string, displayName: string): Promise<boolean> => {
-      if (!userId) return false;
+      if (!userId) {
+        console.error("[useRecYard] No userId available for profile creation");
+        return false;
+      }
 
       const cleanHandle = handle.toUpperCase().replace(/[^A-Z0-9_]/g, "");
+      console.log("[useRecYard] Creating profile for userId:", userId, "handle:", cleanHandle);
 
       try {
-        // First check if a profile already exists for this user
-        const { data: existingProfile } = await supabase
+        // First check if a profile already exists for this user (use maybeSingle to avoid error)
+        const { data: existingProfile, error: existingError } = await supabase
           .from("profiles")
           .select("*")
           .eq("user_id", userId)
-          .single();
+          .maybeSingle();
+
+        if (existingError) {
+          console.error("[useRecYard] Error checking existing profile:", existingError);
+        }
 
         if (existingProfile) {
           // Profile already exists for this user - just load it
-          console.log("[useRecYard] Profile already exists for user, loading it");
+          console.log("[useRecYard] Profile already exists for user, loading it:", existingProfile);
           setProfile(mapDbProfileToProfile(existingProfile));
           return true;
         }
 
-        // Check if the handle is already taken by someone else
-        const { data: handleCheck } = await supabase
+        // Check if the handle is already taken by someone else (use maybeSingle)
+        const { data: handleCheck, error: handleError } = await supabase
           .from("profiles")
           .select("id")
           .eq("handle", cleanHandle)
-          .single();
+          .maybeSingle();
+
+        if (handleError) {
+          console.error("[useRecYard] Error checking handle:", handleError);
+        }
 
         if (handleCheck) {
-          console.error("[useRecYard] Handle already taken:", cleanHandle);
+          console.error("[useRecYard] Handle already taken by another user:", cleanHandle);
           return false;
         }
 
         // Create new profile
+        console.log("[useRecYard] Inserting new profile...");
         const { data, error: insertError } = await supabase
           .from("profiles")
           .insert({
@@ -233,10 +246,11 @@ export function useRecYard() {
           return false;
         }
 
+        console.log("[useRecYard] Profile created successfully:", data);
         setProfile(mapDbProfileToProfile(data));
         return true;
       } catch (err) {
-        console.error("[useRecYard] Create profile error:", err);
+        console.error("[useRecYard] Create profile exception:", err);
         return false;
       }
     },
