@@ -37,6 +37,7 @@ import {
   formatDuration,
   hasAcceptedYardRules,
   acceptYardRules,
+  getProfile,
 } from "@/lib/storage";
 import { useRecYard, formatTimeAgo } from "@/hooks/useRecYard";
 import type { LeaderboardEntry } from "@/hooks/useRecYard";
@@ -130,6 +131,49 @@ export default function RecYardScreen() {
       checkRules();
       initialize();
     }, [initialize]),
+  );
+
+  // Pre-populate profile creation form with existing local profile data
+  useFocusEffect(
+    useCallback(() => {
+      const loadLocalProfile = async () => {
+        // Only pre-populate if we don't have a Supabase profile yet
+        if (!profile && isSubscribed) {
+          const localProfile = await getProfile();
+          if (localProfile) {
+            // Pre-fill the form with local profile data
+            if (localProfile.handle && !editHandle) {
+              setEditHandle(localProfile.handle);
+            }
+            if (localProfile.displayName && !editDisplayName) {
+              setEditDisplayName(localProfile.displayName);
+            }
+            if (localProfile.bio && !editBio) {
+              setEditBio(localProfile.bio);
+            }
+            if (localProfile.instagram && !editInstagram) {
+              setEditInstagram(localProfile.instagram);
+            }
+            if (localProfile.tiktok && !editTiktok) {
+              setEditTiktok(localProfile.tiktok);
+            }
+            if (localProfile.twitter && !editTwitter) {
+              setEditTwitter(localProfile.twitter);
+            }
+            if (localProfile.youtube && !editYoutube) {
+              setEditYoutube(localProfile.youtube);
+            }
+            if (localProfile.discord && !editDiscord) {
+              setEditDiscord(localProfile.discord);
+            }
+            if (localProfile.threads && !editThreads) {
+              setEditThreads(localProfile.threads);
+            }
+          }
+        }
+      };
+      loadLocalProfile();
+    }, [profile, isSubscribed]),
   );
 
   const onRefresh = async () => {

@@ -188,12 +188,41 @@ export function useRecYard() {
     async (handle: string, displayName: string): Promise<boolean> => {
       if (!userId) return false;
 
+      const cleanHandle = handle.toUpperCase().replace(/[^A-Z0-9_]/g, "");
+
       try {
+        // First check if a profile already exists for this user
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", userId)
+          .single();
+
+        if (existingProfile) {
+          // Profile already exists for this user - just load it
+          console.log("[useRecYard] Profile already exists for user, loading it");
+          setProfile(mapDbProfileToProfile(existingProfile));
+          return true;
+        }
+
+        // Check if the handle is already taken by someone else
+        const { data: handleCheck } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("handle", cleanHandle)
+          .single();
+
+        if (handleCheck) {
+          console.error("[useRecYard] Handle already taken:", cleanHandle);
+          return false;
+        }
+
+        // Create new profile
         const { data, error: insertError } = await supabase
           .from("profiles")
           .insert({
             user_id: userId,
-            handle: handle.toUpperCase().replace(/[^A-Z0-9_]/g, ""),
+            handle: cleanHandle,
             display_name: displayName || handle,
           })
           .select()
