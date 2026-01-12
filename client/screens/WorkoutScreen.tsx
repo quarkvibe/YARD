@@ -1163,7 +1163,7 @@ export default function WorkoutScreen() {
       {isOfficialRecYardSubmission && (
         <View style={styles.officialSubmissionBanner}>
           <ThemedText style={styles.officialSubmissionText}>
-            🏆 OFFICIAL REC YARD CHALLENGE
+            OFFICIAL REC YARD CHALLENGE
           </ThemedText>
           <ThemedText style={styles.officialSubmissionSubtext}>
             Your time will be posted to the leaderboard
@@ -1203,18 +1203,20 @@ export default function WorkoutScreen() {
             <Feather name="chevron-down" size={14} color={Colors.dark.accent} />
           </View>
         </Pressable>
-        <Pressable
-          style={styles.quickConfigItem}
-          onPress={() => setShowFlipModePicker(true)}
-        >
-          <ThemedText style={styles.quickConfigLabel}>FLIP MODE</ThemedText>
-          <View style={styles.quickConfigValueRow}>
-            <ThemedText style={styles.quickConfigValue}>
-              {flipModeName}
-            </ThemedText>
-            <Feather name="chevron-down" size={14} color={Colors.dark.accent} />
-          </View>
-        </Pressable>
+        {exerciseType !== "superset" && (
+          <Pressable
+            style={styles.quickConfigItem}
+            onPress={() => setShowFlipModePicker(true)}
+          >
+            <ThemedText style={styles.quickConfigLabel}>FLIP MODE</ThemedText>
+            <View style={styles.quickConfigValueRow}>
+              <ThemedText style={styles.quickConfigValue}>
+                {flipModeName}
+              </ThemedText>
+              <Feather name="chevron-down" size={14} color={Colors.dark.accent} />
+            </View>
+          </Pressable>
+        )}
       </View>
 
       <View style={styles.quickConfigRow}>
