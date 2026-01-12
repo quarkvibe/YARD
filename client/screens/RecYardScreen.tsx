@@ -206,15 +206,17 @@ export default function RecYardScreen() {
       return;
     }
 
-    const result = await startCompetitiveRun();
+    const result = await startCompetitiveRun("superset", "misdemeanor");
 
-    if (result.success && result.runId && result.runCode && result.runNumber) {
+    if (result.success && result.runId && result.runCode && result.runNumber && result.exerciseType && result.intensity) {
       navigation.navigate("RecYardWorkout", {
         profileId: profile.id,
         handle: profile.handle,
         runNumber: result.runNumber,
         runCode: result.runCode,
         runId: result.runId,
+        exerciseType: result.exerciseType,
+        intensity: result.intensity,
       });
     } else {
       Alert.alert("ERROR", result.error || "Failed to start run. Please try again.");

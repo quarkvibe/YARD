@@ -50,7 +50,7 @@ export default function RecYardWorkoutScreen() {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "RecYardWorkout">>();
   
-  const { profileId, handle, runNumber, runCode, runId } = route.params;
+  const { profileId, handle, runNumber, runCode, runId, exerciseType, intensity } = route.params;
 
   const [workoutState, setWorkoutState] = useState<WorkoutState>("countdown");
   const [countdown, setCountdown] = useState(3);
@@ -126,7 +126,11 @@ export default function RecYardWorkoutScreen() {
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
+    const weekId = getCurrentWeekId();
+    const completedAt = new Date().toISOString();
+
     try {
+      // Update the rec_yard_runs record
       await supabase
         .from("rec_yard_runs")
         .update({
@@ -135,13 +139,33 @@ export default function RecYardWorkoutScreen() {
           total_squats: totalSquats,
           cards_completed: currentCardIndex + 1,
           status: "completed",
-          completed_at: new Date().toISOString(),
+          completed_at: completedAt,
         })
         .eq("id", runId);
+
+      // Submit to leaderboard (workout_submissions table)
+      const { error: submissionError } = await supabase
+        .from("workout_submissions")
+        .insert({
+          profile_id: profileId,
+          time: timer,
+          exercise_type: exerciseType,
+          intensity: intensity,
+          total_pushups: totalPushups,
+          total_squats: totalSquats,
+          is_verified: false,
+          week_id: weekId,
+        });
+
+      if (submissionError) {
+        console.error("[RecYardWorkout] Failed to submit to leaderboard:", submissionError);
+      } else {
+        console.log("[RecYardWorkout] Successfully submitted to leaderboard with run:", runCode);
+      }
     } catch (err) {
       console.error("[RecYardWorkout] Failed to update run:", err);
     }
-  }, [timer, totalPushups, totalSquats, currentCardIndex, runId, stopTimer]);
+  }, [timer, totalPushups, totalSquats, currentCardIndex, runId, profileId, exerciseType, intensity, runCode, stopTimer]);
 
   const flipCard = useCallback(() => {
     if (workoutState !== "active") return;

@@ -11,6 +11,7 @@ import {
   TrashTalkMessage,
   TauntCategory,
 } from "@/lib/recyard";
+import { saveProfile as saveLocalProfile, UserProfile } from "@/lib/storage";
 
 // ============================================
 // TYPES
@@ -158,7 +159,28 @@ export function useRecYard() {
           earnedAt: b.created_at,
         }));
 
-        setProfile(mapDbProfileToProfile(profileData, badges));
+        const loadedProfile = mapDbProfileToProfile(profileData, badges);
+        setProfile(loadedProfile);
+        
+        // Sync to local storage so handle persists across the app
+        try {
+          const localProfile: UserProfile = {
+            displayName: loadedProfile.displayName,
+            handle: loadedProfile.handle,
+            bio: loadedProfile.bio,
+            photoUri: loadedProfile.photoUrl || undefined,
+            instagram: loadedProfile.socialLinks.instagram || "",
+            tiktok: loadedProfile.socialLinks.tiktok || "",
+            twitter: loadedProfile.socialLinks.twitter || "",
+            youtube: loadedProfile.socialLinks.youtube || "",
+            discord: loadedProfile.socialLinks.discord || "",
+            threads: loadedProfile.socialLinks.threads || "",
+          };
+          await saveLocalProfile(localProfile);
+          console.log("[useRecYard] Synced profile to local storage on load");
+        } catch (syncErr) {
+          console.error("[useRecYard] Failed to sync to local storage:", syncErr);
+        }
       }
 
       // Load leaderboard
@@ -266,7 +288,12 @@ export function useRecYard() {
         }
 
         console.log("[useRecYard] Profile created successfully:", data);
-        setProfile(mapDbProfileToProfile(data));
+        const newProfile = mapDbProfileToProfile(data);
+        setProfile(newProfile);
+        
+        // Sync to local storage so it persists across the app
+        await syncToLocalProfile(newProfile);
+        
         return { success: true };
       } catch (err) {
         console.error("[useRecYard] Create profile exception:", err);
@@ -275,6 +302,28 @@ export function useRecYard() {
     },
     [userId],
   );
+  
+  // Helper to sync Rec Yard profile to local storage
+  const syncToLocalProfile = async (recYardProfile: RecYardProfile): Promise<void> => {
+    try {
+      const localProfile: UserProfile = {
+        displayName: recYardProfile.displayName,
+        handle: recYardProfile.handle,
+        bio: recYardProfile.bio,
+        photoUri: recYardProfile.photoUrl || undefined,
+        instagram: recYardProfile.socialLinks.instagram || "",
+        tiktok: recYardProfile.socialLinks.tiktok || "",
+        twitter: recYardProfile.socialLinks.twitter || "",
+        youtube: recYardProfile.socialLinks.youtube || "",
+        discord: recYardProfile.socialLinks.discord || "",
+        threads: recYardProfile.socialLinks.threads || "",
+      };
+      await saveLocalProfile(localProfile);
+      console.log("[useRecYard] Synced profile to local storage");
+    } catch (err) {
+      console.error("[useRecYard] Failed to sync to local storage:", err);
+    }
+  };
 
   const updateProfile = useCallback(
     async (updates: Partial<RecYardProfile>): Promise<boolean> => {
@@ -327,6 +376,10 @@ export function useRecYard() {
           };
         }
         setProfile(updatedProfile);
+        
+        // Sync to local storage
+        await syncToLocalProfile(updatedProfile);
+        
         return true;
       } catch (err) {
         console.error("[useRecYard] Update profile error:", err);
@@ -361,8 +414,6 @@ export function useRecYard() {
           )
         `,
         )
-        .eq("is_deleted", false)
-        .eq("is_flagged", false)
         .order("time", { ascending: true })
         .limit(50);
 
@@ -622,11 +673,16 @@ export function useRecYard() {
   // COMPETITIVE RUN
   // ============================================
 
-  const startCompetitiveRun = useCallback(async (): Promise<{
+  const startCompetitiveRun = useCallback(async (
+    exerciseType: string = "superset",
+    intensity: string = "misdemeanor"
+  ): Promise<{
     success: boolean;
     runId?: string;
     runNumber?: number;
     runCode?: string;
+    exerciseType?: string;
+    intensity?: string;
     error?: string;
   }> => {
     if (!profile || !userId) {
@@ -669,8 +725,8 @@ export function useRecYard() {
           run_number: newRunNumber,
           run_code: runCode,
           week_id: weekId,
-          exercise_type: "superset",
-          intensity: "misdemeanor",
+          exercise_type: exerciseType,
+          intensity: intensity,
           status: "in_progress",
         })
         .select()
@@ -691,6 +747,8 @@ export function useRecYard() {
         runId: runData.id,
         runNumber: newRunNumber,
         runCode,
+        exerciseType,
+        intensity,
       };
     } catch (err) {
       console.error("[useRecYard] Start competitive run error:", err);

@@ -12,6 +12,8 @@ export type RootStackParamList = {
     runNumber: number;
     runCode: string;
     runId: string;
+    exerciseType: string;
+    intensity: string;
   };
 };
 
