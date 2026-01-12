@@ -116,6 +116,7 @@ export default function RecYardScreen() {
   const [showRunConfigModal, setShowRunConfigModal] = useState(false);
   const [selectedExerciseType, setSelectedExerciseType] = useState<"pushups" | "squats" | "superset">("superset");
   const [selectedIntensity, setSelectedIntensity] = useState<"misdemeanor" | "hard_time" | "lifer">("misdemeanor");
+  const [selectedFlipMode, setSelectedFlipMode] = useState<"freshfish" | "trustee" | "og" | "podfather">("freshfish");
 
   // Trash talk modal state
   const [showCalloutModal, setShowCalloutModal] = useState(false);
@@ -220,9 +221,9 @@ export default function RecYardScreen() {
     
     setShowRunConfigModal(false);
     
-    const result = await startCompetitiveRun(selectedExerciseType, selectedIntensity);
+    const result = await startCompetitiveRun(selectedExerciseType, selectedIntensity, selectedFlipMode);
 
-    if (result.success && result.runId && result.runCode && result.runNumber && result.exerciseType && result.intensity) {
+    if (result.success && result.runId && result.runCode && result.runNumber && result.exerciseType && result.intensity && result.flipMode) {
       navigation.navigate("RecYardWorkout", {
         profileId: profile.id,
         handle: profile.handle,
@@ -231,6 +232,7 @@ export default function RecYardScreen() {
         runId: result.runId,
         exerciseType: result.exerciseType,
         intensity: result.intensity,
+        flipMode: result.flipMode,
       });
     } else {
       Alert.alert("ERROR", result.error || "Failed to start run. Please try again.");
@@ -2288,6 +2290,36 @@ export default function RecYardScreen() {
               </View>
             </View>
 
+            <View style={styles.runConfigSection}>
+              <ThemedText style={styles.runConfigLabel}>FLIP MODE</ThemedText>
+              <View style={styles.runConfigOptionsWrap}>
+                {([
+                  { value: "freshfish", label: "FRESH FISH" },
+                  { value: "trustee", label: "TRUSTEE" },
+                  { value: "og", label: "OG" },
+                  { value: "podfather", label: "POD FATHER" },
+                ] as const).map((mode) => (
+                  <Pressable
+                    key={mode.value}
+                    style={[
+                      styles.runConfigOptionHalf,
+                      selectedFlipMode === mode.value && styles.runConfigOptionSelected,
+                    ]}
+                    onPress={() => setSelectedFlipMode(mode.value)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.runConfigOptionText,
+                        selectedFlipMode === mode.value && styles.runConfigOptionTextSelected,
+                      ]}
+                    >
+                      {mode.label}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
             <View style={styles.runConfigButtons}>
               <Pressable
                 style={styles.runConfigCancelButton}
@@ -4002,8 +4034,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: Spacing.sm,
   },
+  runConfigOptionsWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+  },
   runConfigOption: {
     flex: 1,
+    backgroundColor: Colors.dark.backgroundRoot,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+    alignItems: "center",
+  },
+  runConfigOptionHalf: {
+    width: "48%",
     backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.sm,
     borderWidth: 1,

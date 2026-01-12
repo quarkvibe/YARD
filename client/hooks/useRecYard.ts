@@ -675,7 +675,8 @@ export function useRecYard() {
 
   const startCompetitiveRun = useCallback(async (
     exerciseType: string = "superset",
-    intensity: string = "misdemeanor"
+    intensity: string = "misdemeanor",
+    flipMode: string = "fresh_fish"
   ): Promise<{
     success: boolean;
     runId?: string;
@@ -683,6 +684,7 @@ export function useRecYard() {
     runCode?: string;
     exerciseType?: string;
     intensity?: string;
+    flipMode?: string;
     error?: string;
   }> => {
     if (!profile || !userId) {
@@ -727,6 +729,7 @@ export function useRecYard() {
           week_id: weekId,
           exercise_type: exerciseType,
           intensity: intensity,
+          flip_mode: flipMode,
           status: "in_progress",
         })
         .select()
@@ -749,6 +752,7 @@ export function useRecYard() {
         runCode,
         exerciseType,
         intensity,
+        flipMode,
       };
     } catch (err) {
       console.error("[useRecYard] Start competitive run error:", err);

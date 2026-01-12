@@ -50,7 +50,7 @@ export default function RecYardWorkoutScreen() {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "RecYardWorkout">>();
   
-  const { profileId, handle, runNumber, runCode, runId, exerciseType, intensity } = route.params;
+  const { profileId, handle, runNumber, runCode, runId, exerciseType, intensity, flipMode } = route.params;
 
   const [workoutState, setWorkoutState] = useState<WorkoutState>("countdown");
   const [countdown, setCountdown] = useState(3);
@@ -71,10 +71,10 @@ export default function RecYardWorkoutScreen() {
   const cardsCompleted = currentCardIndex + 1;
 
   useEffect(() => {
-    const ruleSet = getRuleSetById("misdemeanor");
-    const newDeck = generateDeck(ruleSet, "superset");
+    const ruleSet = getRuleSetById(intensity);
+    const newDeck = generateDeck(ruleSet, exerciseType as "pushups" | "squats" | "superset");
     setDeck(newDeck);
-  }, []);
+  }, [intensity, exerciseType]);
 
   useEffect(() => {
     if (workoutState === "countdown" && countdown > 0) {
@@ -151,6 +151,7 @@ export default function RecYardWorkoutScreen() {
           time: timer,
           exercise_type: exerciseType,
           intensity: intensity,
+          flip_mode: flipMode,
           total_pushups: totalPushups,
           total_squats: totalSquats,
           is_verified: false,
@@ -165,7 +166,7 @@ export default function RecYardWorkoutScreen() {
     } catch (err) {
       console.error("[RecYardWorkout] Failed to update run:", err);
     }
-  }, [timer, totalPushups, totalSquats, currentCardIndex, runId, profileId, exerciseType, intensity, runCode, stopTimer]);
+  }, [timer, totalPushups, totalSquats, currentCardIndex, runId, profileId, exerciseType, intensity, flipMode, runCode, stopTimer]);
 
   const flipCard = useCallback(() => {
     if (workoutState !== "active") return;
@@ -182,21 +183,101 @@ export default function RecYardWorkoutScreen() {
       return;
     }
 
-    const card = deck[nextIndex];
-    const exercise = alternatingExercise;
-    const modifiedCard = { ...card, exercise };
-    
-    setActiveCards([modifiedCard]);
-    setCurrentCardIndex(nextIndex);
+    // Determine how many cards to flip based on flip mode
+    let cardsToFlip: CardValue[] = [];
+    let currentExercise = alternatingExercise;
+    let newPushups = 0;
+    let newSquats = 0;
+    let lastIndex = nextIndex;
 
-    if (exercise === "pushups") {
-      setTotalPushups((prev) => prev + card.value);
+    if (flipMode === "freshfish") {
+      // Fresh Fish: One card at a time
+      const card = deck[nextIndex];
+      cardsToFlip = [{ ...card, exercise: currentExercise }];
+      if (currentExercise === "pushups") {
+        newPushups = card.value;
+      } else {
+        newSquats = card.value;
+      }
+      currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+      lastIndex = nextIndex;
+    } else if (flipMode === "trustee") {
+      // Trustee: 2 cards at a time
+      for (let i = 0; i < 2 && nextIndex + i < deck.length; i++) {
+        const card = deck[nextIndex + i];
+        cardsToFlip.push({ ...card, exercise: currentExercise });
+        if (currentExercise === "pushups") {
+          newPushups += card.value;
+        } else {
+          newSquats += card.value;
+        }
+        currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+        lastIndex = nextIndex + i;
+      }
+    } else if (flipMode === "og") {
+      // OG: Flip again if under 20 reps
+      let totalReps = 0;
+      let idx = nextIndex;
+      while (totalReps < 20 && idx < deck.length) {
+        const card = deck[idx];
+        cardsToFlip.push({ ...card, exercise: currentExercise });
+        totalReps += card.value;
+        if (currentExercise === "pushups") {
+          newPushups += card.value;
+        } else {
+          newSquats += card.value;
+        }
+        currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+        lastIndex = idx;
+        idx++;
+      }
+    } else if (flipMode === "podfather") {
+      // Pod Father: Flip while under 30 reps
+      let totalReps = 0;
+      let idx = nextIndex;
+      while (totalReps < 30 && idx < deck.length) {
+        const card = deck[idx];
+        cardsToFlip.push({ ...card, exercise: currentExercise });
+        totalReps += card.value;
+        if (currentExercise === "pushups") {
+          newPushups += card.value;
+        } else {
+          newSquats += card.value;
+        }
+        currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+        lastIndex = idx;
+        idx++;
+      }
     } else {
-      setTotalSquats((prev) => prev + card.value);
+      // Default to fresh fish
+      const card = deck[nextIndex];
+      cardsToFlip = [{ ...card, exercise: currentExercise }];
+      if (currentExercise === "pushups") {
+        newPushups = card.value;
+      } else {
+        newSquats = card.value;
+      }
+      currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+      lastIndex = nextIndex;
+    }
+    
+    setActiveCards(cardsToFlip);
+    setCurrentCardIndex(lastIndex);
+
+    if (newPushups > 0) {
+      setTotalPushups((prev) => prev + newPushups);
+    }
+    if (newSquats > 0) {
+      setTotalSquats((prev) => prev + newSquats);
     }
 
-    setAlternatingExercise((prev) => prev === "squats" ? "pushups" : "squats");
-  }, [workoutState, currentCardIndex, deck, alternatingExercise, startTimer, completeWorkout]);
+    setAlternatingExercise(currentExercise);
+
+    // Check if workout is complete after flipping
+    if (lastIndex >= deck.length - 1) {
+      completeWorkout();
+    }
+  }, [workoutState, currentCardIndex, deck, alternatingExercise, flipMode, startTimer, completeWorkout]);
 
   const handleQuit = useCallback(() => {
     if (Platform.OS === "web") {
@@ -262,8 +343,15 @@ export default function RecYardWorkoutScreen() {
       </Animated.Text>
       
       <View style={styles.rulesReminder}>
-        <ThemedText style={styles.rulesText}>SUPERSET MODE</ThemedText>
-        <ThemedText style={styles.rulesSubtext}>52 cards alternating pushups/squats</ThemedText>
+        <ThemedText style={styles.rulesText}>
+          {exerciseType.toUpperCase()} / {intensity.replace(/_/g, " ").toUpperCase()}
+        </ThemedText>
+        <ThemedText style={styles.rulesSubtext}>
+          {flipMode === "freshfish" ? "1 card at a time" : 
+           flipMode === "trustee" ? "2 cards at a time" :
+           flipMode === "og" ? "Flip until 20+ reps" :
+           flipMode === "podfather" ? "Flip until 30+ reps" : "1 card at a time"}
+        </ThemedText>
         <ThemedText style={styles.rulesSubtext}>No pausing allowed</ThemedText>
       </View>
     </Animated.View>
@@ -290,15 +378,38 @@ export default function RecYardWorkoutScreen() {
         <View style={styles.cardContainer}>
           <View style={styles.exerciseBadge}>
             <ThemedText style={styles.exerciseText}>
-              {activeCards[0].value} {activeCards[0].exercise.toUpperCase()}
+              {activeCards.length === 1 
+                ? `${activeCards[0].value} ${activeCards[0].exercise?.toUpperCase() || exerciseType.toUpperCase()}`
+                : `${activeCards.reduce((sum, c) => sum + c.value, 0)} TOTAL REPS`}
             </ThemedText>
           </View>
-          <PlayingCard
-            card={activeCards[0]}
-            isFlipped={true}
-            size="large"
-            deckStyleId={deckStyle.id}
-          />
+          {activeCards.length === 1 ? (
+            <PlayingCard
+              card={activeCards[0]}
+              isFlipped={true}
+              size="large"
+              deckStyleId={deckStyle.id}
+            />
+          ) : (
+            <View style={styles.multiCardContainer}>
+              {activeCards.slice(0, 4).map((card, idx) => (
+                <View key={idx} style={styles.miniCardWrapper}>
+                  <PlayingCard
+                    card={card}
+                    isFlipped={true}
+                    size="small"
+                    deckStyleId={deckStyle.id}
+                  />
+                  <ThemedText style={styles.miniCardReps}>
+                    {card.value} {card.exercise?.toUpperCase().slice(0, 4) || ""}
+                  </ThemedText>
+                </View>
+              ))}
+              {activeCards.length > 4 && (
+                <ThemedText style={styles.moreCardsText}>+{activeCards.length - 4} more</ThemedText>
+              )}
+            </View>
+          )}
         </View>
       ) : (
         <View style={styles.cardContainer}>
@@ -531,6 +642,30 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     color: Colors.dark.textSecondary,
     marginTop: Spacing.xl,
+  },
+  multiCardContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: Spacing.md,
+    maxWidth: 300,
+  },
+  miniCardWrapper: {
+    alignItems: "center",
+  },
+  miniCardReps: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+    marginTop: Spacing.xs,
+  },
+  moreCardsText: {
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 1,
+    color: Colors.dark.accent,
+    marginTop: Spacing.sm,
   },
   progressContainer: {
     alignItems: "center",

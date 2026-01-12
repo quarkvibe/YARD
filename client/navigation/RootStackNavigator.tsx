@@ -14,6 +14,7 @@ export type RootStackParamList = {
     runId: string;
     exerciseType: string;
     intensity: string;
+    flipMode: string;
   };
 };
 
