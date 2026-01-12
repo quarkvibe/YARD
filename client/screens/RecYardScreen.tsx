@@ -17,6 +17,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
   FadeIn,
@@ -64,10 +66,13 @@ type TabType =
   | "barbershop"
   | "profile";
 
+type CombinedNavigationProp = BottomTabNavigationProp<MainTabParamList> &
+  NativeStackNavigationProp<RootStackParamList>;
+
 export default function RecYardScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
+  const navigation = useNavigation<CombinedNavigationProp>();
 
   // Use the Supabase-connected Rec Yard hook
   const {
@@ -85,6 +90,7 @@ export default function RecYardScreen() {
     updateProfile: hookUpdateProfile,
     sendCallout: hookSendCallout,
     getDaysUntilChallengeEnd,
+    startCompetitiveRun,
   } = useRecYard();
 
   // Local UI state
@@ -192,6 +198,27 @@ export default function RecYardScreen() {
 
   const handleDeclineRules = () => {
     setShowRulesModal(false);
+  };
+
+  const handleStartOfficialRun = async () => {
+    if (!profile) {
+      Alert.alert("PROFILE REQUIRED", "Create your profile first to start an official run.");
+      return;
+    }
+
+    const result = await startCompetitiveRun();
+
+    if (result.success && result.runId && result.runCode && result.runNumber) {
+      navigation.navigate("RecYardWorkout", {
+        profileId: profile.id,
+        handle: profile.handle,
+        runNumber: result.runNumber,
+        runCode: result.runCode,
+        runId: result.runId,
+      });
+    } else {
+      Alert.alert("ERROR", result.error || "Failed to start run. Please try again.");
+    }
   };
 
   const handleUnlock = async () => {
@@ -862,7 +889,6 @@ export default function RecYardScreen() {
     >
       {/* Welcome Banner */}
       <Animated.View entering={FadeIn} style={styles.welcomeBanner}>
-        <ThemedText style={styles.welcomeEmoji}>🏋️</ThemedText>
         <ThemedText style={styles.welcomeTitle}>WELCOME TO THE YARD</ThemedText>
         <ThemedText style={styles.welcomeSubtitle}>
           @{profile?.handle || "INMATE"}
@@ -895,7 +921,7 @@ export default function RecYardScreen() {
           <ThemedText style={styles.homeStatValue}>
             {profile?.currentStreak || 0}
           </ThemedText>
-          <ThemedText style={styles.homeStatLabel}>STREAK 🔥</ThemedText>
+          <ThemedText style={styles.homeStatLabel}>STREAK</ThemedText>
         </View>
       </View>
 
@@ -903,20 +929,20 @@ export default function RecYardScreen() {
       <ThemedText style={styles.homeSectionTitle}>QUICK ACTIONS</ThemedText>
 
       <Pressable
-        style={styles.homeActionButton}
-        onPress={() => navigation.navigate("WorkoutTab")}
+        style={styles.homeActionButtonPrimary}
+        onPress={handleStartOfficialRun}
       >
-        <Feather name="play-circle" size={24} color={Colors.dark.accent} />
+        <Feather name="play-circle" size={24} color={Colors.dark.backgroundRoot} />
         <View style={styles.homeActionContent}>
-          <ThemedText style={styles.homeActionTitle}>START WORKOUT</ThemedText>
-          <ThemedText style={styles.homeActionDesc}>
-            Enable Practice Mode to submit to leaderboard
+          <ThemedText style={styles.homeActionTitlePrimary}>START OFFICIAL RUN</ThemedText>
+          <ThemedText style={styles.homeActionDescPrimary}>
+            Compete for the leaderboard
           </ThemedText>
         </View>
         <Feather
           name="chevron-right"
           size={20}
-          color={Colors.dark.textSecondary}
+          color={Colors.dark.backgroundRoot}
         />
       </Pressable>
 
@@ -3526,6 +3552,27 @@ const styles = StyleSheet.create({
   homeActionDesc: {
     fontSize: 11,
     color: Colors.dark.textSecondary,
+    marginTop: 2,
+  },
+  homeActionButtonPrimary: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.dark.accent,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
+    gap: Spacing.md,
+  },
+  homeActionTitlePrimary: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 1,
+    color: Colors.dark.backgroundRoot,
+  },
+  homeActionDescPrimary: {
+    fontSize: 11,
+    color: Colors.dark.backgroundRoot,
+    opacity: 0.8,
     marginTop: 2,
   },
 

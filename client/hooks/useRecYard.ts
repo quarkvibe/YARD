@@ -619,6 +619,86 @@ export function useRecYard() {
   );
 
   // ============================================
+  // COMPETITIVE RUN
+  // ============================================
+
+  const startCompetitiveRun = useCallback(async (): Promise<{
+    success: boolean;
+    runId?: string;
+    runNumber?: number;
+    runCode?: string;
+    error?: string;
+  }> => {
+    if (!profile || !userId) {
+      return { success: false, error: "No profile found" };
+    }
+
+    try {
+      const weekId = getCurrentWeekId();
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("rec_yard_run_count")
+        .eq("id", profile.id)
+        .single();
+
+      if (profileError) {
+        console.error("[useRecYard] Error getting run count:", profileError);
+        return { success: false, error: "Failed to get run count" };
+      }
+
+      const currentCount = profileData?.rec_yard_run_count || 0;
+      const newRunNumber = currentCount + 1;
+      const runCode = `@${profile.handle}_${newRunNumber.toString().padStart(3, "0")}`;
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ rec_yard_run_count: newRunNumber })
+        .eq("id", profile.id)
+        .eq("user_id", userId);
+
+      if (updateError) {
+        console.error("[useRecYard] Error updating run count:", updateError);
+        return { success: false, error: "Failed to reserve run number" };
+      }
+
+      const { data: runData, error: runError } = await supabase
+        .from("rec_yard_runs")
+        .insert({
+          profile_id: profile.id,
+          run_number: newRunNumber,
+          run_code: runCode,
+          week_id: weekId,
+          exercise_type: "superset",
+          intensity: "misdemeanor",
+          status: "in_progress",
+        })
+        .select()
+        .single();
+
+      if (runError) {
+        console.error("[useRecYard] Error creating run:", runError);
+        await supabase
+          .from("profiles")
+          .update({ rec_yard_run_count: currentCount })
+          .eq("id", profile.id)
+          .eq("user_id", userId);
+        return { success: false, error: "Failed to create run" };
+      }
+
+      return {
+        success: true,
+        runId: runData.id,
+        runNumber: newRunNumber,
+        runCode,
+      };
+    } catch (err) {
+      console.error("[useRecYard] Start competitive run error:", err);
+      return { success: false, error: "An unexpected error occurred" };
+    }
+  }, [profile, userId]);
+
+  // ============================================
   // REFRESH
   // ============================================
 
@@ -682,6 +762,7 @@ export function useRecYard() {
     respondToCallout,
     getTrashTalkByCategory,
     getDaysUntilChallengeEnd,
+    startCompetitiveRun,
   };
 }
 
