@@ -112,6 +112,11 @@ export default function RecYardScreen() {
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [hasAcceptedRules, setHasAcceptedRules] = useState(false);
 
+  // Competitive run config modal state
+  const [showRunConfigModal, setShowRunConfigModal] = useState(false);
+  const [selectedExerciseType, setSelectedExerciseType] = useState<"pushups" | "squats" | "superset">("superset");
+  const [selectedIntensity, setSelectedIntensity] = useState<"misdemeanor" | "hard_time" | "lifer">("misdemeanor");
+
   // Trash talk modal state
   const [showCalloutModal, setShowCalloutModal] = useState(false);
   const [calloutTarget, setCalloutTarget] = useState<LeaderboardEntry | null>(
@@ -206,7 +211,16 @@ export default function RecYardScreen() {
       return;
     }
 
-    const result = await startCompetitiveRun("superset", "misdemeanor");
+    // Show config modal to select exercise type and intensity
+    setShowRunConfigModal(true);
+  };
+
+  const handleConfirmOfficialRun = async () => {
+    if (!profile) return;
+    
+    setShowRunConfigModal(false);
+    
+    const result = await startCompetitiveRun(selectedExerciseType, selectedIntensity);
 
     if (result.success && result.runId && result.runCode && result.runNumber && result.exerciseType && result.intensity) {
       navigation.navigate("RecYardWorkout", {
@@ -2206,6 +2220,92 @@ export default function RecYardScreen() {
 
       {renderCalloutModal()}
 
+      {/* Run Configuration Modal */}
+      <Modal
+        visible={showRunConfigModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowRunConfigModal(false)}
+      >
+        <View style={styles.runConfigOverlay}>
+          <Animated.View
+            entering={SlideInUp.springify().damping(20)}
+            exiting={SlideOutDown}
+            style={styles.runConfigModal}
+          >
+            <ThemedText style={styles.runConfigTitle}>CONFIGURE RUN</ThemedText>
+            <ThemedText style={styles.runConfigSubtitle}>
+              SELECT YOUR WORKOUT
+            </ThemedText>
+
+            <View style={styles.runConfigSection}>
+              <ThemedText style={styles.runConfigLabel}>EXERCISE TYPE</ThemedText>
+              <View style={styles.runConfigOptions}>
+                {(["pushups", "squats", "superset"] as const).map((type) => (
+                  <Pressable
+                    key={type}
+                    style={[
+                      styles.runConfigOption,
+                      selectedExerciseType === type && styles.runConfigOptionSelected,
+                    ]}
+                    onPress={() => setSelectedExerciseType(type)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.runConfigOptionText,
+                        selectedExerciseType === type && styles.runConfigOptionTextSelected,
+                      ]}
+                    >
+                      {type.toUpperCase()}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.runConfigSection}>
+              <ThemedText style={styles.runConfigLabel}>INTENSITY</ThemedText>
+              <View style={styles.runConfigOptions}>
+                {(["misdemeanor", "hard_time", "lifer"] as const).map((intensity) => (
+                  <Pressable
+                    key={intensity}
+                    style={[
+                      styles.runConfigOption,
+                      selectedIntensity === intensity && styles.runConfigOptionSelected,
+                    ]}
+                    onPress={() => setSelectedIntensity(intensity)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.runConfigOptionText,
+                        selectedIntensity === intensity && styles.runConfigOptionTextSelected,
+                      ]}
+                    >
+                      {intensity.replace("_", " ").toUpperCase()}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.runConfigButtons}>
+              <Pressable
+                style={styles.runConfigCancelButton}
+                onPress={() => setShowRunConfigModal(false)}
+              >
+                <ThemedText style={styles.runConfigCancelText}>CANCEL</ThemedText>
+              </Pressable>
+              <Pressable
+                style={styles.runConfigStartButton}
+                onPress={handleConfirmOfficialRun}
+              >
+                <ThemedText style={styles.runConfigStartText}>START RUN</ThemedText>
+              </Pressable>
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
+
       {/* YARD Rules Agreement Modal */}
       <YardRulesModal
         visible={showRulesModal}
@@ -3851,5 +3951,112 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 1,
     color: Colors.dark.textSecondary,
+  },
+
+  // ============================================
+  // RUN CONFIG MODAL STYLES
+  // ============================================
+  runConfigOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.85)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.xl,
+  },
+  runConfigModal: {
+    width: "100%",
+    maxWidth: 400,
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    padding: Spacing.xl,
+  },
+  runConfigTitle: {
+    fontSize: 24,
+    fontWeight: "900",
+    letterSpacing: 4,
+    color: Colors.dark.chalk,
+    textAlign: "center",
+    marginBottom: Spacing.xs,
+  },
+  runConfigSubtitle: {
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+    textAlign: "center",
+    marginBottom: Spacing.xl,
+  },
+  runConfigSection: {
+    marginBottom: Spacing.xl,
+  },
+  runConfigLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 3,
+    color: Colors.dark.accent,
+    marginBottom: Spacing.md,
+  },
+  runConfigOptions: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+  },
+  runConfigOption: {
+    flex: 1,
+    backgroundColor: Colors.dark.backgroundRoot,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+    alignItems: "center",
+  },
+  runConfigOptionSelected: {
+    backgroundColor: Colors.dark.accent,
+    borderColor: Colors.dark.accent,
+  },
+  runConfigOptionText: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1,
+    color: Colors.dark.textSecondary,
+    textAlign: "center",
+  },
+  runConfigOptionTextSelected: {
+    color: Colors.dark.backgroundRoot,
+  },
+  runConfigButtons: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginTop: Spacing.lg,
+  },
+  runConfigCancelButton: {
+    flex: 1,
+    backgroundColor: Colors.dark.backgroundRoot,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    paddingVertical: Spacing.lg,
+    alignItems: "center",
+  },
+  runConfigCancelText: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.textSecondary,
+  },
+  runConfigStartButton: {
+    flex: 1,
+    backgroundColor: Colors.dark.accent,
+    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.lg,
+    alignItems: "center",
+  },
+  runConfigStartText: {
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 2,
+    color: Colors.dark.backgroundRoot,
   },
 });
