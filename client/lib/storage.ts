@@ -157,6 +157,7 @@ export const SUPERSET_MODES: SupersetMode[] = [
 export type RestAlertType = "haptic" | "sound" | "both" | "none";
 
 export type DeckStyleId =
+  | "standard"
   | "yard"
   | "military"
   | "prison"
@@ -179,6 +180,15 @@ export interface DeckStyle {
 }
 
 export const DECK_STYLES: DeckStyle[] = [
+  {
+    id: "standard",
+    name: "STANDARD",
+    description: "Classic playing cards",
+    previewImage: "standard_deck_back_design.png",
+    backColor: "#1E3A5F",
+    accentColor: "#FFFFFF",
+    textColor: "#FFFFFF",
+  },
   {
     id: "yard",
     name: "YARD",
@@ -401,7 +411,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   selectedFlipModeId: "freshfish",
   selectedExerciseType: "superset",
   selectedSupersetModeId: "alternating",
-  selectedDeckStyleId: "yard",
+  selectedDeckStyleId: "standard",
   soundEnabled: false,
   hapticsEnabled: false,
   // Rest timer defaults

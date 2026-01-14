@@ -15,6 +15,7 @@ import { getDeckStyleById } from "@/lib/storage";
 
 // Import deck back images
 const DECK_IMAGES: Record<string, any> = {
+  standard: require("../../attached_assets/generated_images/standard_deck_back_design.png"),
   yard: require("../../attached_assets/generated_images/yard_deck_back_design.png"),
   military: require("../../attached_assets/generated_images/tactical_deck_back_design.png"),
   prison: require("../../attached_assets/generated_images/lockup_deck_back_design.png"),
@@ -29,6 +30,28 @@ const DECK_IMAGES: Record<string, any> = {
 
 // Face card images for high-value cards (10, J, Q, K, A) per deck style
 const FACE_CARD_IMAGES: Record<string, Record<string, any>> = {
+  standard: {
+    "hearts_10": require("../../attached_assets/generated_images/standard_10_of_hearts.png"),
+    "hearts_J": require("../../attached_assets/generated_images/standard_jack_of_hearts.png"),
+    "hearts_Q": require("../../attached_assets/generated_images/standard_queen_of_hearts.png"),
+    "hearts_K": require("../../attached_assets/generated_images/standard_king_of_hearts.png"),
+    "hearts_A": require("../../attached_assets/generated_images/standard_ace_of_hearts.png"),
+    "diamonds_10": require("../../attached_assets/generated_images/standard_10_of_diamonds.png"),
+    "diamonds_J": require("../../attached_assets/generated_images/standard_jack_of_diamonds.png"),
+    "diamonds_Q": require("../../attached_assets/generated_images/standard_queen_of_diamonds.png"),
+    "diamonds_K": require("../../attached_assets/generated_images/standard_king_of_diamonds.png"),
+    "diamonds_A": require("../../attached_assets/generated_images/standard_ace_of_diamonds.png"),
+    "clubs_10": require("../../attached_assets/generated_images/standard_10_of_clubs.png"),
+    "clubs_J": require("../../attached_assets/generated_images/standard_jack_of_clubs.png"),
+    "clubs_Q": require("../../attached_assets/generated_images/standard_queen_of_clubs.png"),
+    "clubs_K": require("../../attached_assets/generated_images/standard_king_of_clubs.png"),
+    "clubs_A": require("../../attached_assets/generated_images/standard_ace_of_clubs.png"),
+    "spades_10": require("../../attached_assets/generated_images/standard_10_of_spades.png"),
+    "spades_J": require("../../attached_assets/generated_images/standard_jack_of_spades.png"),
+    "spades_Q": require("../../attached_assets/generated_images/standard_queen_of_spades.png"),
+    "spades_K": require("../../attached_assets/generated_images/standard_king_of_spades.png"),
+    "spades_A": require("../../attached_assets/generated_images/standard_ace_of_spades.png"),
+  },
   yard: {
     "hearts_10": require("../../attached_assets/generated_images/yard_deck_10_hearts.png"),
     "hearts_J": require("../../attached_assets/generated_images/yard_deck_jack_hearts.png"),
