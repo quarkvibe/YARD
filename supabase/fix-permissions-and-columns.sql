@@ -92,8 +92,39 @@ CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (auth.uid() = user_
 
 DROP POLICY IF EXISTS "submissions_select" ON workout_submissions;
 DROP POLICY IF EXISTS "submissions_insert" ON workout_submissions;
+DROP POLICY IF EXISTS "submissions_update" ON workout_submissions;
 
 CREATE POLICY "submissions_select" ON workout_submissions FOR SELECT USING (true);
 CREATE POLICY "submissions_insert" ON workout_submissions FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM profiles WHERE profiles.id = workout_submissions.profile_id AND profiles.user_id = auth.uid())
 );
+CREATE POLICY "submissions_update" ON workout_submissions FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM profiles WHERE profiles.id = workout_submissions.profile_id AND profiles.user_id = auth.uid())
+);
+
+-- ============================================
+-- RPC FUNCTION FOR INCREMENTING CHALLENGE PARTICIPANTS
+-- ============================================
+
+CREATE OR REPLACE FUNCTION increment_challenge_participants(challenge_week_id TEXT)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE weekly_challenges
+  SET participant_count = participant_count + 1
+  WHERE week_id = challenge_week_id;
+END;
+$$;
+
+-- Grant execute permission
+GRANT EXECUTE ON FUNCTION increment_challenge_participants(TEXT) TO anon;
+GRANT EXECUTE ON FUNCTION increment_challenge_participants(TEXT) TO authenticated;
+
+-- ============================================
+-- UPDATE POLICY FOR WEEKLY CHALLENGES (for top_time updates)
+-- ============================================
+
+DROP POLICY IF EXISTS "challenges_update" ON weekly_challenges;
+CREATE POLICY "challenges_update" ON weekly_challenges FOR UPDATE USING (true);
