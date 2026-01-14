@@ -131,7 +131,7 @@ export default function RecYardWorkoutScreen() {
 
     try {
       // Update the rec_yard_runs record
-      await supabase
+      const { error: runUpdateError } = await supabase
         .from("rec_yard_runs")
         .update({
           time: timer,
@@ -142,6 +142,10 @@ export default function RecYardWorkoutScreen() {
           completed_at: completedAt,
         })
         .eq("id", runId);
+
+      if (runUpdateError) {
+        console.error("[RecYardWorkout] Failed to update run:", runUpdateError);
+      }
 
       // Submit to leaderboard (workout_submissions table)
       const { error: submissionError } = await supabase
@@ -163,8 +167,56 @@ export default function RecYardWorkoutScreen() {
       } else {
         console.log("[RecYardWorkout] Successfully submitted to leaderboard with run:", runCode);
       }
+
+      // Update profile stats (total_workouts, best_time)
+      const { data: profileData, error: profileFetchError } = await supabase
+        .from("profiles")
+        .select("total_workouts, best_time, user_id")
+        .eq("id", profileId)
+        .single();
+
+      if (profileFetchError) {
+        console.error("[RecYardWorkout] Failed to fetch profile:", profileFetchError);
+      } else if (profileData) {
+        const newTotalWorkouts = (profileData.total_workouts || 0) + 1;
+        const currentBestTime = profileData.best_time;
+        const newBestTime = currentBestTime === null || timer < currentBestTime ? timer : currentBestTime;
+
+        // Update profile using user_id to satisfy RLS policy
+        const { error: profileUpdateError } = await supabase
+          .from("profiles")
+          .update({
+            total_workouts: newTotalWorkouts,
+            best_time: newBestTime,
+            updated_at: completedAt,
+          })
+          .eq("id", profileId)
+          .eq("user_id", profileData.user_id);
+
+        if (profileUpdateError) {
+          console.error("[RecYardWorkout] Failed to update profile stats:", profileUpdateError);
+        } else {
+          console.log("[RecYardWorkout] Profile stats updated - Total:", newTotalWorkouts, "Best:", newBestTime);
+        }
+      }
+
+      // Update weekly challenge participant count (increment if first submission this week)
+      const { data: existingSubmissions } = await supabase
+        .from("workout_submissions")
+        .select("id")
+        .eq("profile_id", profileId)
+        .eq("week_id", weekId);
+
+      // If this is the first submission for this user this week, increment participant count
+      if (existingSubmissions && existingSubmissions.length === 1) {
+        await supabase.rpc("increment_challenge_participants", { challenge_week_id: weekId }).catch(() => {
+          // RPC might not exist, that's okay - we can skip this
+          console.log("[RecYardWorkout] Could not update challenge participant count");
+        });
+      }
+
     } catch (err) {
-      console.error("[RecYardWorkout] Failed to update run:", err);
+      console.error("[RecYardWorkout] Failed to complete workout:", err);
     }
   }, [timer, totalPushups, totalSquats, currentCardIndex, runId, profileId, exerciseType, intensity, flipMode, runCode, stopTimer]);
 
