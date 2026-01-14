@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS rec_yard_runs (
   time INTEGER,
   exercise_type TEXT NOT NULL DEFAULT 'superset',
   intensity TEXT NOT NULL DEFAULT 'misdemeanor',
+  flip_mode TEXT NOT NULL DEFAULT 'freshfish',
   total_pushups INTEGER NOT NULL DEFAULT 0,
   total_squats INTEGER NOT NULL DEFAULT 0,
   cards_completed INTEGER NOT NULL DEFAULT 0,
@@ -19,6 +20,9 @@ CREATE TABLE IF NOT EXISTS rec_yard_runs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE(profile_id, run_number)
 );
+
+-- Add flip_mode column if table already exists
+ALTER TABLE rec_yard_runs ADD COLUMN IF NOT EXISTS flip_mode TEXT NOT NULL DEFAULT 'freshfish';
 
 CREATE INDEX IF NOT EXISTS idx_rec_yard_runs_profile_id ON rec_yard_runs(profile_id);
 CREATE INDEX IF NOT EXISTS idx_rec_yard_runs_week_id ON rec_yard_runs(week_id);

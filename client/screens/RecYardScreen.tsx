@@ -116,7 +116,20 @@ export default function RecYardScreen() {
   const [showRunConfigModal, setShowRunConfigModal] = useState(false);
   const [selectedExerciseType, setSelectedExerciseType] = useState<"pushups" | "squats" | "superset">("superset");
   const [selectedIntensity, setSelectedIntensity] = useState<"misdemeanor" | "hard_time" | "lifer">("misdemeanor");
-  const [selectedFlipMode, setSelectedFlipMode] = useState<"freshfish" | "trustee" | "og" | "podfather">("freshfish");
+  // For non-superset exercises, use flip modes (freshfish, trustee, og, podfather)
+  // For superset exercises, use superset modes (alternating, split2, split4, splitunder20)
+  const [selectedFlipMode, setSelectedFlipMode] = useState<string>("alternating");
+  
+  // Reset flip mode when exercise type changes
+  const handleExerciseTypeChange = (type: "pushups" | "squats" | "superset") => {
+    setSelectedExerciseType(type);
+    // Reset to appropriate default when switching
+    if (type === "superset") {
+      setSelectedFlipMode("alternating");
+    } else {
+      setSelectedFlipMode("freshfish");
+    }
+  };
 
   // Trash talk modal state
   const [showCalloutModal, setShowCalloutModal] = useState(false);
@@ -356,24 +369,57 @@ export default function RecYardScreen() {
   };
 
   // Navigate to workout to participate in weekly challenge
-  const handleClockIn = () => {
+  const handleClockIn = async () => {
     if (!weeklyChallenge) {
       Alert.alert("NO CHALLENGE", "No active weekly challenge right now.");
       return;
     }
 
+    if (!profile) {
+      Alert.alert("PROFILE REQUIRED", "Create your profile first to join a challenge.");
+      return;
+    }
+
+    // Pre-set the exercise type and intensity from the challenge
+    const challengeExerciseType = weeklyChallenge.exerciseType as "pushups" | "squats" | "superset";
+    const challengeIntensity = weeklyChallenge.intensity as "misdemeanor" | "hard_time" | "lifer";
+    
+    // Set defaults based on challenge
+    setSelectedExerciseType(challengeExerciseType);
+    setSelectedIntensity(challengeIntensity);
+    
+    // Set appropriate flip mode
+    if (challengeExerciseType === "superset") {
+      setSelectedFlipMode("alternating");
+    } else {
+      setSelectedFlipMode("freshfish");
+    }
+
     Alert.alert(
-      "CLOCK IN",
-      `Join the "${weeklyChallenge.exerciseType.toUpperCase()} ${weeklyChallenge.intensity.toUpperCase()}" challenge?\n\n• Your time will be submitted to the leaderboard\n• Practice Mode will be auto-enabled\n• SET DONE tracking is required`,
+      "JOIN CHALLENGE",
+      `Start an official run for the "${weeklyChallenge.exerciseType.toUpperCase()} ${weeklyChallenge.intensity.replace("_", " ").toUpperCase()}" challenge?\n\n• Your time will be submitted to the leaderboard\n• Complete all 52 cards\n• No pausing allowed`,
       [
         { text: "CANCEL", style: "cancel" },
         {
-          text: "LET'S GO",
-          onPress: () => {
-            // Navigate to workout screen with official submission flag
-            navigation.navigate("WorkoutTab", {
-              officialRecYardSubmission: true,
-            });
+          text: "START RUN",
+          onPress: async () => {
+            // Start the competitive run directly with challenge settings
+            const result = await startCompetitiveRun(challengeExerciseType, challengeIntensity, selectedFlipMode);
+            
+            if (result.success && result.runId && result.runCode && result.runNumber && result.exerciseType && result.intensity && result.flipMode) {
+              navigation.navigate("RecYardWorkout", {
+                profileId: profile.id,
+                handle: profile.handle,
+                runNumber: result.runNumber,
+                runCode: result.runCode,
+                runId: result.runId,
+                exerciseType: result.exerciseType,
+                intensity: result.intensity,
+                flipMode: result.flipMode,
+              });
+            } else {
+              Alert.alert("ERROR", result.error || "Failed to start run. Please try again.");
+            }
           },
         },
       ],
@@ -1043,7 +1089,7 @@ export default function RecYardScreen() {
     "all" | "pushups" | "squats" | "superset"
   >("all");
   const [difficultyFilter, setDifficultyFilter] = useState<
-    "all" | "misdemeanor" | "standard" | "lifer"
+    "all" | "misdemeanor" | "hard_time" | "lifer"
   >("all");
 
   const renderLeaderboardsTab = () => (
@@ -1076,7 +1122,7 @@ export default function RecYardScreen() {
       {/* Difficulty Filter */}
       <View style={styles.filterRow}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {["all", "misdemeanor", "standard", "lifer"].map((filter) => (
+          {["all", "misdemeanor", "hard_time", "lifer"].map((filter) => (
             <Pressable
               key={filter}
               style={[
@@ -1091,7 +1137,7 @@ export default function RecYardScreen() {
                   difficultyFilter === filter && styles.filterChipTextActive,
                 ]}
               >
-                {filter.toUpperCase()}
+                {filter.replace("_", " ").toUpperCase()}
               </ThemedText>
             </Pressable>
           ))}
@@ -1227,19 +1273,19 @@ export default function RecYardScreen() {
         <View style={styles.challengeRule}>
           <ThemedText style={styles.challengeRuleNumber}>1</ThemedText>
           <ThemedText style={styles.challengeRuleText}>
-            Enable Practice Mode before starting
+            Tap JOIN and start your official run
           </ThemedText>
         </View>
         <View style={styles.challengeRule}>
           <ThemedText style={styles.challengeRuleNumber}>2</ThemedText>
           <ThemedText style={styles.challengeRuleText}>
-            Complete all 52 cards with SET DONE tracking
+            Complete all 52 cards - no pausing allowed
           </ThemedText>
         </View>
         <View style={styles.challengeRule}>
           <ThemedText style={styles.challengeRuleNumber}>3</ThemedText>
           <ThemedText style={styles.challengeRuleText}>
-            Your time is automatically submitted
+            Post your run code to Discord to verify your time
           </ThemedText>
         </View>
       </View>
@@ -1269,20 +1315,7 @@ export default function RecYardScreen() {
       <Pressable
         style={styles.discordCard}
         onPress={() => {
-          Alert.alert(
-            "JOIN THE DISCORD",
-            "Connect with the YARD community on Discord!",
-            [
-              { text: "CANCEL", style: "cancel" },
-              {
-                text: "JOIN NOW",
-                onPress: () => {
-                  // Would open Discord link
-                  // Linking.openURL('https://discord.gg/yard');
-                },
-              },
-            ],
-          );
+          Linking.openURL("https://discord.gg/yard-workout");
         }}
       >
         <View style={styles.discordIconContainer}>
@@ -2231,8 +2264,8 @@ export default function RecYardScreen() {
       >
         <View style={styles.runConfigOverlay}>
           <Animated.View
-            entering={SlideInUp.springify().damping(20)}
-            exiting={SlideOutDown}
+            entering={FadeInDown.duration(300)}
+            exiting={SlideOutDown.duration(200)}
             style={styles.runConfigModal}
           >
             <ThemedText style={styles.runConfigTitle}>CONFIGURE RUN</ThemedText>
@@ -2250,7 +2283,7 @@ export default function RecYardScreen() {
                       styles.runConfigOption,
                       selectedExerciseType === type && styles.runConfigOptionSelected,
                     ]}
-                    onPress={() => setSelectedExerciseType(type)}
+                    onPress={() => handleExerciseTypeChange(type)}
                   >
                     <ThemedText
                       style={[
@@ -2291,32 +2324,83 @@ export default function RecYardScreen() {
             </View>
 
             <View style={styles.runConfigSection}>
-              <ThemedText style={styles.runConfigLabel}>FLIP MODE</ThemedText>
+              <ThemedText style={styles.runConfigLabel}>
+                {selectedExerciseType === "superset" ? "SUPERSET MODE" : "FLIP MODE"}
+              </ThemedText>
               <View style={styles.runConfigOptionsWrap}>
-                {([
-                  { value: "freshfish", label: "FRESH FISH" },
-                  { value: "trustee", label: "TRUSTEE" },
-                  { value: "og", label: "OG" },
-                  { value: "podfather", label: "POD FATHER" },
-                ] as const).map((mode) => (
-                  <Pressable
-                    key={mode.value}
-                    style={[
-                      styles.runConfigOptionHalf,
-                      selectedFlipMode === mode.value && styles.runConfigOptionSelected,
-                    ]}
-                    onPress={() => setSelectedFlipMode(mode.value)}
-                  >
-                    <ThemedText
-                      style={[
-                        styles.runConfigOptionText,
-                        selectedFlipMode === mode.value && styles.runConfigOptionTextSelected,
-                      ]}
-                    >
-                      {mode.label}
-                    </ThemedText>
-                  </Pressable>
-                ))}
+                {selectedExerciseType === "superset" ? (
+                  // Superset modes: TAG TEAM, DOUBLE DOWN, SQUAD LEAD, OVERKILL
+                  <>
+                    {([
+                      { value: "alternating", label: "TAG TEAM", desc: "Alternate each card" },
+                      { value: "split2", label: "DOUBLE DOWN", desc: "2 cards, 1 each" },
+                      { value: "split4", label: "SQUAD LEAD", desc: "4 cards split" },
+                      { value: "splitunder20", label: "OVERKILL", desc: "Draw while <20" },
+                    ]).map((mode) => (
+                      <Pressable
+                        key={mode.value}
+                        style={[
+                          styles.runConfigOptionHalf,
+                          selectedFlipMode === mode.value && styles.runConfigOptionSelected,
+                        ]}
+                        onPress={() => setSelectedFlipMode(mode.value)}
+                      >
+                        <ThemedText
+                          style={[
+                            styles.runConfigOptionText,
+                            selectedFlipMode === mode.value && styles.runConfigOptionTextSelected,
+                          ]}
+                        >
+                          {mode.label}
+                        </ThemedText>
+                        <ThemedText
+                          style={[
+                            styles.runConfigOptionDesc,
+                            selectedFlipMode === mode.value && styles.runConfigOptionDescSelected,
+                          ]}
+                        >
+                          {mode.desc}
+                        </ThemedText>
+                      </Pressable>
+                    ))}
+                  </>
+                ) : (
+                  // Regular flip modes: FRESH FISH, TRUSTEE, OG, POD FATHER
+                  <>
+                    {([
+                      { value: "freshfish", label: "FRESH FISH", desc: "1 card at a time" },
+                      { value: "trustee", label: "TRUSTEE", desc: "2 cards at a time" },
+                      { value: "og", label: "OG", desc: "Flip until 20+ reps" },
+                      { value: "podfather", label: "POD FATHER", desc: "Flip until 30+ reps" },
+                    ]).map((mode) => (
+                      <Pressable
+                        key={mode.value}
+                        style={[
+                          styles.runConfigOptionHalf,
+                          selectedFlipMode === mode.value && styles.runConfigOptionSelected,
+                        ]}
+                        onPress={() => setSelectedFlipMode(mode.value)}
+                      >
+                        <ThemedText
+                          style={[
+                            styles.runConfigOptionText,
+                            selectedFlipMode === mode.value && styles.runConfigOptionTextSelected,
+                          ]}
+                        >
+                          {mode.label}
+                        </ThemedText>
+                        <ThemedText
+                          style={[
+                            styles.runConfigOptionDesc,
+                            selectedFlipMode === mode.value && styles.runConfigOptionDescSelected,
+                          ]}
+                        >
+                          {mode.desc}
+                        </ThemedText>
+                      </Pressable>
+                    ))}
+                  </>
+                )}
               </View>
             </View>
 
@@ -4072,6 +4156,19 @@ const styles = StyleSheet.create({
   },
   runConfigOptionTextSelected: {
     color: Colors.dark.backgroundRoot,
+  },
+  runConfigOptionDesc: {
+    fontSize: 9,
+    fontWeight: "500",
+    letterSpacing: 0.5,
+    color: Colors.dark.textSecondary,
+    textAlign: "center",
+    marginTop: 2,
+    opacity: 0.7,
+  },
+  runConfigOptionDescSelected: {
+    color: Colors.dark.backgroundRoot,
+    opacity: 0.8,
   },
   runConfigButtons: {
     flexDirection: "row",

@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS workout_submissions (
   time INTEGER NOT NULL,
   exercise_type TEXT NOT NULL,
   intensity TEXT NOT NULL,
+  flip_mode TEXT NOT NULL DEFAULT 'freshfish',
   total_pushups INTEGER NOT NULL DEFAULT 0,
   total_squats INTEGER NOT NULL DEFAULT 0,
   is_verified BOOLEAN NOT NULL DEFAULT false,
@@ -38,6 +39,9 @@ CREATE TABLE IF NOT EXISTS workout_submissions (
   week_id TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Add flip_mode column if table already exists
+ALTER TABLE workout_submissions ADD COLUMN IF NOT EXISTS flip_mode TEXT NOT NULL DEFAULT 'freshfish';
 
 -- Callouts table
 CREATE TABLE IF NOT EXISTS callouts (

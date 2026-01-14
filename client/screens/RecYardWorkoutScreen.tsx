@@ -190,8 +190,11 @@ export default function RecYardWorkoutScreen() {
     let newSquats = 0;
     let lastIndex = nextIndex;
 
-    if (flipMode === "freshfish") {
-      // Fresh Fish: One card at a time
+    const isSuperset = exerciseType === "superset";
+
+    // SUPERSET MODES (for superset exercise type)
+    if (isSuperset && flipMode === "alternating") {
+      // TAG TEAM: One card at a time, alternating exercises
       const card = deck[nextIndex];
       cardsToFlip = [{ ...card, exercise: currentExercise }];
       if (currentExercise === "pushups") {
@@ -201,21 +204,34 @@ export default function RecYardWorkoutScreen() {
       }
       currentExercise = currentExercise === "squats" ? "pushups" : "squats";
       lastIndex = nextIndex;
-    } else if (flipMode === "trustee") {
-      // Trustee: 2 cards at a time
+    } else if (isSuperset && flipMode === "split2") {
+      // DOUBLE DOWN: Draw 2 cards, first for pushups, second for squats
       for (let i = 0; i < 2 && nextIndex + i < deck.length; i++) {
         const card = deck[nextIndex + i];
-        cardsToFlip.push({ ...card, exercise: currentExercise });
-        if (currentExercise === "pushups") {
+        const exercise = i === 0 ? "pushups" : "squats";
+        cardsToFlip.push({ ...card, exercise });
+        if (exercise === "pushups") {
           newPushups += card.value;
         } else {
           newSquats += card.value;
         }
-        currentExercise = currentExercise === "squats" ? "pushups" : "squats";
         lastIndex = nextIndex + i;
       }
-    } else if (flipMode === "og") {
-      // OG: Flip again if under 20 reps
+    } else if (isSuperset && flipMode === "split4") {
+      // SQUAD LEAD: Draw 4 cards, 2 for pushups, 2 for squats
+      for (let i = 0; i < 4 && nextIndex + i < deck.length; i++) {
+        const card = deck[nextIndex + i];
+        const exercise = i < 2 ? "pushups" : "squats";
+        cardsToFlip.push({ ...card, exercise });
+        if (exercise === "pushups") {
+          newPushups += card.value;
+        } else {
+          newSquats += card.value;
+        }
+        lastIndex = nextIndex + i;
+      }
+    } else if (isSuperset && flipMode === "splitunder20") {
+      // OVERKILL: Keep drawing while under 20 total reps, alternating exercises
       let totalReps = 0;
       let idx = nextIndex;
       while (totalReps < 20 && idx < deck.length) {
@@ -231,33 +247,91 @@ export default function RecYardWorkoutScreen() {
         lastIndex = idx;
         idx++;
       }
+    }
+    // REGULAR FLIP MODES (for pushups or squats only exercise types)
+    else if (flipMode === "freshfish") {
+      // Fresh Fish: One card at a time
+      const card = deck[nextIndex];
+      const exercise = exerciseType === "pushups" ? "pushups" : exerciseType === "squats" ? "squats" : currentExercise;
+      cardsToFlip = [{ ...card, exercise }];
+      if (exercise === "pushups") {
+        newPushups = card.value;
+      } else {
+        newSquats = card.value;
+      }
+      if (isSuperset) {
+        currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+      }
+      lastIndex = nextIndex;
+    } else if (flipMode === "trustee") {
+      // Trustee: 2 cards at a time
+      for (let i = 0; i < 2 && nextIndex + i < deck.length; i++) {
+        const card = deck[nextIndex + i];
+        const exercise = exerciseType === "pushups" ? "pushups" : exerciseType === "squats" ? "squats" : currentExercise;
+        cardsToFlip.push({ ...card, exercise });
+        if (exercise === "pushups") {
+          newPushups += card.value;
+        } else {
+          newSquats += card.value;
+        }
+        if (isSuperset) {
+          currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+        }
+        lastIndex = nextIndex + i;
+      }
+    } else if (flipMode === "og") {
+      // OG: Flip again if under 20 reps
+      let totalReps = 0;
+      let idx = nextIndex;
+      while (totalReps < 20 && idx < deck.length) {
+        const card = deck[idx];
+        const exercise = exerciseType === "pushups" ? "pushups" : exerciseType === "squats" ? "squats" : currentExercise;
+        cardsToFlip.push({ ...card, exercise });
+        totalReps += card.value;
+        if (exercise === "pushups") {
+          newPushups += card.value;
+        } else {
+          newSquats += card.value;
+        }
+        if (isSuperset) {
+          currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+        }
+        lastIndex = idx;
+        idx++;
+      }
     } else if (flipMode === "podfather") {
       // Pod Father: Flip while under 30 reps
       let totalReps = 0;
       let idx = nextIndex;
       while (totalReps < 30 && idx < deck.length) {
         const card = deck[idx];
-        cardsToFlip.push({ ...card, exercise: currentExercise });
+        const exercise = exerciseType === "pushups" ? "pushups" : exerciseType === "squats" ? "squats" : currentExercise;
+        cardsToFlip.push({ ...card, exercise });
         totalReps += card.value;
-        if (currentExercise === "pushups") {
+        if (exercise === "pushups") {
           newPushups += card.value;
         } else {
           newSquats += card.value;
         }
-        currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+        if (isSuperset) {
+          currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+        }
         lastIndex = idx;
         idx++;
       }
     } else {
-      // Default to fresh fish
+      // Default to alternating (for superset) or single card behavior
       const card = deck[nextIndex];
-      cardsToFlip = [{ ...card, exercise: currentExercise }];
-      if (currentExercise === "pushups") {
+      const exercise = exerciseType === "pushups" ? "pushups" : exerciseType === "squats" ? "squats" : currentExercise;
+      cardsToFlip = [{ ...card, exercise }];
+      if (exercise === "pushups") {
         newPushups = card.value;
       } else {
         newSquats = card.value;
       }
-      currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+      if (isSuperset) {
+        currentExercise = currentExercise === "squats" ? "pushups" : "squats";
+      }
       lastIndex = nextIndex;
     }
     
@@ -277,7 +351,7 @@ export default function RecYardWorkoutScreen() {
     if (lastIndex >= deck.length - 1) {
       completeWorkout();
     }
-  }, [workoutState, currentCardIndex, deck, alternatingExercise, flipMode, startTimer, completeWorkout]);
+  }, [workoutState, currentCardIndex, deck, alternatingExercise, flipMode, exerciseType, startTimer, completeWorkout]);
 
   const handleQuit = useCallback(() => {
     if (Platform.OS === "web") {
@@ -347,10 +421,17 @@ export default function RecYardWorkoutScreen() {
           {exerciseType.toUpperCase()} / {intensity.replace(/_/g, " ").toUpperCase()}
         </ThemedText>
         <ThemedText style={styles.rulesSubtext}>
-          {flipMode === "freshfish" ? "1 card at a time" : 
-           flipMode === "trustee" ? "2 cards at a time" :
-           flipMode === "og" ? "Flip until 20+ reps" :
-           flipMode === "podfather" ? "Flip until 30+ reps" : "1 card at a time"}
+          {/* Superset modes */}
+          {flipMode === "alternating" ? "TAG TEAM - Alternate each card" : 
+           flipMode === "split2" ? "DOUBLE DOWN - 2 cards split" :
+           flipMode === "split4" ? "SQUAD LEAD - 4 cards split" :
+           flipMode === "splitunder20" ? "OVERKILL - Draw while <20" :
+           /* Regular flip modes */
+           flipMode === "freshfish" ? "FRESH FISH - 1 card at a time" : 
+           flipMode === "trustee" ? "TRUSTEE - 2 cards at a time" :
+           flipMode === "og" ? "OG - Flip until 20+ reps" :
+           flipMode === "podfather" ? "POD FATHER - Flip until 30+ reps" : 
+           "1 card at a time"}
         </ThemedText>
         <ThemedText style={styles.rulesSubtext}>No pausing allowed</ThemedText>
       </View>

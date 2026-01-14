@@ -1,6 +1,16 @@
 -- PART 2: ENABLE RLS AND CREATE POLICIES
 -- Run this after Part 1 succeeds
 
+-- GRANT permissions to anon and authenticated roles
+GRANT ALL ON TABLE profiles TO anon;
+GRANT ALL ON TABLE profiles TO authenticated;
+GRANT ALL ON TABLE workout_submissions TO anon;
+GRANT ALL ON TABLE workout_submissions TO authenticated;
+GRANT ALL ON TABLE callouts TO anon;
+GRANT ALL ON TABLE callouts TO authenticated;
+GRANT ALL ON TABLE weekly_challenges TO anon;
+GRANT ALL ON TABLE weekly_challenges TO authenticated;
+
 -- Enable RLS
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE workout_submissions ENABLE ROW LEVEL SECURITY;
