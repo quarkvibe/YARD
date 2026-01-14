@@ -161,7 +161,7 @@ export function useRecYard() {
 
         const loadedProfile = mapDbProfileToProfile(profileData, badges);
         setProfile(loadedProfile);
-        
+
         // Sync to local storage so handle persists across the app
         try {
           const localProfile: UserProfile = {
@@ -179,7 +179,10 @@ export function useRecYard() {
           await saveLocalProfile(localProfile);
           console.log("[useRecYard] Synced profile to local storage on load");
         } catch (syncErr) {
-          console.error("[useRecYard] Failed to sync to local storage:", syncErr);
+          console.error(
+            "[useRecYard] Failed to sync to local storage:",
+            syncErr,
+          );
         }
       }
 
@@ -211,14 +214,25 @@ export function useRecYard() {
   // ============================================
 
   const createProfile = useCallback(
-    async (handle: string, displayName: string): Promise<{ success: boolean; error?: string }> => {
+    async (
+      handle: string,
+      displayName: string,
+    ): Promise<{ success: boolean; error?: string }> => {
       if (!userId) {
         console.error("[useRecYard] No userId available for profile creation");
-        return { success: false, error: "Not authenticated. Please restart the app." };
+        return {
+          success: false,
+          error: "Not authenticated. Please restart the app.",
+        };
       }
 
       const cleanHandle = handle.toUpperCase().replace(/[^A-Z0-9_]/g, "");
-      console.log("[useRecYard] Creating profile for userId:", userId, "handle:", cleanHandle);
+      console.log(
+        "[useRecYard] Creating profile for userId:",
+        userId,
+        "handle:",
+        cleanHandle,
+      );
 
       try {
         // First check if a profile already exists for this user (use maybeSingle to avoid error)
@@ -229,13 +243,22 @@ export function useRecYard() {
           .maybeSingle();
 
         if (existingError) {
-          console.error("[useRecYard] Error checking existing profile:", existingError);
-          return { success: false, error: `Database error: ${existingError.message}` };
+          console.error(
+            "[useRecYard] Error checking existing profile:",
+            existingError,
+          );
+          return {
+            success: false,
+            error: `Database error: ${existingError.message}`,
+          };
         }
 
         if (existingProfile) {
           // Profile already exists for this user - just load it
-          console.log("[useRecYard] Profile already exists for user, loading it:", existingProfile);
+          console.log(
+            "[useRecYard] Profile already exists for user, loading it:",
+            existingProfile,
+          );
           setProfile(mapDbProfileToProfile(existingProfile));
           return { success: true };
         }
@@ -249,12 +272,21 @@ export function useRecYard() {
 
         if (handleError) {
           console.error("[useRecYard] Error checking handle:", handleError);
-          return { success: false, error: `Database error: ${handleError.message}` };
+          return {
+            success: false,
+            error: `Database error: ${handleError.message}`,
+          };
         }
 
         if (handleCheck) {
-          console.error("[useRecYard] Handle already taken by another user:", cleanHandle);
-          return { success: false, error: `Handle @${cleanHandle} is already taken. Choose another.` };
+          console.error(
+            "[useRecYard] Handle already taken by another user:",
+            cleanHandle,
+          );
+          return {
+            success: false,
+            error: `Handle @${cleanHandle} is already taken. Choose another.`,
+          };
         }
 
         // Create new profile with all required fields
@@ -283,28 +315,39 @@ export function useRecYard() {
 
         if (insertError) {
           console.error("[useRecYard] Create profile error:", insertError);
-          console.error("[useRecYard] Error details:", JSON.stringify(insertError, null, 2));
-          return { success: false, error: `Failed to create profile: ${insertError.message}` };
+          console.error(
+            "[useRecYard] Error details:",
+            JSON.stringify(insertError, null, 2),
+          );
+          return {
+            success: false,
+            error: `Failed to create profile: ${insertError.message}`,
+          };
         }
 
         console.log("[useRecYard] Profile created successfully:", data);
         const newProfile = mapDbProfileToProfile(data);
         setProfile(newProfile);
-        
+
         // Sync to local storage so it persists across the app
         await syncToLocalProfile(newProfile);
-        
+
         return { success: true };
       } catch (err) {
         console.error("[useRecYard] Create profile exception:", err);
-        return { success: false, error: "An unexpected error occurred. Please try again." };
+        return {
+          success: false,
+          error: "An unexpected error occurred. Please try again.",
+        };
       }
     },
     [userId],
   );
-  
+
   // Helper to sync Rec Yard profile to local storage
-  const syncToLocalProfile = async (recYardProfile: RecYardProfile): Promise<void> => {
+  const syncToLocalProfile = async (
+    recYardProfile: RecYardProfile,
+  ): Promise<void> => {
     try {
       const localProfile: UserProfile = {
         displayName: recYardProfile.displayName,
@@ -376,10 +419,10 @@ export function useRecYard() {
           };
         }
         setProfile(updatedProfile);
-        
+
         // Sync to local storage
         await syncToLocalProfile(updatedProfile);
-        
+
         return true;
       } catch (err) {
         console.error("[useRecYard] Update profile error:", err);
@@ -673,92 +716,95 @@ export function useRecYard() {
   // COMPETITIVE RUN
   // ============================================
 
-  const startCompetitiveRun = useCallback(async (
-    exerciseType: string = "superset",
-    intensity: string = "misdemeanor",
-    flipMode: string = "fresh_fish"
-  ): Promise<{
-    success: boolean;
-    runId?: string;
-    runNumber?: number;
-    runCode?: string;
-    exerciseType?: string;
-    intensity?: string;
-    flipMode?: string;
-    error?: string;
-  }> => {
-    if (!profile || !userId) {
-      return { success: false, error: "No profile found" };
-    }
-
-    try {
-      const weekId = getCurrentWeekId();
-
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("rec_yard_run_count")
-        .eq("id", profile.id)
-        .single();
-
-      if (profileError) {
-        console.error("[useRecYard] Error getting run count:", profileError);
-        return { success: false, error: "Failed to get run count" };
+  const startCompetitiveRun = useCallback(
+    async (
+      exerciseType: string = "superset",
+      intensity: string = "misdemeanor",
+      flipMode: string = "fresh_fish",
+    ): Promise<{
+      success: boolean;
+      runId?: string;
+      runNumber?: number;
+      runCode?: string;
+      exerciseType?: string;
+      intensity?: string;
+      flipMode?: string;
+      error?: string;
+    }> => {
+      if (!profile || !userId) {
+        return { success: false, error: "No profile found" };
       }
 
-      const currentCount = profileData?.rec_yard_run_count || 0;
-      const newRunNumber = currentCount + 1;
-      const runCode = `@${profile.handle}_${newRunNumber.toString().padStart(3, "0")}`;
+      try {
+        const weekId = getCurrentWeekId();
 
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ rec_yard_run_count: newRunNumber })
-        .eq("id", profile.id)
-        .eq("user_id", userId);
-
-      if (updateError) {
-        console.error("[useRecYard] Error updating run count:", updateError);
-        return { success: false, error: "Failed to reserve run number" };
-      }
-
-      const { data: runData, error: runError } = await supabase
-        .from("rec_yard_runs")
-        .insert({
-          profile_id: profile.id,
-          run_number: newRunNumber,
-          run_code: runCode,
-          week_id: weekId,
-          exercise_type: exerciseType,
-          intensity: intensity,
-          flip_mode: flipMode,
-          status: "in_progress",
-        })
-        .select()
-        .single();
-
-      if (runError) {
-        console.error("[useRecYard] Error creating run:", runError);
-        await supabase
+        const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .update({ rec_yard_run_count: currentCount })
+          .select("rec_yard_run_count")
+          .eq("id", profile.id)
+          .single();
+
+        if (profileError) {
+          console.error("[useRecYard] Error getting run count:", profileError);
+          return { success: false, error: "Failed to get run count" };
+        }
+
+        const currentCount = profileData?.rec_yard_run_count || 0;
+        const newRunNumber = currentCount + 1;
+        const runCode = `@${profile.handle}_${newRunNumber.toString().padStart(3, "0")}`;
+
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ rec_yard_run_count: newRunNumber })
           .eq("id", profile.id)
           .eq("user_id", userId);
-        return { success: false, error: "Failed to create run" };
-      }
 
-      return {
-        success: true,
-        runId: runData.id,
-        runNumber: newRunNumber,
-        runCode,
-        exerciseType,
-        intensity,
-        flipMode,
-      };
-    } catch (err) {
-      console.error("[useRecYard] Start competitive run error:", err);
-      return { success: false, error: "An unexpected error occurred" };
-    }
-  }, [profile, userId]);
+        if (updateError) {
+          console.error("[useRecYard] Error updating run count:", updateError);
+          return { success: false, error: "Failed to reserve run number" };
+        }
+
+        const { data: runData, error: runError } = await supabase
+          .from("rec_yard_runs")
+          .insert({
+            profile_id: profile.id,
+            run_number: newRunNumber,
+            run_code: runCode,
+            week_id: weekId,
+            exercise_type: exerciseType,
+            intensity: intensity,
+            flip_mode: flipMode,
+            status: "in_progress",
+          })
+          .select()
+          .single();
+
+        if (runError) {
+          console.error("[useRecYard] Error creating run:", runError);
+          await supabase
+            .from("profiles")
+            .update({ rec_yard_run_count: currentCount })
+            .eq("id", profile.id)
+            .eq("user_id", userId);
+          return { success: false, error: "Failed to create run" };
+        }
+
+        return {
+          success: true,
+          runId: runData.id,
+          runNumber: newRunNumber,
+          runCode,
+          exerciseType,
+          intensity,
+          flipMode,
+        };
+      } catch (err) {
+        console.error("[useRecYard] Start competitive run error:", err);
+        return { success: false, error: "An unexpected error occurred" };
+      }
+    },
+    [profile, userId],
+  );
 
   // ============================================
   // REFRESH

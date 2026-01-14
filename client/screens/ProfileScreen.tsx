@@ -38,7 +38,7 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [showSocialLinks, setShowSocialLinks] = useState(false);
   const [hapticsEnabled] = useState(true);
-  
+
   // Supabase profile ID for syncing
   const supabaseProfileIdRef = useRef<string | null>(null);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,38 +54,40 @@ export default function ProfileScreen() {
   // Fetches Supabase profile directly to avoid stale refs
   const syncToSupabase = useCallback((localProfile: UserProfile) => {
     pendingProfileRef.current = localProfile;
-    
+
     if (syncTimeoutRef.current) {
       clearTimeout(syncTimeoutRef.current);
     }
-    
+
     syncTimeoutRef.current = setTimeout(async () => {
       const profileToSync = pendingProfileRef.current;
       if (!profileToSync) return;
-      
+
       try {
         const userId = await ensureAuthenticated();
         if (!userId) return;
-        
+
         // Always check for current Supabase profile (not relying on stale ref)
         const { data: supabaseProfile } = await supabase
           .from("profiles")
           .select("id")
           .eq("user_id", userId)
           .maybeSingle();
-        
+
         if (!supabaseProfile) {
           // User doesn't have a Rec Yard profile yet, skip sync
           return;
         }
-        
+
         // Update the ref for future checks
         supabaseProfileIdRef.current = supabaseProfile.id;
-        
+
         const { error } = await supabase
           .from("profiles")
           .update({
-            handle: profileToSync.handle.toUpperCase().replace(/[^A-Z0-9_]/g, ""),
+            handle: profileToSync.handle
+              .toUpperCase()
+              .replace(/[^A-Z0-9_]/g, ""),
             display_name: profileToSync.displayName,
             bio: profileToSync.bio,
             instagram: profileToSync.instagram || "",
@@ -97,7 +99,7 @@ export default function ProfileScreen() {
           })
           .eq("id", supabaseProfile.id)
           .eq("user_id", userId);
-          
+
         if (error) {
           console.error("[ProfileScreen] Supabase sync error:", error);
         } else {
@@ -108,7 +110,7 @@ export default function ProfileScreen() {
       }
     }, 1000);
   }, []);
-  
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -126,7 +128,7 @@ export default function ProfileScreen() {
     // Check subscription status
     const subStatus = await checkRecYardAccess();
     setIsSubscribed(subStatus.isSubscribed);
-    
+
     // Check if user has a Supabase Rec Yard profile
     try {
       const userId = await ensureAuthenticated();
@@ -136,7 +138,7 @@ export default function ProfileScreen() {
           .select("id")
           .eq("user_id", userId)
           .maybeSingle();
-        
+
         if (supabaseProfile) {
           supabaseProfileIdRef.current = supabaseProfile.id;
         }
@@ -176,7 +178,7 @@ export default function ProfileScreen() {
     const newProfile = { ...profile, [key]: value };
     setProfile(newProfile);
     await saveProfile(newProfile);
-    
+
     // Sync to Supabase if user has a Rec Yard profile (debounced)
     syncToSupabase(newProfile);
   };

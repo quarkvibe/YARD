@@ -164,7 +164,11 @@ export default function WorkoutScreen() {
     setRuleSetId(ruleSet.id);
     setRuleSetName(ruleSet.name);
     setFlipModeId(flipMode.id);
-    setFlipModeName(settings.selectedExerciseType === "superset" ? supersetMode.name : flipMode.name);
+    setFlipModeName(
+      settings.selectedExerciseType === "superset"
+        ? supersetMode.name
+        : flipMode.name,
+    );
     setSupersetModeId(supersetMode.id);
     setSupersetModeName(supersetMode.name);
     setExerciseType(settings.selectedExerciseType);
@@ -186,8 +190,6 @@ export default function WorkoutScreen() {
     setBestTime(best);
     setSettingsLoaded(true);
   }, []);
-
-
 
   // Reload settings when returning to idle state (after workout completes or is quit)
   useEffect(() => {
@@ -332,7 +334,11 @@ export default function WorkoutScreen() {
     setRuleSetId(ruleSet.id);
     setRuleSetName(ruleSet.name);
     setFlipModeId(flipMode.id);
-    setFlipModeName(settings.selectedExerciseType === "superset" ? supersetMode.name : flipMode.name);
+    setFlipModeName(
+      settings.selectedExerciseType === "superset"
+        ? supersetMode.name
+        : flipMode.name,
+    );
     setSupersetModeId(supersetMode.id);
     setSupersetModeName(supersetMode.name);
     setHapticsEnabled(settings.hapticsEnabled);
@@ -427,13 +433,7 @@ export default function WorkoutScreen() {
         // Only reload settings when in idle state (not during active workout)
         loadSettings();
       }
-    }, [
-      loadSettings,
-      workoutState,
-      startNew,
-      startWorkout,
-      navigation,
-    ]),
+    }, [loadSettings, workoutState, startNew, startWorkout, navigation]),
   );
 
   const completeWorkout = useCallback(async () => {
@@ -1080,13 +1080,22 @@ export default function WorkoutScreen() {
       return (
         <>
           <View style={styles.exerciseBadge}>
-            <ThemedText style={styles.exerciseText}>{totalReps} REPS</ThemedText>
+            <ThemedText style={styles.exerciseText}>
+              {totalReps} REPS
+            </ThemedText>
             <ThemedText style={styles.cardCountText}>
               ({activeCards.length} CARDS)
             </ThemedText>
           </View>
           <View style={styles.cardContainer}>
-            <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center', justifyContent: 'center' }}>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 16,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               {activeCards.map((card, index) => (
                 <Animated.View
                   key={`${card.suit}-${card.rank}-${index}`}
@@ -1213,7 +1222,11 @@ export default function WorkoutScreen() {
               <ThemedText style={styles.quickConfigValue}>
                 {flipModeName}
               </ThemedText>
-              <Feather name="chevron-down" size={14} color={Colors.dark.accent} />
+              <Feather
+                name="chevron-down"
+                size={14}
+                color={Colors.dark.accent}
+              />
             </View>
           </Pressable>
         )}
@@ -1340,7 +1353,12 @@ export default function WorkoutScreen() {
           )}
           {isOfficialRecYardSubmission && (
             <View style={styles.pauseButtonPlaceholder}>
-              <Feather name="clock" size={16} color={Colors.dark.textSecondary} style={{ opacity: 0.5 }} />
+              <Feather
+                name="clock"
+                size={16}
+                color={Colors.dark.textSecondary}
+                style={{ opacity: 0.5 }}
+              />
             </View>
           )}
         </View>
@@ -1421,8 +1439,8 @@ export default function WorkoutScreen() {
 
       {/* Button Area */}
       {competitiveMode &&
-        workoutPhase === "working" &&
-        activeCards.length > 0 ? (
+      workoutPhase === "working" &&
+      activeCards.length > 0 ? (
         <View style={styles.buttonRow}>
           <AnimatedPressable
             onPress={completeSet}
@@ -2533,7 +2551,7 @@ const styles = StyleSheet.create({
   pauseButtonPlaceholder: {
     width: 32,
     height: 32,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

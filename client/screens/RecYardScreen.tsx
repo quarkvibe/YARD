@@ -114,14 +114,21 @@ export default function RecYardScreen() {
 
   // Competitive run config modal state
   const [showRunConfigModal, setShowRunConfigModal] = useState(false);
-  const [selectedExerciseType, setSelectedExerciseType] = useState<"pushups" | "squats" | "superset">("superset");
-  const [selectedIntensity, setSelectedIntensity] = useState<"misdemeanor" | "hard_time" | "lifer">("misdemeanor");
+  const [selectedExerciseType, setSelectedExerciseType] = useState<
+    "pushups" | "squats" | "superset"
+  >("superset");
+  const [selectedIntensity, setSelectedIntensity] = useState<
+    "misdemeanor" | "hard_time" | "lifer"
+  >("misdemeanor");
   // For non-superset exercises, use flip modes (freshfish, trustee, og, podfather)
   // For superset exercises, use superset modes (alternating, split2, split4, splitunder20)
-  const [selectedFlipMode, setSelectedFlipMode] = useState<string>("alternating");
-  
+  const [selectedFlipMode, setSelectedFlipMode] =
+    useState<string>("alternating");
+
   // Reset flip mode when exercise type changes
-  const handleExerciseTypeChange = (type: "pushups" | "squats" | "superset") => {
+  const handleExerciseTypeChange = (
+    type: "pushups" | "squats" | "superset",
+  ) => {
     setSelectedExerciseType(type);
     // Reset to appropriate default when switching
     if (type === "superset") {
@@ -221,7 +228,10 @@ export default function RecYardScreen() {
 
   const handleStartOfficialRun = async () => {
     if (!profile) {
-      Alert.alert("PROFILE REQUIRED", "Create your profile first to start an official run.");
+      Alert.alert(
+        "PROFILE REQUIRED",
+        "Create your profile first to start an official run.",
+      );
       return;
     }
 
@@ -231,12 +241,24 @@ export default function RecYardScreen() {
 
   const handleConfirmOfficialRun = async () => {
     if (!profile) return;
-    
-    setShowRunConfigModal(false);
-    
-    const result = await startCompetitiveRun(selectedExerciseType, selectedIntensity, selectedFlipMode);
 
-    if (result.success && result.runId && result.runCode && result.runNumber && result.exerciseType && result.intensity && result.flipMode) {
+    setShowRunConfigModal(false);
+
+    const result = await startCompetitiveRun(
+      selectedExerciseType,
+      selectedIntensity,
+      selectedFlipMode,
+    );
+
+    if (
+      result.success &&
+      result.runId &&
+      result.runCode &&
+      result.runNumber &&
+      result.exerciseType &&
+      result.intensity &&
+      result.flipMode
+    ) {
       navigation.navigate("RecYardWorkout", {
         profileId: profile.id,
         handle: profile.handle,
@@ -248,12 +270,18 @@ export default function RecYardScreen() {
         flipMode: result.flipMode,
       });
     } else {
-      Alert.alert("ERROR", result.error || "Failed to start run. Please try again.");
+      Alert.alert(
+        "ERROR",
+        result.error || "Failed to start run. Please try again.",
+      );
     }
   };
 
   const handleUnlock = async () => {
-    console.log("[RecYard] handleUnlock called, hasAcceptedRules:", hasAcceptedRules);
+    console.log(
+      "[RecYard] handleUnlock called, hasAcceptedRules:",
+      hasAcceptedRules,
+    );
 
     // Check if user has accepted the YARD rules first
     if (!hasAcceptedRules) {
@@ -376,18 +404,27 @@ export default function RecYardScreen() {
     }
 
     if (!profile) {
-      Alert.alert("PROFILE REQUIRED", "Create your profile first to join a challenge.");
+      Alert.alert(
+        "PROFILE REQUIRED",
+        "Create your profile first to join a challenge.",
+      );
       return;
     }
 
     // Pre-set the exercise type and intensity from the challenge
-    const challengeExerciseType = weeklyChallenge.exerciseType as "pushups" | "squats" | "superset";
-    const challengeIntensity = weeklyChallenge.intensity as "misdemeanor" | "hard_time" | "lifer";
-    
+    const challengeExerciseType = weeklyChallenge.exerciseType as
+      | "pushups"
+      | "squats"
+      | "superset";
+    const challengeIntensity = weeklyChallenge.intensity as
+      | "misdemeanor"
+      | "hard_time"
+      | "lifer";
+
     // Set defaults based on challenge
     setSelectedExerciseType(challengeExerciseType);
     setSelectedIntensity(challengeIntensity);
-    
+
     // Set appropriate flip mode
     if (challengeExerciseType === "superset") {
       setSelectedFlipMode("alternating");
@@ -404,9 +441,21 @@ export default function RecYardScreen() {
           text: "START RUN",
           onPress: async () => {
             // Start the competitive run directly with challenge settings
-            const result = await startCompetitiveRun(challengeExerciseType, challengeIntensity, selectedFlipMode);
-            
-            if (result.success && result.runId && result.runCode && result.runNumber && result.exerciseType && result.intensity && result.flipMode) {
+            const result = await startCompetitiveRun(
+              challengeExerciseType,
+              challengeIntensity,
+              selectedFlipMode,
+            );
+
+            if (
+              result.success &&
+              result.runId &&
+              result.runCode &&
+              result.runNumber &&
+              result.exerciseType &&
+              result.intensity &&
+              result.flipMode
+            ) {
               navigation.navigate("RecYardWorkout", {
                 profileId: profile.id,
                 handle: profile.handle,
@@ -418,7 +467,10 @@ export default function RecYardScreen() {
                 flipMode: result.flipMode,
               });
             } else {
-              Alert.alert("ERROR", result.error || "Failed to start run. Please try again.");
+              Alert.alert(
+                "ERROR",
+                result.error || "Failed to start run. Please try again.",
+              );
             }
           },
         },
@@ -996,9 +1048,15 @@ export default function RecYardScreen() {
         style={styles.homeActionButtonPrimary}
         onPress={handleStartOfficialRun}
       >
-        <Feather name="play-circle" size={24} color={Colors.dark.backgroundRoot} />
+        <Feather
+          name="play-circle"
+          size={24}
+          color={Colors.dark.backgroundRoot}
+        />
         <View style={styles.homeActionContent}>
-          <ThemedText style={styles.homeActionTitlePrimary}>START OFFICIAL RUN</ThemedText>
+          <ThemedText style={styles.homeActionTitlePrimary}>
+            START OFFICIAL RUN
+          </ThemedText>
           <ThemedText style={styles.homeActionDescPrimary}>
             Compete for the leaderboard
           </ThemedText>
@@ -1315,7 +1373,7 @@ export default function RecYardScreen() {
       <Pressable
         style={styles.discordCard}
         onPress={() => {
-          Linking.openURL("https://discord.gg/yard-workout");
+          Linking.openURL("https://discord.gg/BGuXQJvs");
         }}
       >
         <View style={styles.discordIconContainer}>
@@ -1888,103 +1946,103 @@ export default function RecYardScreen() {
           profile.socialLinks.youtube ||
           profile.socialLinks.discord ||
           profile.socialLinks.threads) && (
-            <View style={styles.socialSection}>
-              <ThemedText style={styles.sectionTitle}>SOCIAL</ThemedText>
-              <View style={styles.socialCard}>
-                {profile.socialLinks.instagram && (
-                  <Pressable
-                    style={styles.socialItem}
-                    onPress={() =>
-                      Linking.openURL(
-                        `https://instagram.com/${profile.socialLinks.instagram}`,
-                      )
-                    }
-                  >
-                    <ThemedText style={styles.socialIcon}>📸</ThemedText>
-                    <ThemedText style={styles.socialLabel}>INSTAGRAM</ThemedText>
-                    <ThemedText style={styles.socialHandle}>
-                      @{profile.socialLinks.instagram}
-                    </ThemedText>
-                  </Pressable>
-                )}
-                {profile.socialLinks.tiktok && (
-                  <Pressable
-                    style={styles.socialItem}
-                    onPress={() =>
-                      Linking.openURL(
-                        `https://tiktok.com/@${profile.socialLinks.tiktok}`,
-                      )
-                    }
-                  >
-                    <ThemedText style={styles.socialIcon}>🎵</ThemedText>
-                    <ThemedText style={styles.socialLabel}>TIKTOK</ThemedText>
-                    <ThemedText style={styles.socialHandle}>
-                      @{profile.socialLinks.tiktok}
-                    </ThemedText>
-                  </Pressable>
-                )}
-                {profile.socialLinks.twitter && (
-                  <Pressable
-                    style={styles.socialItem}
-                    onPress={() =>
-                      Linking.openURL(
-                        `https://twitter.com/${profile.socialLinks.twitter}`,
-                      )
-                    }
-                  >
-                    <ThemedText style={styles.socialIcon}>🐦</ThemedText>
-                    <ThemedText style={styles.socialLabel}>
-                      X / TWITTER
-                    </ThemedText>
-                    <ThemedText style={styles.socialHandle}>
-                      @{profile.socialLinks.twitter}
-                    </ThemedText>
-                  </Pressable>
-                )}
-                {profile.socialLinks.youtube && (
-                  <Pressable
-                    style={styles.socialItem}
-                    onPress={() =>
-                      Linking.openURL(
-                        `https://youtube.com/@${profile.socialLinks.youtube}`,
-                      )
-                    }
-                  >
-                    <ThemedText style={styles.socialIcon}>📺</ThemedText>
-                    <ThemedText style={styles.socialLabel}>YOUTUBE</ThemedText>
-                    <ThemedText style={styles.socialHandle}>
-                      @{profile.socialLinks.youtube}
-                    </ThemedText>
-                  </Pressable>
-                )}
-                {profile.socialLinks.discord && (
-                  <Pressable style={styles.socialItem}>
-                    <ThemedText style={styles.socialIcon}>💬</ThemedText>
-                    <ThemedText style={styles.socialLabel}>DISCORD</ThemedText>
-                    <ThemedText style={styles.socialHandle}>
-                      {profile.socialLinks.discord}
-                    </ThemedText>
-                  </Pressable>
-                )}
-                {profile.socialLinks.threads && (
-                  <Pressable
-                    style={styles.socialItem}
-                    onPress={() =>
-                      Linking.openURL(
-                        `https://www.threads.net/@${profile.socialLinks.threads}`,
-                      )
-                    }
-                  >
-                    <ThemedText style={styles.socialIcon}>🧵</ThemedText>
-                    <ThemedText style={styles.socialLabel}>THREADS</ThemedText>
-                    <ThemedText style={styles.socialHandle}>
-                      @{profile.socialLinks.threads}
-                    </ThemedText>
-                  </Pressable>
-                )}
-              </View>
+          <View style={styles.socialSection}>
+            <ThemedText style={styles.sectionTitle}>SOCIAL</ThemedText>
+            <View style={styles.socialCard}>
+              {profile.socialLinks.instagram && (
+                <Pressable
+                  style={styles.socialItem}
+                  onPress={() =>
+                    Linking.openURL(
+                      `https://instagram.com/${profile.socialLinks.instagram}`,
+                    )
+                  }
+                >
+                  <ThemedText style={styles.socialIcon}>📸</ThemedText>
+                  <ThemedText style={styles.socialLabel}>INSTAGRAM</ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    @{profile.socialLinks.instagram}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {profile.socialLinks.tiktok && (
+                <Pressable
+                  style={styles.socialItem}
+                  onPress={() =>
+                    Linking.openURL(
+                      `https://tiktok.com/@${profile.socialLinks.tiktok}`,
+                    )
+                  }
+                >
+                  <ThemedText style={styles.socialIcon}>🎵</ThemedText>
+                  <ThemedText style={styles.socialLabel}>TIKTOK</ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    @{profile.socialLinks.tiktok}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {profile.socialLinks.twitter && (
+                <Pressable
+                  style={styles.socialItem}
+                  onPress={() =>
+                    Linking.openURL(
+                      `https://twitter.com/${profile.socialLinks.twitter}`,
+                    )
+                  }
+                >
+                  <ThemedText style={styles.socialIcon}>🐦</ThemedText>
+                  <ThemedText style={styles.socialLabel}>
+                    X / TWITTER
+                  </ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    @{profile.socialLinks.twitter}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {profile.socialLinks.youtube && (
+                <Pressable
+                  style={styles.socialItem}
+                  onPress={() =>
+                    Linking.openURL(
+                      `https://youtube.com/@${profile.socialLinks.youtube}`,
+                    )
+                  }
+                >
+                  <ThemedText style={styles.socialIcon}>📺</ThemedText>
+                  <ThemedText style={styles.socialLabel}>YOUTUBE</ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    @{profile.socialLinks.youtube}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {profile.socialLinks.discord && (
+                <Pressable style={styles.socialItem}>
+                  <ThemedText style={styles.socialIcon}>💬</ThemedText>
+                  <ThemedText style={styles.socialLabel}>DISCORD</ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    {profile.socialLinks.discord}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {profile.socialLinks.threads && (
+                <Pressable
+                  style={styles.socialItem}
+                  onPress={() =>
+                    Linking.openURL(
+                      `https://www.threads.net/@${profile.socialLinks.threads}`,
+                    )
+                  }
+                >
+                  <ThemedText style={styles.socialIcon}>🧵</ThemedText>
+                  <ThemedText style={styles.socialLabel}>THREADS</ThemedText>
+                  <ThemedText style={styles.socialHandle}>
+                    @{profile.socialLinks.threads}
+                  </ThemedText>
+                </Pressable>
+              )}
             </View>
-          )}
+          </View>
+        )}
 
         {/* Verification Section */}
         <View style={styles.verificationSection}>
@@ -2017,7 +2075,12 @@ export default function RecYardScreen() {
           </View>
         </View>
 
-        <View style={[styles.legalLinks, { marginTop: Spacing.xl, marginBottom: Spacing.xl }]}>
+        <View
+          style={[
+            styles.legalLinks,
+            { marginTop: Spacing.xl, marginBottom: Spacing.xl },
+          ]}
+        >
           <Pressable
             onPress={() => Linking.openURL("https://flipmovefinish.now/terms")}
           >
@@ -2032,7 +2095,7 @@ export default function RecYardScreen() {
             <ThemedText style={styles.legalLinkText}>Privacy Policy</ThemedText>
           </Pressable>
         </View>
-      </ScrollView >
+      </ScrollView>
     );
   };
 
@@ -2274,21 +2337,25 @@ export default function RecYardScreen() {
             </ThemedText>
 
             <View style={styles.runConfigSection}>
-              <ThemedText style={styles.runConfigLabel}>EXERCISE TYPE</ThemedText>
+              <ThemedText style={styles.runConfigLabel}>
+                EXERCISE TYPE
+              </ThemedText>
               <View style={styles.runConfigOptions}>
                 {(["pushups", "squats", "superset"] as const).map((type) => (
                   <Pressable
                     key={type}
                     style={[
                       styles.runConfigOption,
-                      selectedExerciseType === type && styles.runConfigOptionSelected,
+                      selectedExerciseType === type &&
+                        styles.runConfigOptionSelected,
                     ]}
                     onPress={() => handleExerciseTypeChange(type)}
                   >
                     <ThemedText
                       style={[
                         styles.runConfigOptionText,
-                        selectedExerciseType === type && styles.runConfigOptionTextSelected,
+                        selectedExerciseType === type &&
+                          styles.runConfigOptionTextSelected,
                       ]}
                     >
                       {type.toUpperCase()}
@@ -2301,54 +2368,78 @@ export default function RecYardScreen() {
             <View style={styles.runConfigSection}>
               <ThemedText style={styles.runConfigLabel}>INTENSITY</ThemedText>
               <View style={styles.runConfigOptions}>
-                {(["misdemeanor", "hard_time", "lifer"] as const).map((intensity) => (
-                  <Pressable
-                    key={intensity}
-                    style={[
-                      styles.runConfigOption,
-                      selectedIntensity === intensity && styles.runConfigOptionSelected,
-                    ]}
-                    onPress={() => setSelectedIntensity(intensity)}
-                  >
-                    <ThemedText
+                {(["misdemeanor", "hard_time", "lifer"] as const).map(
+                  (intensity) => (
+                    <Pressable
+                      key={intensity}
                       style={[
-                        styles.runConfigOptionText,
-                        selectedIntensity === intensity && styles.runConfigOptionTextSelected,
+                        styles.runConfigOption,
+                        selectedIntensity === intensity &&
+                          styles.runConfigOptionSelected,
                       ]}
+                      onPress={() => setSelectedIntensity(intensity)}
                     >
-                      {intensity.replace("_", " ").toUpperCase()}
-                    </ThemedText>
-                  </Pressable>
-                ))}
+                      <ThemedText
+                        style={[
+                          styles.runConfigOptionText,
+                          selectedIntensity === intensity &&
+                            styles.runConfigOptionTextSelected,
+                        ]}
+                      >
+                        {intensity.replace("_", " ").toUpperCase()}
+                      </ThemedText>
+                    </Pressable>
+                  ),
+                )}
               </View>
             </View>
 
             <View style={styles.runConfigSection}>
               <ThemedText style={styles.runConfigLabel}>
-                {selectedExerciseType === "superset" ? "SUPERSET MODE" : "FLIP MODE"}
+                {selectedExerciseType === "superset"
+                  ? "SUPERSET MODE"
+                  : "FLIP MODE"}
               </ThemedText>
               <View style={styles.runConfigOptionsWrap}>
                 {selectedExerciseType === "superset" ? (
                   // Superset modes: TAG TEAM, DOUBLE DOWN, SQUAD LEAD, OVERKILL
                   <>
-                    {([
-                      { value: "alternating", label: "TAG TEAM", desc: "Alternate each card" },
-                      { value: "split2", label: "DOUBLE DOWN", desc: "2 cards, 1 each" },
-                      { value: "split4", label: "SQUAD LEAD", desc: "4 cards split" },
-                      { value: "splitunder20", label: "OVERKILL", desc: "Draw while <20" },
-                    ]).map((mode) => (
+                    {[
+                      {
+                        value: "alternating",
+                        label: "TAG TEAM",
+                        desc: "Alternate each card",
+                      },
+                      {
+                        value: "split2",
+                        label: "DOUBLE DOWN",
+                        desc: "2 cards, 1 each",
+                      },
+                      {
+                        value: "split4",
+                        label: "SQUAD LEAD",
+                        desc: "4 cards split",
+                      },
+                      {
+                        value: "splitunder20",
+                        label: "OVERKILL",
+                        desc: "Draw while <20",
+                      },
+                    ].map((mode) => (
                       <Pressable
                         key={mode.value}
                         style={[
                           styles.runConfigOptionHalf,
-                          selectedFlipMode === mode.value && styles.runConfigOptionSelected,
+                          selectedFlipMode === mode.value &&
+                            styles.runConfigOptionSelected,
                         ]}
                         onPress={() => setSelectedFlipMode(mode.value)}
                       >
                         <ThemedText
                           style={[
                             styles.runConfigOptionText,
-                            selectedFlipMode === mode.value && styles.runConfigOptionTextSelected,
+                            selectedFlipMode === mode.value &&
+                              styles.runConfigOptionTextSelected,
                           ]}
                         >
                           {mode.label}
@@ -2356,7 +2447,8 @@ export default function RecYardScreen() {
                         <ThemedText
                           style={[
                             styles.runConfigOptionDesc,
-                            selectedFlipMode === mode.value && styles.runConfigOptionDescSelected,
+                            selectedFlipMode === mode.value &&
+                              styles.runConfigOptionDescSelected,
                           ]}
                         >
                           {mode.desc}
@@ -2367,24 +2459,38 @@ export default function RecYardScreen() {
                 ) : (
                   // Regular flip modes: FRESH FISH, TRUSTEE, OG, POD FATHER
                   <>
-                    {([
-                      { value: "freshfish", label: "FRESH FISH", desc: "1 card at a time" },
-                      { value: "trustee", label: "TRUSTEE", desc: "2 cards at a time" },
+                    {[
+                      {
+                        value: "freshfish",
+                        label: "FRESH FISH",
+                        desc: "1 card at a time",
+                      },
+                      {
+                        value: "trustee",
+                        label: "TRUSTEE",
+                        desc: "2 cards at a time",
+                      },
                       { value: "og", label: "OG", desc: "Flip until 20+ reps" },
-                      { value: "podfather", label: "POD FATHER", desc: "Flip until 30+ reps" },
-                    ]).map((mode) => (
+                      {
+                        value: "podfather",
+                        label: "POD FATHER",
+                        desc: "Flip until 30+ reps",
+                      },
+                    ].map((mode) => (
                       <Pressable
                         key={mode.value}
                         style={[
                           styles.runConfigOptionHalf,
-                          selectedFlipMode === mode.value && styles.runConfigOptionSelected,
+                          selectedFlipMode === mode.value &&
+                            styles.runConfigOptionSelected,
                         ]}
                         onPress={() => setSelectedFlipMode(mode.value)}
                       >
                         <ThemedText
                           style={[
                             styles.runConfigOptionText,
-                            selectedFlipMode === mode.value && styles.runConfigOptionTextSelected,
+                            selectedFlipMode === mode.value &&
+                              styles.runConfigOptionTextSelected,
                           ]}
                         >
                           {mode.label}
@@ -2392,7 +2498,8 @@ export default function RecYardScreen() {
                         <ThemedText
                           style={[
                             styles.runConfigOptionDesc,
-                            selectedFlipMode === mode.value && styles.runConfigOptionDescSelected,
+                            selectedFlipMode === mode.value &&
+                              styles.runConfigOptionDescSelected,
                           ]}
                         >
                           {mode.desc}
@@ -2409,13 +2516,17 @@ export default function RecYardScreen() {
                 style={styles.runConfigCancelButton}
                 onPress={() => setShowRunConfigModal(false)}
               >
-                <ThemedText style={styles.runConfigCancelText}>CANCEL</ThemedText>
+                <ThemedText style={styles.runConfigCancelText}>
+                  CANCEL
+                </ThemedText>
               </Pressable>
               <Pressable
                 style={styles.runConfigStartButton}
                 onPress={handleConfirmOfficialRun}
               >
-                <ThemedText style={styles.runConfigStartText}>START RUN</ThemedText>
+                <ThemedText style={styles.runConfigStartText}>
+                  START RUN
+                </ThemedText>
               </Pressable>
             </View>
           </Animated.View>
