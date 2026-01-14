@@ -243,18 +243,7 @@ GRANT EXECUTE ON FUNCTION increment_challenge_participants(TEXT) TO anon;
 GRANT EXECUTE ON FUNCTION increment_challenge_participants(TEXT) TO authenticated;
 
 -- ============================================
--- CREATE A DEFAULT WEEKLY CHALLENGE FOR TESTING
+-- DONE - ALL TABLES AND POLICIES CREATED
 -- ============================================
-
--- Get current week ID format: YYYY-WW
-INSERT INTO weekly_challenges (week_id, title, exercise_type, intensity, starts_at, ends_at)
-SELECT 
-  TO_CHAR(NOW(), 'IYYY-IW'),
-  'WEEKLY YARD CHALLENGE',
-  'superset',
-  'misdemeanor',
-  DATE_TRUNC('week', NOW()),
-  DATE_TRUNC('week', NOW()) + INTERVAL '6 days 23 hours 59 minutes 59 seconds'
-WHERE NOT EXISTS (
-  SELECT 1 FROM weekly_challenges WHERE week_id = TO_CHAR(NOW(), 'IYYY-IW')
-);
+-- Weekly challenges should be created through the app or manually
+-- with the correct schema that matches your existing table
