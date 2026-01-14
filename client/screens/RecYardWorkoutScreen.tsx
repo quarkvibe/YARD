@@ -49,8 +49,17 @@ export default function RecYardWorkoutScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "RecYardWorkout">>();
-  
-  const { profileId, handle, runNumber, runCode, runId, exerciseType, intensity, flipMode } = route.params;
+
+  const {
+    profileId,
+    handle,
+    runNumber,
+    runCode,
+    runId,
+    exerciseType,
+    intensity,
+    flipMode,
+  } = route.params;
 
   const [workoutState, setWorkoutState] = useState<WorkoutState>("countdown");
   const [countdown, setCountdown] = useState(3);
@@ -60,7 +69,9 @@ export default function RecYardWorkoutScreen() {
   const [totalPushups, setTotalPushups] = useState(0);
   const [totalSquats, setTotalSquats] = useState(0);
   const [activeCards, setActiveCards] = useState<CardValue[]>([]);
-  const [alternatingExercise, setAlternatingExercise] = useState<"pushups" | "squats">("squats");
+  const [alternatingExercise, setAlternatingExercise] = useState<
+    "pushups" | "squats"
+  >("squats");
   const [deckStyle] = useState<DeckStyle>(DECK_STYLES[0]);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -72,7 +83,10 @@ export default function RecYardWorkoutScreen() {
 
   useEffect(() => {
     const ruleSet = getRuleSetById(intensity);
-    const newDeck = generateDeck(ruleSet, exerciseType as "pushups" | "squats" | "superset");
+    const newDeck = generateDeck(
+      ruleSet,
+      exerciseType as "pushups" | "squats" | "superset",
+    );
     setDeck(newDeck);
   }, [intensity, exerciseType]);
 
@@ -80,7 +94,7 @@ export default function RecYardWorkoutScreen() {
     if (workoutState === "countdown" && countdown > 0) {
       countdownScale.value = withSequence(
         withTiming(1.3, { duration: 200 }),
-        withTiming(1, { duration: 200 })
+        withTiming(1, { duration: 200 }),
       );
       const timer = setTimeout(() => {
         setCountdown(countdown - 1);
@@ -163,9 +177,15 @@ export default function RecYardWorkoutScreen() {
         });
 
       if (submissionError) {
-        console.error("[RecYardWorkout] Failed to submit to leaderboard:", submissionError);
+        console.error(
+          "[RecYardWorkout] Failed to submit to leaderboard:",
+          submissionError,
+        );
       } else {
-        console.log("[RecYardWorkout] Successfully submitted to leaderboard with run:", runCode);
+        console.log(
+          "[RecYardWorkout] Successfully submitted to leaderboard with run:",
+          runCode,
+        );
       }
 
       // Update profile stats (total_workouts, best_time)
@@ -176,11 +196,17 @@ export default function RecYardWorkoutScreen() {
         .single();
 
       if (profileFetchError) {
-        console.error("[RecYardWorkout] Failed to fetch profile:", profileFetchError);
+        console.error(
+          "[RecYardWorkout] Failed to fetch profile:",
+          profileFetchError,
+        );
       } else if (profileData) {
         const newTotalWorkouts = (profileData.total_workouts || 0) + 1;
         const currentBestTime = profileData.best_time;
-        const newBestTime = currentBestTime === null || timer < currentBestTime ? timer : currentBestTime;
+        const newBestTime =
+          currentBestTime === null || timer < currentBestTime
+            ? timer
+            : currentBestTime;
 
         // Update profile using user_id to satisfy RLS policy
         const { error: profileUpdateError } = await supabase
@@ -194,9 +220,17 @@ export default function RecYardWorkoutScreen() {
           .eq("user_id", profileData.user_id);
 
         if (profileUpdateError) {
-          console.error("[RecYardWorkout] Failed to update profile stats:", profileUpdateError);
+          console.error(
+            "[RecYardWorkout] Failed to update profile stats:",
+            profileUpdateError,
+          );
         } else {
-          console.log("[RecYardWorkout] Profile stats updated - Total:", newTotalWorkouts, "Best:", newBestTime);
+          console.log(
+            "[RecYardWorkout] Profile stats updated - Total:",
+            newTotalWorkouts,
+            "Best:",
+            newBestTime,
+          );
         }
       }
 
@@ -209,16 +243,33 @@ export default function RecYardWorkoutScreen() {
 
       // If this is the first submission for this user this week, increment participant count
       if (existingSubmissions && existingSubmissions.length === 1) {
-        await supabase.rpc("increment_challenge_participants", { challenge_week_id: weekId }).catch(() => {
+        try {
+          await supabase.rpc("increment_challenge_participants", {
+            challenge_week_id: weekId,
+          });
+        } catch {
           // RPC might not exist, that's okay - we can skip this
-          console.log("[RecYardWorkout] Could not update challenge participant count");
-        });
+          console.log(
+            "[RecYardWorkout] Could not update challenge participant count",
+          );
+        }
       }
-
     } catch (err) {
       console.error("[RecYardWorkout] Failed to complete workout:", err);
     }
-  }, [timer, totalPushups, totalSquats, currentCardIndex, runId, profileId, exerciseType, intensity, flipMode, runCode, stopTimer]);
+  }, [
+    timer,
+    totalPushups,
+    totalSquats,
+    currentCardIndex,
+    runId,
+    profileId,
+    exerciseType,
+    intensity,
+    flipMode,
+    runCode,
+    stopTimer,
+  ]);
 
   const flipCard = useCallback(() => {
     if (workoutState !== "active") return;
@@ -304,7 +355,12 @@ export default function RecYardWorkoutScreen() {
     else if (flipMode === "freshfish") {
       // Fresh Fish: One card at a time
       const card = deck[nextIndex];
-      const exercise = exerciseType === "pushups" ? "pushups" : exerciseType === "squats" ? "squats" : currentExercise;
+      const exercise =
+        exerciseType === "pushups"
+          ? "pushups"
+          : exerciseType === "squats"
+            ? "squats"
+            : currentExercise;
       cardsToFlip = [{ ...card, exercise }];
       if (exercise === "pushups") {
         newPushups = card.value;
@@ -319,7 +375,12 @@ export default function RecYardWorkoutScreen() {
       // Trustee: 2 cards at a time
       for (let i = 0; i < 2 && nextIndex + i < deck.length; i++) {
         const card = deck[nextIndex + i];
-        const exercise = exerciseType === "pushups" ? "pushups" : exerciseType === "squats" ? "squats" : currentExercise;
+        const exercise =
+          exerciseType === "pushups"
+            ? "pushups"
+            : exerciseType === "squats"
+              ? "squats"
+              : currentExercise;
         cardsToFlip.push({ ...card, exercise });
         if (exercise === "pushups") {
           newPushups += card.value;
@@ -337,7 +398,12 @@ export default function RecYardWorkoutScreen() {
       let idx = nextIndex;
       while (totalReps < 20 && idx < deck.length) {
         const card = deck[idx];
-        const exercise = exerciseType === "pushups" ? "pushups" : exerciseType === "squats" ? "squats" : currentExercise;
+        const exercise =
+          exerciseType === "pushups"
+            ? "pushups"
+            : exerciseType === "squats"
+              ? "squats"
+              : currentExercise;
         cardsToFlip.push({ ...card, exercise });
         totalReps += card.value;
         if (exercise === "pushups") {
@@ -357,7 +423,12 @@ export default function RecYardWorkoutScreen() {
       let idx = nextIndex;
       while (totalReps < 30 && idx < deck.length) {
         const card = deck[idx];
-        const exercise = exerciseType === "pushups" ? "pushups" : exerciseType === "squats" ? "squats" : currentExercise;
+        const exercise =
+          exerciseType === "pushups"
+            ? "pushups"
+            : exerciseType === "squats"
+              ? "squats"
+              : currentExercise;
         cardsToFlip.push({ ...card, exercise });
         totalReps += card.value;
         if (exercise === "pushups") {
@@ -374,7 +445,12 @@ export default function RecYardWorkoutScreen() {
     } else {
       // Default to alternating (for superset) or single card behavior
       const card = deck[nextIndex];
-      const exercise = exerciseType === "pushups" ? "pushups" : exerciseType === "squats" ? "squats" : currentExercise;
+      const exercise =
+        exerciseType === "pushups"
+          ? "pushups"
+          : exerciseType === "squats"
+            ? "squats"
+            : currentExercise;
       cardsToFlip = [{ ...card, exercise }];
       if (exercise === "pushups") {
         newPushups = card.value;
@@ -386,7 +462,7 @@ export default function RecYardWorkoutScreen() {
       }
       lastIndex = nextIndex;
     }
-    
+
     setActiveCards(cardsToFlip);
     setCurrentCardIndex(lastIndex);
 
@@ -403,11 +479,24 @@ export default function RecYardWorkoutScreen() {
     if (lastIndex >= deck.length - 1) {
       completeWorkout();
     }
-  }, [workoutState, currentCardIndex, deck, alternatingExercise, flipMode, exerciseType, startTimer, completeWorkout]);
+  }, [
+    workoutState,
+    currentCardIndex,
+    deck,
+    alternatingExercise,
+    flipMode,
+    exerciseType,
+    startTimer,
+    completeWorkout,
+  ]);
 
   const handleQuit = useCallback(() => {
     if (Platform.OS === "web") {
-      if (confirm("Quit this official run? Your progress will be lost and this run will be marked as DNF.")) {
+      if (
+        confirm(
+          "Quit this official run? Your progress will be lost and this run will be marked as DNF.",
+        )
+      ) {
         navigation.goBack();
       }
     } else {
@@ -431,7 +520,7 @@ export default function RecYardWorkoutScreen() {
               navigation.goBack();
             },
           },
-        ]
+        ],
       );
     }
   }, [navigation, runId]);
@@ -462,28 +551,37 @@ export default function RecYardWorkoutScreen() {
         <ThemedText style={styles.runCodeLabel}>OFFICIAL RUN</ThemedText>
         <ThemedText style={styles.runCodeValue}>{runCode}</ThemedText>
       </View>
-      
+
       <ThemedText style={styles.countdownLabel}>GET READY</ThemedText>
       <Animated.Text style={[styles.countdownNumber, countdownAnimatedStyle]}>
         {countdown}
       </Animated.Text>
-      
+
       <View style={styles.rulesReminder}>
         <ThemedText style={styles.rulesText}>
-          {exerciseType.toUpperCase()} / {intensity.replace(/_/g, " ").toUpperCase()}
+          {exerciseType.toUpperCase()} /{" "}
+          {intensity.replace(/_/g, " ").toUpperCase()}
         </ThemedText>
         <ThemedText style={styles.rulesSubtext}>
           {/* Superset modes */}
-          {flipMode === "alternating" ? "TAG TEAM - Alternate each card" : 
-           flipMode === "split2" ? "DOUBLE DOWN - 2 cards split" :
-           flipMode === "split4" ? "SQUAD LEAD - 4 cards split" :
-           flipMode === "splitunder20" ? "OVERKILL - Draw while <20" :
-           /* Regular flip modes */
-           flipMode === "freshfish" ? "FRESH FISH - 1 card at a time" : 
-           flipMode === "trustee" ? "TRUSTEE - 2 cards at a time" :
-           flipMode === "og" ? "OG - Flip until 20+ reps" :
-           flipMode === "podfather" ? "POD FATHER - Flip until 30+ reps" : 
-           "1 card at a time"}
+          {flipMode === "alternating"
+            ? "TAG TEAM - Alternate each card"
+            : flipMode === "split2"
+              ? "DOUBLE DOWN - 2 cards split"
+              : flipMode === "split4"
+                ? "SQUAD LEAD - 4 cards split"
+                : flipMode === "splitunder20"
+                  ? "OVERKILL - Draw while <20"
+                  : /* Regular flip modes */
+                    flipMode === "freshfish"
+                    ? "FRESH FISH - 1 card at a time"
+                    : flipMode === "trustee"
+                      ? "TRUSTEE - 2 cards at a time"
+                      : flipMode === "og"
+                        ? "OG - Flip until 20+ reps"
+                        : flipMode === "podfather"
+                          ? "POD FATHER - Flip until 30+ reps"
+                          : "1 card at a time"}
         </ThemedText>
         <ThemedText style={styles.rulesSubtext}>No pausing allowed</ThemedText>
       </View>
@@ -503,7 +601,9 @@ export default function RecYardWorkoutScreen() {
         </View>
 
         <View style={styles.timerContainer}>
-          <ThemedText style={styles.timerText}>{formatDuration(timer)}</ThemedText>
+          <ThemedText style={styles.timerText}>
+            {formatDuration(timer)}
+          </ThemedText>
         </View>
       </View>
 
@@ -511,7 +611,7 @@ export default function RecYardWorkoutScreen() {
         <View style={styles.cardContainer}>
           <View style={styles.exerciseBadge}>
             <ThemedText style={styles.exerciseText}>
-              {activeCards.length === 1 
+              {activeCards.length === 1
                 ? `${activeCards[0].value} ${activeCards[0].exercise?.toUpperCase() || exerciseType.toUpperCase()}`
                 : `${activeCards.reduce((sum, c) => sum + c.value, 0)} TOTAL REPS`}
             </ThemedText>
@@ -534,33 +634,51 @@ export default function RecYardWorkoutScreen() {
                     deckStyleId={deckStyle.id}
                   />
                   <ThemedText style={styles.miniCardReps}>
-                    {card.value} {card.exercise?.toUpperCase().slice(0, 4) || ""}
+                    {card.value}{" "}
+                    {card.exercise?.toUpperCase().slice(0, 4) || ""}
                   </ThemedText>
                 </View>
               ))}
               {activeCards.length > 4 && (
-                <ThemedText style={styles.moreCardsText}>+{activeCards.length - 4} more</ThemedText>
+                <ThemedText style={styles.moreCardsText}>
+                  +{activeCards.length - 4} more
+                </ThemedText>
               )}
             </View>
           )}
         </View>
       ) : (
         <View style={styles.cardContainer}>
-          <DeckStack cardsRemaining={52} totalCards={52} deckStyleId={deckStyle.id} />
-          <ThemedText style={styles.tapToStartText}>TAP FLIP TO START</ThemedText>
+          <DeckStack
+            cardsRemaining={52}
+            totalCards={52}
+            deckStyleId={deckStyle.id}
+          />
+          <ThemedText style={styles.tapToStartText}>
+            TAP FLIP TO START
+          </ThemedText>
         </View>
       )}
 
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${(cardsCompleted / 52) * 100}%` }]} />
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${(cardsCompleted / 52) * 100}%` },
+            ]}
+          />
         </View>
-        <ThemedText style={styles.progressText}>{cardsCompleted}/52 CARDS</ThemedText>
+        <ThemedText style={styles.progressText}>
+          {cardsCompleted}/52 CARDS
+        </ThemedText>
       </View>
 
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <ThemedText style={[styles.statValue, { color: Colors.dark.pushups }]}>
+          <ThemedText
+            style={[styles.statValue, { color: Colors.dark.pushups }]}
+          >
             {totalPushups}
           </ThemedText>
           <ThemedText style={styles.statLabel}>PUSHUPS</ThemedText>
@@ -586,23 +704,35 @@ export default function RecYardWorkoutScreen() {
   );
 
   const renderCompleteState = () => (
-    <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.completeContainer}>
+    <Animated.View
+      entering={FadeIn}
+      exiting={FadeOut}
+      style={styles.completeContainer}
+    >
       <View style={styles.runCodeBanner}>
-        <ThemedText style={styles.runCodeLabel}>OFFICIAL RUN COMPLETE</ThemedText>
+        <ThemedText style={styles.runCodeLabel}>
+          OFFICIAL RUN COMPLETE
+        </ThemedText>
         <ThemedText style={styles.runCodeValue}>{runCode}</ThemedText>
       </View>
 
-      <ThemedText style={styles.completeTime}>{formatDuration(timer)}</ThemedText>
+      <ThemedText style={styles.completeTime}>
+        {formatDuration(timer)}
+      </ThemedText>
 
       <View style={styles.finalStatsRow}>
         <View style={styles.finalStatCard}>
-          <ThemedText style={[styles.finalStatValue, { color: Colors.dark.pushups }]}>
+          <ThemedText
+            style={[styles.finalStatValue, { color: Colors.dark.pushups }]}
+          >
             {totalPushups}
           </ThemedText>
           <ThemedText style={styles.finalStatLabel}>PUSHUPS</ThemedText>
         </View>
         <View style={styles.finalStatCard}>
-          <ThemedText style={[styles.finalStatValue, { color: Colors.dark.squats }]}>
+          <ThemedText
+            style={[styles.finalStatValue, { color: Colors.dark.squats }]}
+          >
             {totalSquats}
           </ThemedText>
           <ThemedText style={styles.finalStatLabel}>SQUATS</ThemedText>
@@ -612,10 +742,15 @@ export default function RecYardWorkoutScreen() {
       <View style={styles.discordSection}>
         <ThemedText style={styles.discordTitle}>POST YOUR PROOF</ThemedText>
         <ThemedText style={styles.discordSubtext}>
-          Record your run and post it to the YARD Discord with your run code to verify your time
+          Record your run and post it to the YARD Discord with your run code to
+          verify your time
         </ThemedText>
         <Pressable style={styles.discordButton} onPress={openDiscord}>
-          <Feather name="message-circle" size={20} color={Colors.dark.backgroundRoot} />
+          <Feather
+            name="message-circle"
+            size={20}
+            color={Colors.dark.backgroundRoot}
+          />
           <ThemedText style={styles.discordButtonText}>OPEN DISCORD</ThemedText>
         </Pressable>
       </View>

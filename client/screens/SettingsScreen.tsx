@@ -1,5 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { ScrollView, View, StyleSheet, Switch, Pressable, Linking } from "react-native";
+import {
+  ScrollView,
+  View,
+  StyleSheet,
+  Switch,
+  Pressable,
+  Linking,
+} from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
@@ -33,7 +40,7 @@ export default function SettingsScreen() {
   const [showRuleDetails, setShowRuleDetails] = useState<string | null>(null);
 
   const handleStartWorkout = () => {
-    navigation.navigate("WorkoutTab", { startNew: true });
+    navigation.navigate("WorkoutTab");
   };
 
   const loadData = useCallback(async () => {
@@ -403,14 +410,14 @@ export default function SettingsScreen() {
                       style={[
                         styles.durationOption,
                         settings.restTimerDuration === seconds &&
-                        styles.durationOptionSelected,
+                          styles.durationOptionSelected,
                       ]}
                     >
                       <ThemedText
                         style={[
                           styles.durationOptionText,
                           settings.restTimerDuration === seconds &&
-                          styles.durationOptionTextSelected,
+                            styles.durationOptionTextSelected,
                         ]}
                       >
                         {seconds}s
@@ -442,7 +449,7 @@ export default function SettingsScreen() {
                       style={[
                         styles.alertOption,
                         settings.restAlertType === option.id &&
-                        styles.alertOptionSelected,
+                          styles.alertOptionSelected,
                       ]}
                     >
                       <Feather
