@@ -159,10 +159,22 @@ export default function RecYardWorkoutScreen() {
 
       if (runUpdateError) {
         console.error("[RecYardWorkout] Failed to update run:", runUpdateError);
+        Alert.alert("RUN UPDATE ERROR", runUpdateError.message);
       }
 
       // Submit to leaderboard (workout_submissions table)
-      const { error: submissionError } = await supabase
+      console.log("[RecYardWorkout] Submitting to leaderboard with data:", {
+        profile_id: profileId,
+        time: timer,
+        exercise_type: exerciseType,
+        intensity: intensity,
+        flip_mode: flipMode,
+        total_pushups: totalPushups,
+        total_squats: totalSquats,
+        week_id: weekId,
+      });
+
+      const { data: submissionData, error: submissionError } = await supabase
         .from("workout_submissions")
         .insert({
           profile_id: profileId,
@@ -174,17 +186,23 @@ export default function RecYardWorkoutScreen() {
           total_squats: totalSquats,
           is_verified: false,
           week_id: weekId,
-        });
+        })
+        .select()
+        .single();
 
       if (submissionError) {
         console.error(
           "[RecYardWorkout] Failed to submit to leaderboard:",
           submissionError,
         );
+        Alert.alert(
+          "LEADERBOARD ERROR",
+          `Failed to submit: ${submissionError.message}\n\nCode: ${submissionError.code}`,
+        );
       } else {
         console.log(
-          "[RecYardWorkout] Successfully submitted to leaderboard with run:",
-          runCode,
+          "[RecYardWorkout] Successfully submitted to leaderboard:",
+          submissionData,
         );
       }
 
@@ -200,6 +218,7 @@ export default function RecYardWorkoutScreen() {
           "[RecYardWorkout] Failed to fetch profile:",
           profileFetchError,
         );
+        Alert.alert("PROFILE FETCH ERROR", profileFetchError.message);
       } else if (profileData) {
         const newTotalWorkouts = (profileData.total_workouts || 0) + 1;
         const currentBestTime = profileData.best_time;
