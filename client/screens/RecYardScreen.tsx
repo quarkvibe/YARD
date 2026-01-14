@@ -1373,7 +1373,7 @@ export default function RecYardScreen() {
       <Pressable
         style={styles.discordCard}
         onPress={() => {
-          Linking.openURL("https://discord.gg/yard-workout");
+          Linking.openURL("https://discord.gg/BGuXQJvs");
         }}
       >
         <View style={styles.discordIconContainer}>

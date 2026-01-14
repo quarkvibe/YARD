@@ -542,7 +542,7 @@ export default function RecYardWorkoutScreen() {
   }));
 
   const openDiscord = () => {
-    Linking.openURL("https://discord.gg/yard-workout");
+    Linking.openURL("https://discord.gg/BGuXQJvs");
   };
 
   const renderCountdown = () => (
