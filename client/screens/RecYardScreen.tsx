@@ -89,6 +89,7 @@ export default function RecYardScreen() {
     createProfile: hookCreateProfile,
     updateProfile: hookUpdateProfile,
     sendCallout: hookSendCallout,
+    respondToCallout: hookRespondToCallout,
     getDaysUntilChallengeEnd,
     startCompetitiveRun,
   } = useRecYard();
@@ -143,6 +144,7 @@ export default function RecYardScreen() {
   const [calloutTarget, setCalloutTarget] = useState<LeaderboardEntry | null>(
     null,
   );
+  const [respondingToCalloutId, setRespondingToCalloutId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] =
     useState<TauntCategory>("challenge");
   const [customMessage, setCustomMessage] = useState("");
@@ -585,7 +587,13 @@ export default function RecYardScreen() {
   // ============================================
 
   const openCalloutModal = (target: LeaderboardEntry) => {
+    // Prevent sending beef to yourself
+    if (profile && target.profileId === profile.id) {
+      Alert.alert("HOLD UP", "You can't send beef to yourself! Find someone else to call out.");
+      return;
+    }
     setCalloutTarget(target);
+    setRespondingToCalloutId(null); // Not responding, just sending
     setSelectedCategory("challenge");
     setCustomMessage("");
     setShowCalloutModal(true);
@@ -594,16 +602,25 @@ export default function RecYardScreen() {
   const handleSendCallout = async (message: string, messageId?: string) => {
     if (!calloutTarget || !profile) return;
 
-    const success = await hookSendCallout(
-      calloutTarget.profileId,
-      calloutTarget.handle,
-      message,
-      messageId,
-    );
+    let success = false;
+
+    // If responding to an existing callout, mark it as responded
+    if (respondingToCalloutId) {
+      success = await hookRespondToCallout(respondingToCalloutId, message);
+    } else {
+      // Sending a new callout
+      success = await hookSendCallout(
+        calloutTarget.profileId,
+        calloutTarget.handle,
+        message,
+        messageId,
+      );
+    }
 
     if (success) {
       setShowCalloutModal(false);
       setCalloutTarget(null);
+      setRespondingToCalloutId(null);
 
       // Fire animation
       fireScale.value = withSequence(
@@ -611,12 +628,19 @@ export default function RecYardScreen() {
         withSpring(1, { damping: 15 }),
       );
 
-      Alert.alert(
-        "🔥 CALLOUT SENT",
-        `You just called out @${calloutTarget.handle}. Let's see if they respond.`,
-      );
+      if (respondingToCalloutId) {
+        Alert.alert(
+          "🔥 RESPONSE SENT",
+          `You clapped back at @${calloutTarget.handle}!`,
+        );
+      } else {
+        Alert.alert(
+          "🔥 CALLOUT SENT",
+          `You just called out @${calloutTarget.handle}. Let's see if they respond.`,
+        );
+      }
     } else {
-      Alert.alert("ERROR", "Failed to send callout.");
+      Alert.alert("ERROR", respondingToCalloutId ? "Failed to send response." : "Failed to send callout.");
     }
   };
 
@@ -1549,6 +1573,7 @@ export default function RecYardScreen() {
                         exerciseType: "",
                         intensity: "",
                       });
+                      setRespondingToCalloutId(callout.id); // Track which callout we're responding to
                       setShowCalloutModal(true);
                     }}
                   >
@@ -2117,16 +2142,23 @@ export default function RecYardScreen() {
           style={styles.calloutModal}
         >
           <View style={styles.modalHeader}>
-            <Pressable onPress={() => setShowCalloutModal(false)}>
+            <Pressable onPress={() => {
+              setShowCalloutModal(false);
+              setRespondingToCalloutId(null);
+            }}>
               <Feather name="x" size={24} color={Colors.dark.chalk} />
             </Pressable>
-            <ThemedText style={styles.modalTitle}>🔥 CALL OUT</ThemedText>
+            <ThemedText style={styles.modalTitle}>
+              {respondingToCalloutId ? "🔥 CLAP BACK" : "🔥 CALL OUT"}
+            </ThemedText>
             <View style={{ width: 24 }} />
           </View>
 
           {calloutTarget && (
             <View style={styles.calloutTargetInfo}>
-              <ThemedText style={styles.targetLabel}>TARGET:</ThemedText>
+              <ThemedText style={styles.targetLabel}>
+                {respondingToCalloutId ? "RESPONDING TO:" : "TARGET:"}
+              </ThemedText>
               <ThemedText style={styles.targetHandle}>
                 @{calloutTarget.handle}
               </ThemedText>
