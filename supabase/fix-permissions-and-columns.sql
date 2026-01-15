@@ -104,8 +104,12 @@ CREATE TABLE IF NOT EXISTS callouts (
   responded BOOLEAN NOT NULL DEFAULT false,
   response_message TEXT,
   responded_at TIMESTAMPTZ,
+  is_deleted BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Add is_deleted column if callouts table already exists
+ALTER TABLE callouts ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT false;
 
 -- ============================================
 -- CREATE WEEKLY_CHALLENGES TABLE IF NOT EXISTS
