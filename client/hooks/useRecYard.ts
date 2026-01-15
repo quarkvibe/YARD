@@ -101,6 +101,7 @@ export function useRecYard() {
   const [userId, setUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<RecYardProfile | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [challengeLeaderboard, setChallengeLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [weeklyChallenge, setWeeklyChallenge] =
     useState<WeeklyChallenge | null>(null);
   const [sentCallouts, setSentCallouts] = useState<Callout[]>([]);
@@ -189,8 +190,9 @@ export function useRecYard() {
       // Load leaderboard
       await loadLeaderboard();
 
-      // Load weekly challenge
+      // Load weekly challenge and its leaderboard
       await loadWeeklyChallenge();
+      await loadChallengeLeaderboard();
 
       // Load callouts if we have a profile
       if (profileData) {
@@ -547,6 +549,61 @@ export function useRecYard() {
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }, [weeklyChallenge]);
 
+  const loadChallengeLeaderboard = useCallback(async () => {
+    const weekId = getCurrentWeekId();
+    
+    try {
+      const { data, error: fetchError } = await supabase
+        .from("workout_submissions")
+        .select(
+          `
+          id,
+          time,
+          exercise_type,
+          intensity,
+          is_verified,
+          created_at,
+          profile:profiles!profile_id (
+            id,
+            handle,
+            display_name,
+            photo_url,
+            is_verified
+          )
+        `,
+        )
+        .eq("week_id", weekId)
+        .order("time", { ascending: true })
+        .limit(50);
+
+      if (fetchError) {
+        console.error("[useRecYard] Load challenge leaderboard error:", fetchError);
+        return;
+      }
+
+      const entries: LeaderboardEntry[] = (data || []).map((item, index) => ({
+        id: item.id,
+        rank: index + 1,
+        profileId: (item.profile as any)?.id || "",
+        handle: (item.profile as any)?.handle || "UNKNOWN",
+        displayName:
+          (item.profile as any)?.display_name ||
+          (item.profile as any)?.handle ||
+          "Unknown",
+        photoUrl: (item.profile as any)?.photo_url || null,
+        time: item.time,
+        isVerified: item.is_verified,
+        submittedAt: item.created_at,
+        exerciseType: item.exercise_type,
+        intensity: item.intensity,
+      }));
+
+      setChallengeLeaderboard(entries);
+    } catch (err) {
+      console.error("[useRecYard] Load challenge leaderboard error:", err);
+    }
+  }, []);
+
   // ============================================
   // CALLOUTS (TRASH TALK)
   // ============================================
@@ -813,10 +870,11 @@ export function useRecYard() {
   const refresh = useCallback(async () => {
     await loadLeaderboard();
     await loadWeeklyChallenge();
+    await loadChallengeLeaderboard();
     if (profile) {
       await loadCallouts(profile.id);
     }
-  }, [loadLeaderboard, loadWeeklyChallenge, loadCallouts, profile]);
+  }, [loadLeaderboard, loadWeeklyChallenge, loadChallengeLeaderboard, loadCallouts, profile]);
 
   // ============================================
   // HELPERS
@@ -856,6 +914,7 @@ export function useRecYard() {
     setIsSubscribed,
     profile,
     leaderboard,
+    challengeLeaderboard,
     weeklyChallenge,
     sentCallouts,
     receivedCallouts,

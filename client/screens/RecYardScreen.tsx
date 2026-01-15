@@ -81,6 +81,7 @@ export default function RecYardScreen() {
     setIsSubscribed,
     profile,
     leaderboard,
+    challengeLeaderboard,
     weeklyChallenge,
     sentCallouts,
     receivedCallouts,
@@ -1370,6 +1371,49 @@ export default function RecYardScreen() {
             Post your run code to Discord to verify your time
           </ThemedText>
         </View>
+      </View>
+
+      {/* Weekly Challenge Leaderboard */}
+      <View style={styles.challengeLeaderboardCard}>
+        <ThemedText style={styles.challengeLeaderboardTitle}>
+          🏆 THIS WEEK&apos;S STANDINGS
+        </ThemedText>
+        {challengeLeaderboard.length === 0 ? (
+          <View style={styles.emptyLeaderboard}>
+            <ThemedText style={styles.emptyLeaderboardText}>
+              No submissions yet this week.
+            </ThemedText>
+            <ThemedText style={styles.emptyLeaderboardSubtext}>
+              Be the first to set a time!
+            </ThemedText>
+          </View>
+        ) : (
+          challengeLeaderboard.slice(0, 10).map((entry, index) => (
+            <View key={entry.id} style={styles.challengeLeaderboardRow}>
+              <View style={styles.challengeLeaderboardRank}>
+                <ThemedText style={[
+                  styles.challengeRankText,
+                  index === 0 && styles.challengeRankFirst,
+                  index === 1 && styles.challengeRankSecond,
+                  index === 2 && styles.challengeRankThird,
+                ]}>
+                  {index === 0 ? "👑" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`}
+                </ThemedText>
+              </View>
+              <View style={styles.challengeLeaderboardInfo}>
+                <ThemedText style={styles.challengeLeaderboardHandle}>
+                  @{entry.handle}
+                </ThemedText>
+                <ThemedText style={styles.challengeLeaderboardMeta}>
+                  {entry.exerciseType.toUpperCase()} • {entry.intensity.replace("_", " ").toUpperCase()}
+                </ThemedText>
+              </View>
+              <ThemedText style={styles.challengeLeaderboardTime}>
+                {formatDuration(entry.time)}
+              </ThemedText>
+            </View>
+          ))
+        )}
       </View>
     </ScrollView>
   );
@@ -4091,6 +4135,83 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.dark.textSecondary,
     lineHeight: 20,
+  },
+
+  // Challenge Leaderboard Styles
+  challengeLeaderboardCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    padding: Spacing.lg,
+    marginTop: Spacing.lg,
+  },
+  challengeLeaderboardTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: Colors.dark.chalk,
+    marginBottom: Spacing.lg,
+    textAlign: "center",
+  },
+  emptyLeaderboard: {
+    alignItems: "center",
+    paddingVertical: Spacing.xl,
+  },
+  emptyLeaderboardText: {
+    fontSize: 14,
+    color: Colors.dark.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  emptyLeaderboardSubtext: {
+    fontSize: 12,
+    color: Colors.dark.textTertiary,
+  },
+  challengeLeaderboardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.dark.cardBorder,
+  },
+  challengeLeaderboardRank: {
+    width: 40,
+    alignItems: "center",
+  },
+  challengeRankText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: Colors.dark.textSecondary,
+  },
+  challengeRankFirst: {
+    fontSize: 20,
+  },
+  challengeRankSecond: {
+    fontSize: 18,
+  },
+  challengeRankThird: {
+    fontSize: 16,
+  },
+  challengeLeaderboardInfo: {
+    flex: 1,
+    marginLeft: Spacing.sm,
+  },
+  challengeLeaderboardHandle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: Colors.dark.chalk,
+    letterSpacing: 1,
+  },
+  challengeLeaderboardMeta: {
+    fontSize: 10,
+    color: Colors.dark.textTertiary,
+    marginTop: 2,
+  },
+  challengeLeaderboardTime: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: Colors.dark.accent,
+    letterSpacing: 1,
   },
 
   // ============================================

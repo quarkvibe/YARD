@@ -247,6 +247,55 @@ GRANT EXECUTE ON FUNCTION increment_challenge_participants(TEXT) TO anon;
 GRANT EXECUTE ON FUNCTION increment_challenge_participants(TEXT) TO authenticated;
 
 -- ============================================
+-- RPC FUNCTION FOR UPDATING CHALLENGE STATS
+-- Updates participant_count (if first submission) and top_time
+-- ============================================
+
+CREATE OR REPLACE FUNCTION update_challenge_stats(
+  p_week_id TEXT,
+  p_profile_id UUID,
+  p_time INTEGER
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  existing_count INTEGER;
+  current_top_time INTEGER;
+BEGIN
+  -- Check if this is the user's first submission for this week
+  SELECT COUNT(*) INTO existing_count
+  FROM workout_submissions
+  WHERE profile_id = p_profile_id AND week_id = p_week_id;
+  
+  -- Get current top time for the challenge
+  SELECT top_time INTO current_top_time
+  FROM weekly_challenges
+  WHERE week_id = p_week_id;
+  
+  -- Update the challenge
+  UPDATE weekly_challenges
+  SET 
+    -- Only increment if this is their first submission (count will be 1 after insert)
+    participant_count = CASE 
+      WHEN existing_count = 1 THEN participant_count + 1 
+      ELSE participant_count 
+    END,
+    -- Update top_time if this is faster or no top time exists
+    top_time = CASE 
+      WHEN current_top_time IS NULL OR p_time < current_top_time THEN p_time 
+      ELSE current_top_time 
+    END
+  WHERE week_id = p_week_id;
+END;
+$$;
+
+-- Grant execute permission
+GRANT EXECUTE ON FUNCTION update_challenge_stats(TEXT, UUID, INTEGER) TO anon;
+GRANT EXECUTE ON FUNCTION update_challenge_stats(TEXT, UUID, INTEGER) TO authenticated;
+
+-- ============================================
 -- FIX CHECK CONSTRAINTS
 -- ============================================
 -- The app sends values that don't match the original schema constraints.
