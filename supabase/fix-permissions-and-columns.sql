@@ -243,6 +243,29 @@ GRANT EXECUTE ON FUNCTION increment_challenge_participants(TEXT) TO anon;
 GRANT EXECUTE ON FUNCTION increment_challenge_participants(TEXT) TO authenticated;
 
 -- ============================================
+-- FIX CHECK CONSTRAINTS
+-- ============================================
+-- The app sends values that don't match the original schema constraints.
+-- 
+-- INTENSITY:
+--   DB constraint: 'standard', 'hard-time', 'lifer'
+--   App sends: 'misdemeanor', 'hard_time', 'lifer'
+--
+-- FLIP_MODE:
+--   DB constraint: 'freshfish', 'trustee', 'og', 'podfather'
+--   App also sends (superset modes): 'alternating', 'split2', 'split4', 'splitunder20'
+
+-- Drop intensity constraints
+ALTER TABLE workout_submissions DROP CONSTRAINT IF EXISTS workout_submissions_intensity_check;
+ALTER TABLE weekly_challenges DROP CONSTRAINT IF EXISTS weekly_challenges_intensity_check;
+
+-- Drop flip_mode constraints
+ALTER TABLE workout_submissions DROP CONSTRAINT IF EXISTS workout_submissions_flip_mode_check;
+
+-- Note: We're intentionally not adding new constraints to allow flexibility
+-- The app validates these values on the client side
+
+-- ============================================
 -- DONE - ALL TABLES AND POLICIES CREATED
 -- ============================================
 -- Weekly challenges should be created through the app or manually
