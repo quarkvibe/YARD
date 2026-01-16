@@ -248,7 +248,7 @@ GRANT EXECUTE ON FUNCTION increment_challenge_participants(TEXT) TO authenticate
 
 -- ============================================
 -- RPC FUNCTION FOR UPDATING CHALLENGE STATS
--- Creates challenge if not exists, then updates participant_count and top_time
+-- Creates challenge if not exists, then RECALCULATES participant_count and top_time
 -- ============================================
 
 CREATE OR REPLACE FUNCTION update_challenge_stats(
@@ -261,11 +261,11 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  existing_count INTEGER;
-  current_top_time INTEGER;
   challenge_exists BOOLEAN;
   week_start TIMESTAMPTZ;
   week_end TIMESTAMPTZ;
+  new_participant_count INTEGER;
+  new_top_time INTEGER;
 BEGIN
   -- Calculate week start and end dates
   week_start := date_trunc('week', CURRENT_DATE)::timestamptz;
@@ -280,29 +280,21 @@ BEGIN
     VALUES (p_week_id, 'WEEKLY CHALLENGE', 'superset', 'misdemeanor', week_start, week_end, 0, NULL);
   END IF;
 
-  -- Check if this is the user's first submission for this week
-  SELECT COUNT(*) INTO existing_count
+  -- Count UNIQUE participants (distinct profile_ids with submissions this week)
+  SELECT COUNT(DISTINCT profile_id) INTO new_participant_count
   FROM workout_submissions
-  WHERE profile_id = p_profile_id AND week_id = p_week_id;
-  
-  -- Get current top time for the challenge
-  SELECT top_time INTO current_top_time
-  FROM weekly_challenges
   WHERE week_id = p_week_id;
   
-  -- Update the challenge
+  -- Get the actual fastest time this week
+  SELECT MIN(time) INTO new_top_time
+  FROM workout_submissions
+  WHERE week_id = p_week_id;
+  
+  -- Update the challenge with recalculated values
   UPDATE weekly_challenges
   SET 
-    -- Only increment if this is their first submission (count will be 1 after insert)
-    participant_count = CASE 
-      WHEN existing_count = 1 THEN participant_count + 1 
-      ELSE participant_count 
-    END,
-    -- Update top_time if this is faster or no top time exists
-    top_time = CASE 
-      WHEN current_top_time IS NULL OR p_time < current_top_time THEN p_time 
-      ELSE current_top_time 
-    END
+    participant_count = new_participant_count,
+    top_time = new_top_time
   WHERE week_id = p_week_id;
 END;
 $$;
