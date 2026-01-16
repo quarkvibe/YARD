@@ -502,15 +502,22 @@ export function useRecYard() {
 
   const loadWeeklyChallenge = useCallback(async () => {
     const weekId = getCurrentWeekId();
+    console.log("[useRecYard] Loading weekly challenge for week:", weekId);
 
     try {
-      const { data } = await supabase
+      // First try to get existing challenge
+      const { data, error: fetchError } = await supabase
         .from("weekly_challenges")
         .select("*")
         .eq("week_id", weekId)
-        .single();
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error("[useRecYard] Error fetching challenge:", fetchError);
+      }
 
       if (data) {
+        console.log("[useRecYard] Found existing challenge:", data);
         setWeeklyChallenge({
           id: data.id,
           weekId: data.week_id,
@@ -523,18 +530,63 @@ export function useRecYard() {
           topTime: data.top_time,
         });
       } else {
-        // Create default challenge if none exists
-        setWeeklyChallenge({
-          id: "",
-          weekId,
+        // NO CHALLENGE EXISTS - CREATE ONE IN THE DATABASE
+        console.log("[useRecYard] No challenge found, creating new one for week:", weekId);
+        
+        const now = new Date();
+        const startsAt = new Date(now);
+        startsAt.setHours(0, 0, 0, 0);
+        // Set to start of week (Sunday)
+        startsAt.setDate(startsAt.getDate() - startsAt.getDay());
+        
+        const endsAt = new Date(startsAt);
+        endsAt.setDate(endsAt.getDate() + 7);
+        
+        const newChallenge = {
+          week_id: weekId,
           title: "WEEKLY CHALLENGE",
-          exerciseType: "superset",
-          intensity: "standard",
-          startsAt: new Date().toISOString(),
-          endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          participantCount: 0,
-          topTime: null,
-        });
+          exercise_type: "superset",
+          intensity: "misdemeanor",
+          starts_at: startsAt.toISOString(),
+          ends_at: endsAt.toISOString(),
+          participant_count: 0,
+          top_time: null,
+        };
+
+        const { data: insertedChallenge, error: insertError } = await supabase
+          .from("weekly_challenges")
+          .insert(newChallenge)
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error("[useRecYard] Error creating challenge:", insertError);
+          // Still set local state as fallback
+          setWeeklyChallenge({
+            id: "",
+            weekId,
+            title: "WEEKLY CHALLENGE",
+            exerciseType: "superset",
+            intensity: "misdemeanor",
+            startsAt: startsAt.toISOString(),
+            endsAt: endsAt.toISOString(),
+            participantCount: 0,
+            topTime: null,
+          });
+        } else {
+          console.log("[useRecYard] Successfully created challenge:", insertedChallenge);
+          setWeeklyChallenge({
+            id: insertedChallenge.id,
+            weekId: insertedChallenge.week_id,
+            title: insertedChallenge.title,
+            exerciseType: insertedChallenge.exercise_type,
+            intensity: insertedChallenge.intensity,
+            startsAt: insertedChallenge.starts_at,
+            endsAt: insertedChallenge.ends_at,
+            participantCount: insertedChallenge.participant_count,
+            topTime: insertedChallenge.top_time,
+          });
+        }
       }
     } catch (err) {
       console.error("[useRecYard] Load challenge error:", err);

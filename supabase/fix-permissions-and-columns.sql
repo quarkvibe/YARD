@@ -248,7 +248,7 @@ GRANT EXECUTE ON FUNCTION increment_challenge_participants(TEXT) TO authenticate
 
 -- ============================================
 -- RPC FUNCTION FOR UPDATING CHALLENGE STATS
--- Updates participant_count (if first submission) and top_time
+-- Creates challenge if not exists, then updates participant_count and top_time
 -- ============================================
 
 CREATE OR REPLACE FUNCTION update_challenge_stats(
@@ -263,7 +263,23 @@ AS $$
 DECLARE
   existing_count INTEGER;
   current_top_time INTEGER;
+  challenge_exists BOOLEAN;
+  week_start TIMESTAMPTZ;
+  week_end TIMESTAMPTZ;
 BEGIN
+  -- Calculate week start and end dates
+  week_start := date_trunc('week', CURRENT_DATE)::timestamptz;
+  week_end := week_start + interval '7 days';
+
+  -- Check if challenge exists
+  SELECT EXISTS(SELECT 1 FROM weekly_challenges WHERE week_id = p_week_id) INTO challenge_exists;
+  
+  -- Create challenge if it doesn't exist
+  IF NOT challenge_exists THEN
+    INSERT INTO weekly_challenges (week_id, title, exercise_type, intensity, starts_at, ends_at, participant_count, top_time)
+    VALUES (p_week_id, 'WEEKLY CHALLENGE', 'superset', 'misdemeanor', week_start, week_end, 0, NULL);
+  END IF;
+
   -- Check if this is the user's first submission for this week
   SELECT COUNT(*) INTO existing_count
   FROM workout_submissions

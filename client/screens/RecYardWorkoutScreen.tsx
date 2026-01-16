@@ -254,44 +254,31 @@ export default function RecYardWorkoutScreen() {
       }
 
       // Update weekly challenge stats (participant count + top time)
-      try {
-        const { error: challengeError } = await supabase.rpc("update_challenge_stats", {
-          p_week_id: weekId,
-          p_profile_id: profileId,
-          p_time: timer,
-        });
-        
-        if (challengeError) {
-          console.log(
-            "[RecYardWorkout] Could not update challenge stats:",
-            challengeError.message,
-          );
-        } else {
-          console.log("[RecYardWorkout] Challenge stats updated successfully");
-        }
-      } catch (rpcError) {
-        // RPC might not exist yet, fall back to old method
-        console.log(
-          "[RecYardWorkout] update_challenge_stats RPC not available, trying fallback",
+      console.log("[RecYardWorkout] Updating challenge stats:", {
+        weekId,
+        profileId,
+        time: timer,
+      });
+      
+      const { data: rpcData, error: challengeError } = await supabase.rpc("update_challenge_stats", {
+        p_week_id: weekId,
+        p_profile_id: profileId,
+        p_time: timer,
+      });
+      
+      if (challengeError) {
+        console.error(
+          "[RecYardWorkout] Challenge stats update FAILED:",
+          challengeError.message,
+          challengeError.code,
+          challengeError.details,
         );
-        
-        const { data: existingSubmissions } = await supabase
-          .from("workout_submissions")
-          .select("id")
-          .eq("profile_id", profileId)
-          .eq("week_id", weekId);
-
-        if (existingSubmissions && existingSubmissions.length === 1) {
-          try {
-            await supabase.rpc("increment_challenge_participants", {
-              challenge_week_id: weekId,
-            });
-          } catch {
-            console.log(
-              "[RecYardWorkout] Could not update challenge participant count",
-            );
-          }
-        }
+        Alert.alert(
+          "CHALLENGE UPDATE",
+          `Could not update weekly challenge: ${challengeError.message}`,
+        );
+      } else {
+        console.log("[RecYardWorkout] Challenge stats updated successfully:", rpcData);
       }
     } catch (err) {
       console.error("[RecYardWorkout] Failed to complete workout:", err);
